@@ -126,35 +126,35 @@ const Hero = () => {
         />
       </div>
 
-      {!ehMobile && (
-        <AnimatedContent distance={60} direction="horizontal" duration={0.9} initialOpacity={1} animateOpacity={false} scale={1.02} delay={0.3}>
-          <div
-            ref={mascotRef}
+      {/* Mascote Buko - Responsivo */}
+      <AnimatedContent distance={60} direction="horizontal" duration={0.9} initialOpacity={1} animateOpacity={false} scale={1.02} delay={0.3}>
+        <div
+          ref={mascotRef}
+          style={{
+            position: "absolute",
+            right: ehMobile ? "-120px" : "-370px",
+            bottom: ehMobile ? "-210px" : "-270px",
+            transform: ehMobile ? "translateX(50%) rotate(-8deg)" : "rotate(-8deg)",
+            width: ehMobile ? 200 : 280,
+            height: ehMobile ? 240 : 340,
+            borderRadius: 12,
+            overflow: "hidden",
+            flexShrink: 0,
+            opacity: ehMobile ? 1 : 1,
+          }}
+        >
+          <img
+            src="/buko.png"
+            alt="Buko mascot waving"
             style={{
-              position: "absolute",
-              right: "-370px",
-              bottom: "-270px",
-              width: 280,
-              height: 340,
-              borderRadius: 12,
-              overflow: "hidden",
-              transform: "rotate(-8deg)",
-              flexShrink: 0,
+              width: "130%",
+              height: "80%",
+              objectFit: "cover",
+              objectPosition: "center 20%",
             }}
-          >
-            <img
-              src="/buko.png"
-              alt="Buko mascot waving"
-              style={{
-                width: "130%",
-                height: "80%",
-                objectFit: "cover",
-                objectPosition: "center 20%",
-              }}
-            />
-          </div>
-        </AnimatedContent>
-      )}
+          />
+        </div>
+      </AnimatedContent>
     </section>
   );
 };

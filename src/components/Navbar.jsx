@@ -4,6 +4,11 @@ import { useLarguraJanela } from '../hooks/useHooks';
 import Logo from './Logo';
 import AnimatedContent from './AnimatedContent';
 
+/**
+ * Botão Hamburger responsivo para navegação mobile
+ * @param {Object} props - { aberto, onClick }
+ * @returns {JSX.Element}
+ */
 const BotaoHamburger = ({ aberto, onClick }) => (
   <button
     onClick={onClick}
@@ -35,13 +40,22 @@ const BotaoHamburger = ({ aberto, onClick }) => (
       e.currentTarget.style.transform = "";
     }}
   >
+    {/* Três linhas do ícone hamburger */}
     <span className="hamburger-line line-top" />
     <span className="hamburger-line line-mid" />
     <span className="hamburger-line line-bot" />
   </button>
 );
 
-const Navbar = () => {
+/**
+ * Componente Navbar - Navegação principal da aplicação
+ * Responsivo (desktop e mobile)
+ * Integrado com sistema de autenticação
+ * @param {Object} props - { onLoginClick, usuarioLogado, onLogout }
+ * @returns {JSX.Element}
+ */
+const Navbar = ({ onLoginClick, usuarioLogado, onLogout }) => {
+  // Estados
   const [menuAberto, setMenuAberto] = useState(false);
   const larguraJanela = useLarguraJanela();
   const ehMobile = larguraJanela < 768;
@@ -53,6 +67,7 @@ const Navbar = () => {
 
   const alternarMenu = useCallback(() => setMenuAberto((v) => !v), []);
 
+  // Estilos reutilizáveis para links de navegação
   const estiloLinkNav = {
     background: "none",
     border: "none",
@@ -67,6 +82,43 @@ const Navbar = () => {
     cursor: "pointer",
     transition: "color 0.2s ease, transform 0.2s ease",
   };
+
+  // Estilos do botão de login/usuário
+  const estiloBotaoLogin = {
+    base: {
+      background: "#111",
+      color: "#fff",
+      border: "none",
+      borderRadius: 5,
+      fontSize: 12,
+      fontWeight: 600,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      cursor: "pointer",
+      transition: "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+    },
+    hover: {
+      background: "#1a5fa8",
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 12px rgba(26, 95, 168, 0.3)",
+    },
+  };
+
+  // Função para aplicar/remover estilos no botão de login
+  const handleLoginMouseEnter = (e) => {
+    Object.assign(e.currentTarget.style, estiloBotaoLogin.hover);
+  };
+
+  const handleLoginMouseLeave = (e) => {
+    e.currentTarget.style.background = "#111";
+    e.currentTarget.style.transform = "";
+    e.currentTarget.style.boxShadow = "none";
+  };
+
+  // Texto do botão baseado no estado de autenticação
+  const textoBotaoLogin = usuarioLogado 
+    ? usuarioLogado.email.split('@')[0].toUpperCase() 
+    : 'LOGIN';
 
   return (
     <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200 }}>
@@ -98,47 +150,29 @@ const Navbar = () => {
           style={{ display: "flex", alignItems: "center", gap: 24 }}
         >
           <AnimatedContent distance={20} direction="horizontal" duration={0.8} initialOpacity={0} animateOpacity>
-            <button style={{
-              background: "none", border: "none",
-              fontSize: 13, color: "#444", letterSpacing: 1,
-              fontWeight: 500, textTransform: "uppercase",
-              cursor: "pointer",
-              transition: "color 0.2s ease, transform 0.2s ease",
-              padding: "4px 0",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#1a5fa8";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#444";
-              e.currentTarget.style.transform = "";
-            }}
+            <button 
+              style={estiloLinkNav}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#1a5fa8";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#444";
+                e.currentTarget.style.transform = "";
+              }}
             >
               CONTATO
             </button>
           </AnimatedContent>
+
           <AnimatedContent distance={20} direction="horizontal" duration={0.8} initialOpacity={0} animateOpacity delay={0.1}>
-            <button style={{
-              background: "#111", color: "#fff", border: "none",
-              borderRadius: 5, padding: "8px 22px",
-              fontSize: 12, fontWeight: 600,
-              letterSpacing: 1, textTransform: "uppercase",
-              cursor: "pointer",
-              transition: "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#1a5fa8";
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(26, 95, 168, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#111";
-              e.currentTarget.style.transform = "";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            <button 
+              onClick={onLoginClick}
+              style={{ ...estiloBotaoLogin.base, padding: "8px 22px" }}
+              onMouseEnter={handleLoginMouseEnter}
+              onMouseLeave={handleLoginMouseLeave}
             >
-              LOGIN
+              {textoBotaoLogin}
             </button>
           </AnimatedContent>
         </div>
@@ -164,14 +198,18 @@ const Navbar = () => {
             display: "flex",
             flexDirection: "column",
             gap: 12,
+            alignItems: "center",
           }}
         >
           <AnimatedContent distance={30} direction="vertical" duration={0.8} initialOpacity={0} animateOpacity>
             <button 
-              style={estiloLinkNav}
+              style={{
+                ...estiloLinkNav,
+                textAlign: "center",
+              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = "#1a5fa8";
-                e.currentTarget.style.transform = "translateX(4px)";
+                e.currentTarget.style.transform = "translateX(0)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "#444";
@@ -181,30 +219,23 @@ const Navbar = () => {
               CONTATO
             </button>
           </AnimatedContent>
+
           <div style={{ height: 1, background: "#edf2f7" }} />
+
           <AnimatedContent distance={30} direction="vertical" duration={0.8} initialOpacity={0} animateOpacity delay={0.1}>
-            <button style={{
-              background: "#111", color: "#fff", border: "none",
-              borderRadius: 5, padding: "11px 24px",
-              fontSize: 13, fontWeight: 600,
-              letterSpacing: 1, textTransform: "uppercase",
-              alignSelf: "stretch",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#1a5fa8";
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(26, 95, 168, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#111";
-              e.currentTarget.style.transform = "";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            <button 
+              onClick={onLoginClick}
+              style={{
+                ...estiloBotaoLogin.base,
+                padding: "11px 24px",
+                fontSize: 13,
+                minWidth: 220,
+                textAlign: "center",
+              }}
+              onMouseEnter={handleLoginMouseEnter}
+              onMouseLeave={handleLoginMouseLeave}
             >
-              LOGIN
+              {textoBotaoLogin}
             </button>
           </AnimatedContent>
         </div>
