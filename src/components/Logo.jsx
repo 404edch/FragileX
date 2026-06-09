@@ -1,5 +1,5 @@
 import React from 'react';
-import logoGif from './logo.gif';
+import logoGif from '/logo.gif';
 import SplitText from './SplitText';
 
 export const LogoGif = () => (
