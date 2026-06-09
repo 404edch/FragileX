@@ -6,6 +6,9 @@ import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
 
+const ehDispositivoTouch = () =>
+  typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
 const SplitText = ({
   text,
   className = '',
@@ -45,6 +48,10 @@ const SplitText = ({
   useGSAP(
     () => {
       if (!ref.current || !text || !fontsLoaded) return;
+      if (ehDispositivoTouch()) {
+        ref.current.style.visibility = 'visible';
+        return;
+      }
       // Prevent re-animation if already completed
       if (animationCompletedRef.current) return;
       const el = ref.current;

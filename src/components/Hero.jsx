@@ -7,6 +7,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const ehDispositivoTouch = () =>
+  typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
 const Hero = () => {
   const larguraJanela = useLarguraJanela();
   const ehMobile = larguraJanela < 480;
@@ -14,6 +17,8 @@ const Hero = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
+    if (ehDispositivoTouch()) return;
+
     if (mascotRef.current && sectionRef.current) {
       gsap.to(mascotRef.current, {
         opacity: 0,

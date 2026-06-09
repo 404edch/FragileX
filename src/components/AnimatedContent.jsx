@@ -4,6 +4,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const ehDispositivoTouch = () =>
+  typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
 const AnimatedContent = ({
   children,
   container,
@@ -30,6 +33,11 @@ const AnimatedContent = ({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    if (ehDispositivoTouch()) {
+      el.style.visibility = 'visible';
+      return;
+    }
 
     let scrollerTarget = container || document.getElementById('snap-main-container') || null;
 

@@ -156,7 +156,7 @@ const Footer = () => {
         </div>
       </AnimatedContent>
 
-      <AnimatedContent distance={40} direction="vertical" duration={1} initialOpacity={0} animateOpacity threshold={0.15} delay={0.15}>
+     
         <div style={{
           marginTop: 32,
           paddingTop: 16,
@@ -168,7 +168,7 @@ const Footer = () => {
         }}>
           © {new Date().getFullYear()} Instituto Buko Kaesemodel. Todos os direitos reservados.
         </div>
-      </AnimatedContent>
+    
     </footer>
   );
 };
