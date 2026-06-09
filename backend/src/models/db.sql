@@ -12,7 +12,7 @@ CREATE TABLE pacientes (
     id_usuario INT PRIMARY KEY,
     data_nascimento DATE NOT NULL,
     sexo_biologico CHAR(1) CHECK (sexo_biologico IN ('M', 'F')) NOT NULL,
-	genero CHAR(1) CHECK (genero IN ('Homem', 'Mulher', '')) NOT NULL,
+	genero CHAR(15) CHECK (genero IN ('Feminino', 'Masculino')) NOT NULL,
 	sindrome VARCHAR(20) CHECK (sindrome IN ('normal', 'mutacao', 'pre_mutacao')) NOT NULL,
     CONSTRAINT fk_paciente_usuario FOREIGN KEY (id_usuario)
 	REFERENCES usuarios(id) ON DELETE CASCADE
@@ -71,7 +71,7 @@ CREATE TABLE checklists (
     id SERIAL PRIMARY KEY,
     id_paciente INT NOT NULL,
     id_medico INT,
-    preenchedor VARCHAR(50) NOT NULL,
+    preenchido_por VARCHAR(50) NOT NULL,
     score_final DECIMAL(4,2),
     data_preenchimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_paciente FOREIGN KEY (id_paciente) 
