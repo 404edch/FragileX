@@ -12,11 +12,15 @@ export const LogoGif = () => (
       objectFit: "contain",
       display: "block",
     }}
-    onError={(e) => { e.target.style.display = "none"; }}
+    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
   />
 );
 
-export const LogoTexto = ({ pequeno = false }) => (
+interface LogoProps {
+  pequeno?: boolean;
+}
+
+export const LogoTexto = ({ pequeno = false }: LogoProps) => (
   <div style={{
     lineHeight: 1,
     fontFamily: "'DM Serif Display', serif",
@@ -75,7 +79,7 @@ export const LogoTexto = ({ pequeno = false }) => (
   </div>
 );
 
-const Logo = ({ pequeno = false }) => (
+const Logo = ({ pequeno = false }: LogoProps) => (
   <div style={{ display: "flex", alignItems: "center", gap: 12, height: "100%" }}>
     <LogoGif />
     <LogoTexto pequeno={pequeno} />

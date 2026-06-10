@@ -28,7 +28,7 @@ export default function App() {
       <div style={{ minHeight: '100vh', width: '100%', background: '#fff' }}>
         <Navbar
           onLoginClick={() => setDashboardAberto(true)}
-          usuarioLogado={null}
+          usuarioLogado={undefined}
           onLogout={() => {}}
         />
         <main>

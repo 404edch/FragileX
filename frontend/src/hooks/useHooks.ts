@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject } from "react";
 
 /**
  * Retorna a largura atual da janela, atualiza no redimensionamento (com debounce).
  */
-export function useLarguraJanela() {
-  const [largura, setLargura] = useState(() =>
+export function useLarguraJanela(): number {
+  const [largura, setLargura] = useState<number>(() =>
     typeof window !== "undefined" ? window.innerWidth : 1280
   );
 
   useEffect(() => {
-    let timer;
+    let timer: ReturnType<typeof setTimeout>;
     const tratarRedimensionamento = () => {
       clearTimeout(timer);
       timer = setTimeout(() => setLargura(window.innerWidth), 80);
@@ -27,8 +27,8 @@ export function useLarguraJanela() {
 /**
  * Dispara o callback uma vez quando o elemento entra no viewport pela primeira vez.
  */
-export function useUmaVezNoViewport(ref, limite = 0.2) {
-  const [disparado, setDisparado] = useState(false);
+export function useUmaVezNoViewport(ref: RefObject<HTMLElement | null>, limite: number = 0.2): boolean {
+  const [disparado, setDisparado] = useState<boolean>(false);
 
   useEffect(() => {
     if (disparado) return;

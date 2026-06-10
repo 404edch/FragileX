@@ -3,8 +3,25 @@ import React, { useState, useEffect } from 'react';
 // ==========================================
 // 1. SIDEBAR COMPONENT
 // ==========================================
-const Sidebar = ({ isOpen, role, setView, onLogout }) => {
-  const sidebarStyle = {
+interface Patient {
+  id: number | string;
+  name: string;
+  age: number;
+  sex: string;
+  lastConsultation: string;
+  tag?: string;
+  responsibleFigure?: string;
+  phone?: string;
+}
+
+interface SidebarProps {
+  isOpen: boolean;
+  role: string;
+  setView: (view: string) => void;
+  onLogout?: () => void;
+}
+const Sidebar = ({ isOpen, role, setView, onLogout }: SidebarProps) => {
+  const sidebarStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
     left: isOpen ? 0 : '-250px',
@@ -20,7 +37,7 @@ const Sidebar = ({ isOpen, role, setView, onLogout }) => {
     zIndex: 999
   };
 
-  const btnStyle = {
+  const btnStyle: React.CSSProperties = {
     padding: '10px',
     textAlign: 'left',
     background: 'none',
@@ -66,8 +83,12 @@ const Sidebar = ({ isOpen, role, setView, onLogout }) => {
 // ==========================================
 // 2. PATIENT LIST COMPONENT
 // ==========================================
-const PatientList = ({ onPatientClick, role }) => {
-  const [patients, setPatients] = useState([]); // Awaits DB population
+interface PatientListProps {
+  onPatientClick: (patient: Patient) => void;
+  role: string;
+}
+const PatientList = ({ onPatientClick, role }: PatientListProps) => {
+  const [patients, setPatients] = useState<Patient[]>([]); // Awaits DB population
 
   return (
     <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
@@ -86,7 +107,7 @@ const PatientList = ({ onPatientClick, role }) => {
         </thead>
         <tbody>
           {patients.length === 0 ? (
-            <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#999' }}>No patients found. Database empty.</td></tr>
+            <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#999' }}>No patients found. Database empty.</td></tr>
           ) : (
             patients.map((patient) => (
               <tr key={patient.id} onClick={() => onPatientClick(patient)} style={{ cursor: 'pointer', borderBottom: '1px solid #eee' }}>
@@ -106,8 +127,13 @@ const PatientList = ({ onPatientClick, role }) => {
 // ==========================================
 // 3. PATIENT CARD COMPONENT
 // ==========================================
-const PatientCard = ({ patient, onClose, role }) => {
-  const handleWhatsAppRedirect = (phone) => {
+interface PatientCardProps {
+  patient: Patient;
+  onClose: () => void;
+  role: string;
+}
+const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
+  const handleWhatsAppRedirect = (phone?: string) => {
     if(phone) window.open(`https://wa.me/${phone}`, '_blank');
   };
 
@@ -159,7 +185,11 @@ const PatientCard = ({ patient, onClose, role }) => {
 // ==========================================
 // 4. PATIENT FORM COMPONENT
 // ==========================================
-const PatientForm = ({ onCancel, role }) => {
+interface PatientFormProps {
+  onCancel: () => void;
+  role: string;
+}
+const PatientForm = ({ onCancel, role }: PatientFormProps) => {
   return (
     <div style={{ background: '#fff', padding: '30px', borderRadius: '8px', textAlign: 'left' }}>
       <h2>Register New Patient</h2>
@@ -227,7 +257,7 @@ const AuditLog = () => {
         </thead>
         <tbody>
           <tr>
-            <td colSpan="4" style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
+            <td colSpan={4} style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
               Data will populate here once connected to the Audit API endpoint.
             </td>
           </tr>
@@ -240,14 +270,17 @@ const AuditLog = () => {
 // ==========================================
 // MAIN DASHBOARD WRAPPER
 // ==========================================
-const Dashboard = ({ onLogout }) => {
+interface DashboardProps {
+  onLogout?: () => void;
+}
+const Dashboard = ({ onLogout }: DashboardProps) => {
   // Hardcoded to 'admin' so you can see all menu options. 
   // Change this to 'medic', 'institute', or 'patient' to test permissions.
   const [userRole] = useState('admin'); 
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('patients'); 
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 

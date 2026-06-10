@@ -6,7 +6,11 @@ import AnimatedContent from './AnimatedContent';
  * Oferece autenticação com email e senha
  * Responsivo para mobile e desktop
  */
-const Login = ({ onClose, onLoginSuccess }) => {
+interface LoginProps {
+  onClose?: () => void;
+  onLoginSuccess?: (data: { email: string; senha?: string }) => void;
+}
+const Login = ({ onClose, onLoginSuccess }: LoginProps) => {
   // Estados do formulário
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -17,13 +21,13 @@ const Login = ({ onClose, onLoginSuccess }) => {
   const [senhaTocada, setSenhaTocada] = useState(false);
 
   // Validação de email
-  const validarEmail = (e) => {
+  const validarEmail = (e: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(e);
   };
 
   // Validação de senha
-  const validarSenha = (s) => s.length >= 6;
+  const validarSenha = (s: string) => s.length >= 6;
 
   // Erros de validação
   const erroEmail = emailTocado && email && !validarEmail(email);
@@ -31,7 +35,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
   const formValido = email && senha && validarEmail(email) && validarSenha(senha);
 
   // Manipulador de submissão do formulário
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
     setCarregando(true);
@@ -61,7 +65,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
       setSenha('');
       setCarregando(false);
       if (onClose) onClose();
-    } catch (err) {
+    } catch (err: any) {
       setErro(err.message || 'Erro ao fazer login. Tente novamente.');
       setCarregando(false);
     }
@@ -77,7 +81,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
       borderRadius: 6,
       fontFamily: 'inherit',
       transition: 'all 0.3s ease',
-      boxSizing: 'border-box',
+      boxSizing: 'border-box' as const,
     },
     focado: {
       borderColor: '#1a5fa8',
@@ -190,7 +194,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
                   ...(emailTocado && email && validarEmail(email) ? estiloInput.focado : {}),
                   ...(erroEmail ? estiloInput.erro : {}),
                 }}
-                aria-invalid={erroEmail}
+                aria-invalid={!!erroEmail}
                 aria-describedby={erroEmail ? 'email-error' : undefined}
               />
               {erroEmail && (
@@ -228,7 +232,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
                     ...(senhaTocada && senha && validarSenha(senha) ? estiloInput.focado : {}),
                     ...(erroSenha ? estiloInput.erro : {}),
                   }}
-                  aria-invalid={erroSenha}
+                  aria-invalid={!!erroSenha}
                   aria-describedby={erroSenha ? 'senha-error' : undefined}
                 />
                 {senha && (

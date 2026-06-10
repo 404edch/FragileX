@@ -7,6 +7,30 @@ gsap.registerPlugin(ScrollTrigger);
 const ehDispositivoTouch = () =>
   typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
+import { ReactNode, CSSProperties } from 'react';
+
+interface AnimatedContentProps {
+  children: ReactNode;
+  container?: string | HTMLElement | null;
+  distance?: number;
+  direction?: 'vertical' | 'horizontal';
+  reverse?: boolean;
+  duration?: number;
+  ease?: string;
+  initialOpacity?: number;
+  animateOpacity?: boolean;
+  scale?: number;
+  threshold?: number;
+  delay?: number;
+  disappearAfter?: number;
+  disappearDuration?: number;
+  disappearEase?: string;
+  onComplete?: () => void;
+  onDisappearanceComplete?: () => void;
+  className?: string;
+  style?: CSSProperties;
+}
+
 const AnimatedContent = ({
   children,
   container,
@@ -27,8 +51,8 @@ const AnimatedContent = ({
   onDisappearanceComplete,
   className = '',
   ...props
-}) => {
-  const ref = useRef(null);
+}: AnimatedContentProps) => {
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;

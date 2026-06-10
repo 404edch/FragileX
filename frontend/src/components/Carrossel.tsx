@@ -5,7 +5,10 @@ import { useLarguraJanela, useUmaVezNoViewport } from '../hooks/useHooks';
 /**
  * Imagem de Placeholder para os cards
  */
-export const ImagemPlaceholder = ({ etiqueta }) => (
+interface ImagemPlaceholderProps {
+  etiqueta: string;
+}
+export const ImagemPlaceholder = ({ etiqueta }: ImagemPlaceholderProps) => (
   <div
     aria-label={etiqueta}
     style={{
@@ -28,7 +31,12 @@ export const ImagemPlaceholder = ({ etiqueta }) => (
 /**
  * Card individual do carrossel
  */
-export const CardCarrossel = ({ nome, etiquetaImg, estilo: estiloExtra }) => (
+interface CardCarrosselProps {
+  nome: string;
+  etiquetaImg: string;
+  estilo?: React.CSSProperties;
+}
+export const CardCarrossel = ({ nome, etiquetaImg, estilo: estiloExtra }: CardCarrosselProps) => (
   <article
     className="carousel-card"
     style={{
@@ -58,7 +66,13 @@ export const CardCarrossel = ({ nome, etiquetaImg, estilo: estiloExtra }) => (
 /**
  * Botão de seta para navegação
  */
-const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }) => (
+interface BotaoSetaProps {
+  direcao: 'esquerda' | 'direita';
+  onClick: () => void;
+  desativado: boolean;
+  etiqueta: string;
+}
+const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }: BotaoSetaProps) => (
   <button
     onClick={onClick}
     disabled={desativado}
@@ -103,7 +117,10 @@ const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }) => (
 /**
  * Carrossel para Desktop com navegação por setas
  */
-export const CarrosselDesktop = ({ cards }) => {
+interface CarrosselProps {
+  cards: { id: number | string; nome: string; etiquetaImg: string }[];
+}
+export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
   const larguraJanela = useLarguraJanela();
   const [offset, setOffset] = useState(0);
   const [animando, setAnimando] = useState(false);
@@ -133,7 +150,7 @@ export const CarrosselDesktop = ({ cards }) => {
   const podeVoltar = offset > 0;
   const podeAvancar = offset < offsetMaximo;
 
-  const navegar = useCallback((dir) => {
+  const navegar = useCallback((dir: 'esquerda' | 'direita') => {
     if (animando) return;
     setAnimando(true);
     setOffset((prev) => {
@@ -169,6 +186,7 @@ export const CarrosselDesktop = ({ cards }) => {
               key={card.id}
               nome={card.nome}
               etiquetaImg={card.etiquetaImg}
+              estilo={{}}
             />
           ))}
         </div>
@@ -187,8 +205,8 @@ export const CarrosselDesktop = ({ cards }) => {
 /**
  * Carrossel para Mobile com scroll nativo
  */
-export const CarrosselMobile = ({ cards }) => {
-  const trilhoRef = useRef(null);
+export const CarrosselMobile = ({ cards }: CarrosselProps) => {
+  const trilhoRef = useRef<HTMLDivElement>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(0);
 
   useEffect(() => {
