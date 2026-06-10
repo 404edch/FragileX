@@ -10,7 +10,8 @@
     padding: 60px 40px;
     display: flex;
     justify-content: center;
-    margin-left: 250px; /* To account for sidebar width */
+    margin-left: 250px;
+    /* To account for sidebar width */
 }
 
 .dashboard-content-area {
@@ -20,13 +21,13 @@
 
 /* Fallback generic styles for elements inside Dashboard but not extracted */
 .dashboard-med-registration {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 16px;
     text-align: left;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-med-title {
@@ -36,7 +37,7 @@
 
 .dashboard-db-placeholder {
     padding: 20px;
-    background: rgba(0,0,0,0.03);
+    background: rgba(0, 0, 0, 0.03);
     color: #666;
     border-radius: 8px;
     border: 1px dashed #ccc;
@@ -63,20 +64,21 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 998;
 }
 
 @media (max-width: 768px) {
     .dashboard-main {
         margin-left: 0;
-        padding: 70px 20px 40px; /* Top padding to account for menu btn */
+        padding: 70px 20px 40px;
+        /* Top padding to account for menu btn */
     }
-    
+
     .mobile-menu-btn {
         display: block;
     }
-    
+
     .sidebar-overlay {
         display: block;
     }

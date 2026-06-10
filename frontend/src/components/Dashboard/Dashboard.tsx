@@ -50,6 +50,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
     <div className="dashboard-wrapper">
       <Sidebar 
         role={userRole} 
+        user={{ name: 'Dr. Roberto Alves', photo: 'https://i.pravatar.cc/150?img=11' }}
         setView={(view) => { setCurrentView(view); setIsSidebarOpen(false); }}
         onLogout={onLogout}
         isOpen={isSidebarOpen}
