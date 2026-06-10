@@ -1,0 +1,85 @@
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0d2e5e 0%, #1a5fa8 45%, #4a9fd4 100%);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.dashboard-main {
+    flex: 1;
+    padding: 60px 40px;
+    display: flex;
+    justify-content: center;
+    margin-left: 250px;
+    /* To account for sidebar width */
+}
+
+.dashboard-content-area {
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* Fallback generic styles for elements inside Dashboard but not extracted */
+.dashboard-med-registration {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 16px;
+    text-align: left;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-med-title {
+    color: #1a3a6e;
+    margin-top: 0;
+}
+
+.dashboard-db-placeholder {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.03);
+    color: #666;
+    border-radius: 8px;
+    border: 1px dashed #ccc;
+    margin-top: 20px;
+}
+
+/* Mobile responsive adjustments */
+.mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+@media (max-width: 768px) {
+    .dashboard-main {
+        margin-left: 0;
+        padding: 70px 20px 40px;
+        /* Top padding to account for menu btn */
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .sidebar-overlay {
+        display: block;
+    }
+}

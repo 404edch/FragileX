@@ -1,0 +1,66 @@
+.patient-form-container {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 16px;
+    text-align: left;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.patient-form-title {
+    color: #1a3a6e;
+    margin-top: 0;
+}
+
+.patient-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.patient-form-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.patient-form-label {
+    font-weight: bold;
+    color: #333;
+}
+
+.patient-form-db-placeholder {
+    padding: 20px;
+    background: rgba(0,0,0,0.03);
+    color: #666;
+    border-radius: 8px;
+    border: 1px dashed #ccc;
+    margin-top: 8px;
+}
+
+.patient-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.patient-form-save-btn {
+    background: #1a5fa8;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.patient-form-cancel-btn {
+    background: #e0e0e0;
+    color: #333;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
