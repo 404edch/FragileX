@@ -8,7 +8,13 @@ export const LARGURA_CARD = 220;
 export const ESPACAMENTO_CARD = 24;
 export const PADDING_MINIMO_CARD = 48; // padding horizontal da seção × 2
 
-export const DADOS_CARDS = [
+export interface IDadosCard {
+  id: number;
+  nome: string;
+  etiquetaImg: string;
+}
+
+export const DADOS_CARDS: IDadosCard[] = [
   { id: 1, nome: "Equipe BK",      etiquetaImg: "Foto equipe" },
   { id: 2, nome: "Nossa missão",   etiquetaImg: "Foto missão" },
   { id: 3, nome: "Nosso impacto",  etiquetaImg: "Foto impacto" },

@@ -9,7 +9,11 @@ import AnimatedContent from './AnimatedContent';
  * @param {Object} props - { aberto, onClick }
  * @returns {JSX.Element}
  */
-const BotaoHamburger = ({ aberto, onClick }) => (
+interface BotaoHamburgerProps {
+  aberto: boolean;
+  onClick: () => void;
+}
+const BotaoHamburger = ({ aberto, onClick }: BotaoHamburgerProps) => (
   <button
     onClick={onClick}
     aria-label={aberto ? "Fechar menu" : "Abrir menu"}
@@ -54,7 +58,12 @@ const BotaoHamburger = ({ aberto, onClick }) => (
  * @param {Object} props - { onLoginClick, usuarioLogado, onLogout }
  * @returns {JSX.Element}
  */
-const Navbar = ({ onLoginClick, usuarioLogado, onLogout }) => {
+interface NavbarProps {
+  onLoginClick: () => void;
+  usuarioLogado?: { email: string };
+  onLogout: () => void;
+}
+const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: NavbarProps) => {
   // Estados
   const [menuAberto, setMenuAberto] = useState(false);
   const larguraJanela = useLarguraJanela();
@@ -68,7 +77,7 @@ const Navbar = ({ onLoginClick, usuarioLogado, onLogout }) => {
   const alternarMenu = useCallback(() => setMenuAberto((v) => !v), []);
 
   // Estilos reutilizáveis para links de navegação
-  const estiloLinkNav = {
+  const estiloLinkNav: React.CSSProperties = {
     background: "none",
     border: "none",
     fontSize: 13,
@@ -105,11 +114,11 @@ const Navbar = ({ onLoginClick, usuarioLogado, onLogout }) => {
   };
 
   // Função para aplicar/remover estilos no botão de login
-  const handleLoginMouseEnter = (e) => {
+  const handleLoginMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     Object.assign(e.currentTarget.style, estiloBotaoLogin.hover);
   };
 
-  const handleLoginMouseLeave = (e) => {
+  const handleLoginMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.background = "#111";
     e.currentTarget.style.transform = "";
     e.currentTarget.style.boxShadow = "none";

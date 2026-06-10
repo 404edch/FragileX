@@ -3,7 +3,11 @@ import { useLarguraJanela } from '../hooks/useHooks';
 import AnimatedContent from './AnimatedContent';
 import logoIBK from '/LOGO_IBK.png';
 
-const IconeSocial = ({ d, etiqueta }) => (
+interface IconeSocialProps {
+  d: string;
+  etiqueta: string;
+}
+const IconeSocial = ({ d, etiqueta }: IconeSocialProps) => (
   <a
     href="#"
     aria-label={etiqueta}
@@ -85,7 +89,7 @@ const Footer = () => {
               objectFit: "contain",
               display: "block",
             }}
-            onError={(e) => { e.target.style.display = "none"; }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
           />
         </div>
       ),

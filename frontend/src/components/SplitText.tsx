@@ -9,6 +9,25 @@ gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
 const ehDispositivoTouch = () =>
   typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
+import { ReactNode, CSSProperties } from 'react';
+
+interface SplitTextProps {
+  text: string;
+  className?: string;
+  style?: CSSProperties;
+  delay?: number;
+  duration?: number;
+  ease?: string;
+  splitType?: string;
+  from?: any;
+  to?: any;
+  threshold?: number;
+  rootMargin?: string;
+  textAlign?: any;
+  tag?: React.ElementType;
+  onLetterAnimationComplete?: () => void;
+}
+
 const SplitText = ({
   text,
   className = '',
@@ -24,8 +43,8 @@ const SplitText = ({
   textAlign = 'center',
   tag = 'p',
   onLetterAnimationComplete
-}) => {
-  const ref = useRef(null);
+}: SplitTextProps) => {
+  const ref = useRef<any>(null);
   const animationCompletedRef = useRef(false);
   const onCompleteRef = useRef(onLetterAnimationComplete);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -77,8 +96,8 @@ const SplitText = ({
             : `+=${marginValue}${marginUnit}`;
       const start = `top ${startPct}%${sign}`;
 
-      let targets;
-      const assignTargets = self => {
+      let targets: any;
+      const assignTargets = (self: any) => {
         if (splitType.includes('chars') && self.chars.length) targets = self.chars;
         if (!targets && splitType.includes('words') && self.words.length) targets = self.words;
         if (!targets && splitType.includes('lines') && self.lines.length) targets = self.lines;
@@ -164,7 +183,7 @@ const SplitText = ({
     };
     const mergedStyle = { ...baseStyle, ...style };
     const classes = `split-parent ${className}`;
-    const Tag = tag || 'p';
+    const Tag: any = tag || 'p';
 
     return (
       <Tag ref={ref} style={mergedStyle} className={classes}>
