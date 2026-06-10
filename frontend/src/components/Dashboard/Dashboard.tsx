@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import Sidebar from './Sidebar/Sidebar';
 import PatientList from './PatientList/PatientList';
-import PatientCard from './PatientCard/PatientCard';
 import PatientForm from './PatientForm/PatientForm';
 import Reports from './Reports/Reports';
 import AuditLog from './AuditLog/AuditLog';
@@ -16,16 +15,17 @@ interface DashboardProps {
 const Dashboard = ({ onLogout }: DashboardProps) => {
   const [userRole] = useState('admin'); 
   const [currentView, setCurrentView] = useState('patients'); 
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handlePatientClick = (patient: Patient) => {
+    window.open(`/?patientId=${patient.id}`, '_blank');
+  };
 
   const renderContent = () => {
-    if (selectedPatient) {
-      return <PatientCard patient={selectedPatient} onClose={() => setSelectedPatient(null)} role={userRole} />;
-    }
 
     switch (currentView) {
       case 'patients':
-        return <PatientList onPatientClick={setSelectedPatient} role={userRole} />;
+        return <PatientList onPatientClick={handlePatientClick} role={userRole} />;
       case 'register':
         return <PatientForm onCancel={() => setCurrentView('patients')} role={userRole} />;
       case 'reports':
@@ -42,7 +42,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
           </motion.div>
         );
       default:
-        return <PatientList onPatientClick={setSelectedPatient} role={userRole} />;
+        return <PatientList onPatientClick={handlePatientClick} role={userRole} />;
     }
   };
 
@@ -50,11 +50,22 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
     <div className="dashboard-wrapper">
       <Sidebar 
         role={userRole} 
-        setView={(view) => { setCurrentView(view); setSelectedPatient(null); }}
+        setView={(view) => { setCurrentView(view); setIsSidebarOpen(false); }}
         onLogout={onLogout}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
+      {isSidebarOpen && <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
+
       <main className="dashboard-main">
+        <button className="mobile-menu-btn" onClick={() => setIsSidebarOpen(true)} aria-label="Abrir Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
         <div className="dashboard-content-area">
           {renderContent()}
         </div>

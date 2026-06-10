@@ -44,9 +44,40 @@
 }
 
 /* Mobile responsive adjustments */
+.mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+}
+
 @media (max-width: 768px) {
     .dashboard-main {
         margin-left: 0;
-        padding: 40px 20px;
+        padding: 70px 20px 40px; /* Top padding to account for menu btn */
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .sidebar-overlay {
+        display: block;
     }
 }

@@ -25,7 +25,7 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
         onClick={onClose} 
         className="patient-card-back-btn"
       >
-        ← Voltar para a Lista
+        ← Fechar Aba
       </motion.button>
       
       <div className="patient-card-header">

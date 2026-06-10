@@ -6,12 +6,21 @@ interface SidebarProps {
   role: string;
   setView: (view: string) => void;
   onLogout?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar = ({ role, setView, onLogout }: SidebarProps) => {
+const Sidebar = ({ role, setView, onLogout, isOpen, onClose }: SidebarProps) => {
   return (
-    <aside className="sidebar">
-      <h2 className="sidebar-title">Menu</h2>
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <div className="sidebar-header-mobile">
+        <h2 className="sidebar-title">Menu</h2>
+        {onClose && (
+          <button className="sidebar-close-btn" onClick={onClose} aria-label="Fechar Menu">
+            &times;
+          </button>
+        )}
+      </div>
       <nav className="sidebar-nav">
         {['medic', 'institute', 'admin'].includes(role) && (
           <>
