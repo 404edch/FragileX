@@ -1,36 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { LARGURA_CARD, ESPACAMENTO_CARD } from '../constants/constantes';
-import { useLarguraJanela, useUmaVezNoViewport } from '../hooks/useHooks';
+import { LARGURA_CARD, ESPACAMENTO_CARD } from '../../../constants/constantes';
+import { useLarguraJanela } from '../../../hooks/useHooks';
+import './Carrossel.css';
 
-/**
- * Imagem de Placeholder para os cards
- */
 interface ImagemPlaceholderProps {
   etiqueta: string;
 }
 export const ImagemPlaceholder = ({ etiqueta }: ImagemPlaceholderProps) => (
-  <div
-    aria-label={etiqueta}
-    style={{
-      width: "100%",
-      height: 160,
-      background: "linear-gradient(135deg, #c8d8ea 0%, #d8e8f4 100%)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#6a8caa",
-      fontSize: 12,
-      fontWeight: 500,
-      letterSpacing: 0.3,
-    }}
-  >
+  <div aria-label={etiqueta} className="carousel-img-placeholder">
     {etiqueta}
   </div>
 );
 
-/**
- * Card individual do carrossel
- */
 interface CardCarrosselProps {
   nome: string;
   etiquetaImg: string;
@@ -41,31 +22,16 @@ export const CardCarrossel = ({ nome, etiquetaImg, estilo: estiloExtra }: CardCa
     className="carousel-card"
     style={{
       width: LARGURA_CARD,
-      background: "#ffffff",
-      borderRadius: 12,
-      boxShadow: "0 4px 20px rgba(20,60,120,0.09)",
-      overflow: "hidden",
-      flexShrink: 0,
-      transition: "transform 0.25s ease, box-shadow 0.25s ease",
       ...estiloExtra,
     }}
   >
-    <div style={{
-      padding: "12px 16px",
-      fontSize: 13,
-      fontWeight: 600,
-      color: "#1a4a6e",
-      borderBottom: "1px solid #e8f0f8",
-    }}>
+    <div className="carousel-card-title">
       {nome}
     </div>
     <ImagemPlaceholder etiqueta={etiquetaImg} />
   </article>
 );
 
-/**
- * Botão de seta para navegação
- */
 interface BotaoSetaProps {
   direcao: 'esquerda' | 'direita';
   onClick: () => void;
@@ -77,46 +43,12 @@ const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }: BotaoSetaProps) =
     onClick={onClick}
     disabled={desativado}
     aria-label={etiqueta}
-    style={{
-      background: desativado ? "#f0f4f8" : "#ffffff",
-      border: "1.5px solid",
-      borderColor: desativado ? "#dde5ef" : "#1a5fa8",
-      borderRadius: "50%",
-      width: 40,
-      height: 40,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexShrink: 0,
-      cursor: desativado ? "default" : "pointer",
-      color: desativado ? "#bcc8d8" : "#1a5fa8",
-      fontSize: 20,
-      lineHeight: 1,
-      transition: "background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease",
-      boxShadow: desativado ? "none" : "0 2px 8px rgba(26,95,168,0.12)",
-    }}
-    onMouseEnter={(e) => {
-      if (!desativado) {
-        e.currentTarget.style.background = "#1a5fa8";
-        e.currentTarget.style.color = "#fff";
-        e.currentTarget.style.transform = "scale(1.07)";
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (!desativado) {
-        e.currentTarget.style.background = "#ffffff";
-        e.currentTarget.style.color = "#1a5fa8";
-        e.currentTarget.style.transform = "";
-      }
-    }}
+    className={`carousel-arrow-btn ${desativado ? 'carousel-arrow-disabled' : ''}`}
   >
     {direcao === "esquerda" ? "‹" : "›"}
   </button>
 );
 
-/**
- * Carrossel para Desktop com navegação por setas
- */
 interface CarrosselProps {
   cards: { id: number | string; nome: string; etiquetaImg: string }[];
 }
@@ -171,7 +103,7 @@ export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
         etiqueta="Anterior"
       />
 
-      <div className="slide-viewport" style={{ flex: 1 }} aria-live="polite" aria-label="Carrossel de cards">
+      <div className="slide-viewport" style={{ flex: 1, overflow: 'hidden' }} aria-live="polite" aria-label="Carrossel de cards">
         <div
           style={{
             display: "flex",
@@ -202,9 +134,6 @@ export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
   );
 };
 
-/**
- * Carrossel para Mobile com scroll nativo
- */
 export const CarrosselMobile = ({ cards }: CarrosselProps) => {
   const trilhoRef = useRef<HTMLDivElement>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(0);
@@ -228,10 +157,9 @@ export const CarrosselMobile = ({ cards }: CarrosselProps) => {
     <div style={{ width: "100%" }}>
       <div
         ref={trilhoRef}
-        className="carousel-track"
+        className="carousel-track-mobile"
         role="region"
         aria-label="Carrossel de cards — deslize para navegar"
-        style={{ paddingLeft: 20, paddingRight: 20 }}
       >
         {cards.map((card) => (
           <CardCarrossel
@@ -243,20 +171,14 @@ export const CarrosselMobile = ({ cards }: CarrosselProps) => {
         ))}
       </div>
 
-      <div role="tablist" aria-label="Indicadores de posição" style={{ display: "flex", justifyContent: "center", gap: 7, marginTop: 4 }}>
+      <div role="tablist" aria-label="Indicadores de posição" className="carousel-indicators">
         {cards.map((_, i) => (
           <div
             key={i}
             role="tab"
             aria-selected={i === indiceAtivo}
             aria-label={`Card ${i + 1} de ${cards.length}`}
-            style={{
-              width: i === indiceAtivo ? 18 : 8,
-              height: 8,
-              borderRadius: 4,
-              background: i === indiceAtivo ? "#1a5fa8" : "#c0d4e8",
-              transition: "width 0.3s ease, background 0.3s ease",
-            }}
+            className={`carousel-indicator ${i === indiceAtivo ? 'carousel-indicator-active' : ''}`}
           />
         ))}
       </div>

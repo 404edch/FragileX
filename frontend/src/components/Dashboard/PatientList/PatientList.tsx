@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import AnimatedList from '../../Shared/AnimatedList';
+import { Patient } from '../types';
+import './PatientList.css';
+
+// 🚨 MOCK DATA: Delete this block when integrating with your DB 🚨
+const MOCK_PATIENTS_DATA: Patient[] = [
+  { id: 1, name: 'Alice Cooper', age: 45, sex: 'F', lastConsultation: '2023-10-12', tag: 'Urgente' },
+  { id: 2, name: 'Bob Smith', age: 32, sex: 'M', lastConsultation: '2023-09-01' },
+  { id: 3, name: 'Charlie Johnson', age: 60, sex: 'M', lastConsultation: '2023-11-05' },
+  { id: 4, name: 'Diana Prince', age: 28, sex: 'F', lastConsultation: '2023-12-01', tag: 'Acompanhamento' },
+  { id: 5, name: 'Edward Elric', age: 22, sex: 'M', lastConsultation: '2024-01-15' },
+];
+// 🚨 END MOCK DATA 🚨
+
+interface PatientListProps {
+  onPatientClick: (patient: Patient) => void;
+  role: string;
+}
+
+const PatientList = ({ onPatientClick, role }: PatientListProps) => {
+  const [patients] = useState<Patient[]>(MOCK_PATIENTS_DATA);
+
+  const animatedItems = patients.map((patient) => ({
+    ...patient,
+    render: (
+      <div className="patient-list-item">
+        <div>
+          <h3 className="patient-list-name">{patient.name}</h3>
+          <p className="patient-list-details">
+            Idade: {patient.age} | Sexo: {patient.sex} | Última Consulta: {patient.lastConsultation}
+          </p>
+        </div>
+        {patient.tag && (
+          <span 
+            className="patient-list-tag" 
+            style={{ background: patient.tag === 'Urgente' ? '#ff4d4f' : '#1a5fa8' }}
+          >
+            {patient.tag}
+          </span>
+        )}
+      </div>
+    )
+  }));
+
+  return (
+    <div className="patient-list-container">
+      <div className="patient-list-header">
+        <h2 className="patient-list-title">{role === 'medic' ? 'Meus Pacientes' : 'Todos os Pacientes'}</h2>
+        <div className="patient-list-controls">
+          <input 
+            type="text" 
+            placeholder="Buscar por nome..." 
+            className="patient-search-input"
+          />
+          <button className="patient-filter-btn" aria-label="Filtros" title="Filtrar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <AnimatedList 
+        items={animatedItems} 
+        onItemSelect={(item) => onPatientClick(item as Patient)} 
+        className="patient-animated-list"
+        displayScrollbar={false}
+      />
+    </div>
+  );
+};
+
+export default PatientList;

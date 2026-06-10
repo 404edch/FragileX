@@ -1,0 +1,33 @@
+.quem-somos-section {
+  background: linear-gradient(180deg, #eaf3fb 0%, #ffffff 100%);
+  padding: 56px clamp(16px, 3vw, 24px) 64px;
+  text-align: center;
+}
+
+.quem-somos-header {
+  margin-bottom: 40px;
+}
+
+.quem-somos-title {
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 700;
+  color: #1a3a6e;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.quem-somos-subtitle {
+  font-size: 13px;
+  color: #5a7a9a;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.quem-somos-carousel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}

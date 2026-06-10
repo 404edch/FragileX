@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import EstilosGlobais from './components/EstilosGlobais';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import QuemSomos from './components/QuemSomos';
-import Footer from './components/Footer';
-import Dashboard from './components/Dashboard';
+import EstilosGlobais from './components/Shared/EstilosGlobais';
+import Navbar from './components/LandingPage/Navbar/Navbar';
+import Hero from './components/LandingPage/Hero/Hero';
+import QuemSomos from './components/LandingPage/QuemSomos/QuemSomos';
+import Footer from './components/LandingPage/Footer/Footer';
+import Dashboard from './components/Dashboard/Dashboard';
 
 /**
  * Componente principal da aplicação

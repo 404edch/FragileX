@@ -1,5 +1,5 @@
 import React from 'react';
-import { ESPACAMENTO_CARD } from '../constants/constantes';
+import { ESPACAMENTO_CARD } from '../../constants/constantes';
 
 /**
  * Estilos globais da aplicação injetados via tag <style>

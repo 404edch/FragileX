@@ -1,7 +1,8 @@
 import React from 'react';
-import { useLarguraJanela } from '../hooks/useHooks';
-import AnimatedContent from './AnimatedContent';
+import { useLarguraJanela } from '../../../hooks/useHooks';
+import AnimatedContent from '../../Shared/AnimatedContent';
 import logoIBK from '/LOGO_IBK.png';
+import './Footer.css';
 
 interface IconeSocialProps {
   d: string;
@@ -11,24 +12,7 @@ const IconeSocial = ({ d, etiqueta }: IconeSocialProps) => (
   <a
     href="#"
     aria-label={etiqueta}
-    style={{
-      color: "#a8c8d8",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: 36,
-      height: 36,
-      borderRadius: "50%",
-      transition: "background 0.2s ease, color 0.2s ease",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background = "#1a5fa8";
-      e.currentTarget.style.color = "#fff";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background = "transparent";
-      e.currentTarget.style.color = "#a8c8d8";
-    }}
+    className="footer-social-icon"
   >
     <svg
       width="18" height="18" viewBox="0 0 24 24"
@@ -64,17 +48,6 @@ const Footer = () => {
   const larguraJanela = useLarguraJanela();
   const ehMobile = larguraJanela < 600;
 
-  const estiloCabecalhoCol = {
-    fontSize: 13,
-    fontWeight: 700,
-    color: "#ffffff",
-    borderBottom: "2px solid #4a9fd4",
-    paddingBottom: 10,
-    marginBottom: 16,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-  };
-
   const colunas = [
     {
       titulo: "Eu Digo X",
@@ -107,9 +80,7 @@ const Footer = () => {
             <a
               key={label}
               href="#"
-              style={{ fontSize: 13, color: "#d4e4f0", fontWeight: 500 }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#ffffff"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#d4e4f0"; }}
+              className="footer-link"
             >
               {label}
             </a>
@@ -131,48 +102,23 @@ const Footer = () => {
 
   return (
     <footer
-      style={{
-        background: "#0d2e5e",
-        borderTop: "3px solid #1a5fa8",
-        padding: "36px clamp(16px, 4vw, 40px) 28px",
-        fontFamily: "'DM Sans', sans-serif",
-      }}
+      className="footer-container"
       aria-label="Rodapé"
     >
       <AnimatedContent distance={40} direction="vertical" duration={1} initialOpacity={0} animateOpacity threshold={0.15}>
-        <div style={{
-          display: "flex",
-          justifyContent: ehMobile ? "center" : "space-between",
-          flexDirection: ehMobile ? "column" : "row",
-          flexWrap: "wrap",
-          gap: 32,
-          maxWidth: 900,
-          margin: "0 auto",
-          alignItems: ehMobile ? "center" : "flex-start",
-          textAlign: ehMobile ? "center" : "left",
-        }}>
+        <div className={`footer-content ${ehMobile ? 'footer-mobile' : 'footer-desktop'}`}>
           {colunas.map((col) => (
             <div key={col.titulo} style={{ minWidth: 140 }}>
-              <div style={estiloCabecalhoCol}>{col.titulo}</div>
+              <div className="footer-col-title">{col.titulo}</div>
               {col.conteudo}
             </div>
           ))}
         </div>
       </AnimatedContent>
 
-     
-        <div style={{
-          marginTop: 32,
-          paddingTop: 16,
-          borderTop: "1px solid rgba(255,255,255,0.15)",
-          textAlign: "center",
-          fontSize: 12,
-          color: "#a8c8d8",
-          letterSpacing: 0.3,
-        }}>
+        <div className="footer-copyright">
           © {new Date().getFullYear()} Instituto Buko Kaesemodel. Todos os direitos reservados.
         </div>
-    
     </footer>
   );
 };
