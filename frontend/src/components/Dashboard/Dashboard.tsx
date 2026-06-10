@@ -18,7 +18,7 @@ const Dashboard = ({ onLogout }: DashboardProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handlePatientClick = (patient: Patient) => {
-    window.open(`/?patientId=${patient.id}`, '_blank');
+    window.open(`/patient/${patient.id}`, '_blank');
   };
 
   const renderContent = () => {

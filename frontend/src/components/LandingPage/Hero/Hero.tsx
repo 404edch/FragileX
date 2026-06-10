@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ALTURA_NAVBAR } from '../../../constants/constantes';
 import { useLarguraJanela } from '../../../hooks/useHooks';
 import AnimatedContent from '../../Shared/AnimatedContent';
@@ -12,6 +13,7 @@ const ehDispositivoTouch = () =>
   typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
 const Hero = () => {
+  const navigate = useNavigate();
   const larguraJanela = useLarguraJanela();
   const ehMobile = larguraJanela < 480;
   const mascotRef = useRef(null);
@@ -43,7 +45,7 @@ const Hero = () => {
     >
       <div className="hero-content" style={{ maxWidth: ehMobile ? 320 : 400 }}>
         <AnimatedContent distance={30} direction="vertical" duration={0.9} initialOpacity={0} animateOpacity scale={1.02} delay={0.08}>
-          <button className="hero-btn-primary">
+          <button className="hero-btn-primary" onClick={() => navigate('/checklist')}>
             Cadastre-se
           </button>
         </AnimatedContent>

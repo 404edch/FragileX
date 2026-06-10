@@ -1,0 +1,220 @@
+.checklist-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0d2e5e 0%, #1a5fa8 45%, #4a9fd4 100%);
+    font-family: 'DM Sans', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.checklist-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.checklist-title {
+    color: #1a3a6e;
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.checklist-subtitle {
+    color: #4a5568;
+    margin-bottom: 32px;
+    font-size: 16px;
+}
+
+.checklist-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+    text-align: left;
+}
+
+.checklist-item-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checklist-item-label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 12px 16px;
+    background-color: #f8fafc;
+    color: #4a5568;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #e2e8f0;
+    user-select: none;
+}
+
+.checklist-item-label:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.checklist-item-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+    flex-shrink: 0;
+}
+
+.checklist-item-input:checked + .checklist-item-label {
+    background-color: #ebf8ff;
+    border-color: #1a5fa8;
+    color: #1a3a6e;
+}
+
+.checklist-item-input:checked + .checklist-item-label::before {
+    background-color: #1a5fa8;
+    border-color: #1a5fa8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+    background-size: 14px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.checklist-submit-btn {
+    background-color: #4a9fd4;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.checklist-submit-btn:hover {
+    background-color: #1a5fa8;
+}
+
+.checklist-error-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.checklist-error-title {
+    color: #e53e3e;
+    margin-bottom: 12px;
+}
+
+.checklist-error-text {
+    color: #4a5568;
+    margin-bottom: 24px;
+}
+
+.checklist-retry-btn {
+    background-color: #1a5fa8;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.checklist-retry-btn:hover {
+    background-color: #0d2e5e;
+}
+
+.checklist-loading {
+    color: #1a5fa8;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Forms & Input Fields */
+.cadastro-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.cadastro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    text-align: left;
+}
+
+.cadastro-section-title {
+    color: #1a3a6e;
+    font-size: 20px;
+    margin-top: 32px;
+    margin-bottom: 16px;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+}
+
+.cadastro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cadastro-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.required-asterisk {
+    color: #e53e3e;
+    margin-left: 2px;
+}
+
+.cadastro-input {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #1e293b;
+    background-color: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.cadastro-input:focus {
+    outline: none;
+    border-color: #1a5fa8;
+    box-shadow: 0 0 0 3px rgba(26, 95, 168, 0.2);
+    background-color: white;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
