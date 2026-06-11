@@ -10,17 +10,13 @@ const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
       <p className="checklist-subtitle">Preencha as informações pessoais e de contato.</p>
 
       <div className="cadastro-grid">
-        <ItemCadastro
-          label="Nome do Paciente"
-          name="nomePaciente"
-          required
-        />
-        <ItemCadastro
-          label="Data de Nascimento"
-          name="dataNascimento"
-          type="date"
-          required
-        />
+        <ItemCadastro label="Nome do Paciente" name="nomePaciente" required />
+        <ItemCadastro label="CPF do Paciente" name="cpfPaciente" required />
+        <ItemCadastro label="Data de Nascimento" name="dataNascimento" type="date" required />
+        
+        {!isMedico && (
+            <ItemCadastro label="Senha" name="senha" type="password" required />
+        )}
 
         <div className="cadastro-item">
           <label className="cadastro-label">

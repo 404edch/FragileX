@@ -35,11 +35,45 @@ const PatientList = ({ onPatientClick, role }: PatientListProps) => {
     )
   }));
 
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importCpf, setImportCpf] = useState('');
+  const [importMessage, setImportMessage] = useState('');
+
+  const handleImportPatient = async () => {
+    try {
+      console.log('Simulando solicitação de vínculo no Supabase para CPF:', importCpf);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setImportMessage('Solicitação de vínculo enviada com sucesso!');
+    } catch (e) {
+      setImportMessage('Erro de conexão.');
+    }
+  };
+
   return (
     <div className="patient-list-container">
+      {showImportModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', minWidth: '300px' }}>
+            <h3>Importar Paciente Existente</h3>
+            <p>Digite o CPF do paciente para solicitar vínculo.</p>
+            <input type="text" value={importCpf} onChange={e => setImportCpf(e.target.value)} placeholder="000.000.000-00" style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+            {importMessage && <p style={{ color: importMessage.includes('Erro') ? 'red' : 'green' }}>{importMessage}</p>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setShowImportModal(false)}>Fechar</button>
+              <button onClick={handleImportPatient} style={{ background: '#1a5fa8', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px' }}>Solicitar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="patient-list-header">
-        <h2 className="patient-list-title">{role === 'medic' ? 'Meus Pacientes' : 'Todos os Pacientes'}</h2>
+        <h2 className="patient-list-title">{role === 'medico' ? 'Meus Pacientes' : 'Todos os Pacientes'}</h2>
         <div className="patient-list-controls">
+          {role === 'medico' && (
+            <button onClick={() => setShowImportModal(true)} style={{ background: '#1a5fa8', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' }}>
+              Importar Paciente
+            </button>
+          )}
           <input 
             type="text" 
             placeholder="Buscar por nome..." 

@@ -37,6 +37,7 @@ const MENU_OPTIONS: MenuOption[] = [
   // Paciente
   { id: 'patient-fill-checklist', label: 'Novo Checklist', roles: ['paciente'] },
   { id: 'my-history', label: 'Meu Histórico', roles: ['paciente'] },
+  { id: 'link-requests', label: 'Solicitações de Vínculo', roles: ['paciente'] },
 ];
 
 const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {

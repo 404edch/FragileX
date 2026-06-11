@@ -11,14 +11,31 @@ export default function RegistroPaciente() {
   const isMedico = usuario?.role === 'medico';
 
   const formAction = async (formData: FormData) => {
-    const dadosPessoais = Object.fromEntries(formData.entries());
+    const rawData = Object.fromEntries(formData.entries());
+    
+    // Mapeamento dos campos para a API
+    const payload = {
+        nome: rawData.nomePaciente,
+        cpf: rawData.cpfPaciente,
+        email: rawData.email,
+        telefone: rawData.telefone,
+        data_nascimento: rawData.dataNascimento,
+        sexo_biologico: rawData.sexo_biologico === 'masculino' ? 'M' : 'F',
+        genero: rawData.genero === 'masculino' ? 'Masculino' : 'Feminino',
+        sindrome: 'normal', // Default or asked?
+        senha: rawData.senha,
+        id_medico: isMedico ? 1 : undefined // Mock ID medico for testing
+    };
 
     try {
-      await sendCadastro(dadosPessoais);
-      alert("Paciente registrado com sucesso!");
+      // Mock da requisição que no futuro será feita via Supabase
+      console.log('Payload para Supabase:', payload);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      alert(isMedico ? "Paciente registrado! Aguardando ativação." : "Conta criada com sucesso!");
       navigate('/dashboard');
     } catch (error) {
-      alert("Erro ao registrar paciente. Tente novamente.");
+      alert("Erro ao registrar.");
     }
   };
 

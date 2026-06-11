@@ -57,9 +57,11 @@ const Dashboard = () => {
       case 'all-doctors':
         return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
       case 'approvals':
-        return <div className="dashboard-db-placeholder">[MOCK: Aprovações Pendentes de Médicos]</div>;
+        return <div className="dashboard-db-placeholder">[MOCK: Aprovações Pendentes de Médicos (Ação: Admin acessa adminRotas)]</div>;
       case 'my-history':
-        return <div className="dashboard-db-placeholder">[MOCK: Histórico de Checklists do Paciente (Score Oculto)]</div>;
+        return <div className="dashboard-db-placeholder">[MOCK: Histórico de Checklists do Paciente]</div>;
+      case 'link-requests':
+        return <div className="dashboard-db-placeholder">[MOCK: Solicitações de Vínculo do Médico aguardando Aprovação/Recusa do Paciente]</div>;
       default:
         return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }

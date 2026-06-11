@@ -7,10 +7,27 @@ import { useNavigate } from 'react-router-dom';
 const AplicacaoMedico = () => {
   const navigate = useNavigate();
 
-  const handleApply = (e: FormEvent<HTMLFormElement>) => {
+  const handleApply = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Sua aplicação foi enviada para análise do Instituto Buko Kaesemodel. Entraremos em contato em breve!");
-    navigate('/');
+    const form = new FormData(e.currentTarget);
+    const data = {
+      nome: form.get('nomeCompleto'),
+      crm: form.get('crm'),
+      especialidade: form.get('especialidade'),
+      estado: form.get('estado'),
+      email: form.get('email'),
+      telefone: form.get('telefone'),
+      instituicao: form.get('linkCurriculo') || 'Não informada'
+    };
+
+    try {
+      console.log('Payload da Aplicação para Supabase:', data);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert("Sua aplicação foi enviada para análise do Instituto Buko Kaesemodel. Entraremos em contato em breve!");
+      navigate('/');
+    } catch (err) {
+      alert("Erro de conexão.");
+    }
   };
 
   return (
