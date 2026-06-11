@@ -8,6 +8,7 @@ WHERE cs.id_checklist = 1;
 
 
 -- pesquisa por nome do checklist com score 
+-- or diminui a performance 
 SELECT
 	s.sintoma,
 	cs.possui,
@@ -21,14 +22,14 @@ JOIN checklist_sintomas cs ON s.id = cs.id_sintoma
 JOIN checklists c ON cs.id_checklist = c.id 
 JOIN pacientes p ON c.id_paciente = p.id_usuario
 JOIN usuarios u ON p.id_usuario = u.id
-WHERE u.nome = 'Paciente 11' OR u.cpf = '33333333311'; -- substituir por :variaveldoback no nome e no cpf 
-		
+WHERE u.nome = 'Paciente 11' OR u.cpf = '33333333311'; -- substituir por variavel do back no nome e no cpf
+
 -- informações para os cards dos 10 ultimos consultados
 -- nome sexo e data
 SELECT 
 	u.nome,
 	p.sexo_biologico,
-	c.data_preenchimento
+	c.data_preenchimento::DATE
 FROM checklists c 
 JOIN pacientes p ON c.id_paciente = p.id_usuario
 JOIN usuarios u ON p.id_usuario = u.id
@@ -42,4 +43,3 @@ FROM checklists c
 JOIN usuarios u ON c.id_paciente = u.id
 WHERE u.nome = 'Paciente 11' OR u.cpf = '33333333311'; -- substituir por :variaveldoback no nome e no cpf 
 
--- 
