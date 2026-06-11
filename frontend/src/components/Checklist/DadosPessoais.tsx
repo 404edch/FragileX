@@ -1,7 +1,6 @@
-import React from "react";
 import ItemCadastro from "./ItemCadastro";
 
-const DadosPessoais = () => {
+const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
   return (
     <div
       className="checklist-container"

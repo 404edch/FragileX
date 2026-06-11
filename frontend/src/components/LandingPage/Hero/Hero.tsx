@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ALTURA_NAVBAR } from '../../../constants/constantes';
 import { useLarguraJanela } from '../../../hooks/useHooks';
@@ -45,13 +45,13 @@ const Hero = () => {
     >
       <div className="hero-content" style={{ maxWidth: ehMobile ? 320 : 400 }}>
         <AnimatedContent distance={30} direction="vertical" duration={0.9} initialOpacity={0} animateOpacity scale={1.02} delay={0.08}>
-          <button className="hero-btn-primary" onClick={() => navigate('/checklist')}>
+          <button className="hero-btn-primary" onClick={() => navigate('/registro')}>
             Cadastre-se
           </button>
         </AnimatedContent>
 
         <AnimatedContent distance={30} direction="vertical" duration={0.9} initialOpacity={0} animateOpacity scale={1.02} delay={0.22}>
-          <button className="hero-btn-secondary">
+          <button className="hero-btn-secondary" onClick={() => navigate('/aplicacao-medico')}>
             Sou um Médico
           </button>
         </AnimatedContent>

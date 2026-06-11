@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 
 interface UserInfo {
@@ -7,7 +7,7 @@ interface UserInfo {
   photo?: string;
 }
 
-interface SidebarProps {
+interface Props {
   role: string;
   user?: UserInfo;
   setView: (view: string) => void;
@@ -22,17 +22,25 @@ type MenuOption = {
   roles: string[];
 };
 
-// Structured menu to easily grant/revoke access based on role
 const MENU_OPTIONS: MenuOption[] = [
-  { id: 'patients', label: 'Lista de Pacientes', roles: ['medic', 'institute', 'admin'] },
-  { id: 'register', label: 'Cadastrar Paciente', roles: ['medic', 'institute', 'admin'] },
-  { id: 'reports', label: 'Relatórios', roles: ['institute', 'admin'] },
-  { id: 'audit', label: 'Registro de Auditoria', roles: ['admin'] },
-  { id: 'medRegistration', label: 'Cadastro de Médicos', roles: ['admin'] },
-  { id: 'support', label: 'Suporte', roles: ['patient', 'medic'] },
+  // Instituto
+  { id: 'all-patients', label: 'Todos os Pacientes', roles: ['instituto'] },
+  { id: 'all-doctors', label: 'Médicos Cadastrados', roles: ['instituto'] },
+  { id: 'approvals', label: 'Aprovações Pendentes', roles: ['instituto'] },
+
+  // Medico
+  { id: 'my-patients', label: 'Meus Pacientes', roles: ['medico'] },
+  { id: 'register-patient', label: 'Cadastrar Paciente', roles: ['medico', 'instituto'] },
+  { id: 'quick-checklist', label: 'Checklist Rápido', roles: ['medico'] },
+  { id: 'fill-checklist', label: 'Preencher Checklist', roles: ['medico'] },
+
+  // Paciente
+  { id: 'patient-fill-checklist', label: 'Novo Checklist', roles: ['paciente'] },
+  { id: 'my-history', label: 'Meu Histórico', roles: ['paciente'] },
 ];
 
-const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: SidebarProps) => {
+const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
+  const navigate = useNavigate();
   const allowedOptions = MENU_OPTIONS.filter(option => option.roles.includes(role));
 
   return (
@@ -47,15 +55,15 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: SidebarProp
           </button>
         )}
       </div>
-      
+
       <nav className="sidebar-nav">
         <div className="sidebar-role-group">
           {allowedOptions.map(option => (
-            <motion.button 
+            <motion.button
               key={option.id}
-              whileHover={{ scale: 1.02, backgroundColor: 'var(--hover-bg, rgba(26,95,168,0.1))' }} 
-              whileTap={{ scale: 0.98 }} 
-              className="sidebar-btn" 
+              whileHover={{ scale: 1.02, backgroundColor: 'var(--hover-bg, rgba(26,95,168,0.1))' }}
+              whileTap={{ scale: 0.98 }}
+              className="sidebar-btn"
               onClick={() => setView(option.id)}
             >
               {option.label}
@@ -67,9 +75,8 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: SidebarProp
       <div className="sidebar-main-logo-container">
         <img src="/ibkblue.png.webp" alt="IBK Logo" className="sidebar-main-logo" />
       </div>
-        
+
       <div className="sidebar-bottom-group">
-        {/* Logged in User Profile Info */}
         {user && (
           <div className="sidebar-user-profile">
             {user.photo ? (
@@ -83,10 +90,20 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: SidebarProp
           </div>
         )}
 
-        <motion.button 
-          whileHover={{ scale: 1.02 }} 
+        <motion.button
+          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={onLogout} 
+          onClick={() => navigate('/')}
+          className="sidebar-btn"
+          style={{ marginBottom: '8px' }}
+        >
+          Início
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onLogout}
           className="sidebar-btn logout"
         >
           Sair

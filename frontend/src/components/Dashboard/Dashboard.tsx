@@ -1,58 +1,77 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar/Sidebar';
 import PatientList from './PatientList/PatientList';
-import PatientForm from './PatientForm/PatientForm';
-import Reports from './Reports/Reports';
-import AuditLog from './AuditLog/AuditLog';
-import { Patient } from './types';
+import { type Patient } from './types';
 import './Dashboard.css';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-interface DashboardProps {
-  onLogout?: () => void;
-}
+const NAVIGATION_VIEWS: Record<string, string> = {
+  'register-patient': '/registro',
+  'quick-checklist': '/checklist-rapido',
+  'fill-checklist': '/preencher-checklist',
+  'patient-fill-checklist': '/preencher-checklist',
+};
 
-const Dashboard = ({ onLogout }: DashboardProps) => {
-  const [userRole] = useState('admin'); 
-  const [currentView, setCurrentView] = useState('patients'); 
+const DEFAULT_VIEW: Record<string, string> = {
+  instituto: 'all-patients',
+  medico: 'my-patients',
+  paciente: 'my-history',
+};
+
+const Dashboard = () => {
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
+  const [currentView, setCurrentView] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (!usuario) {
+      navigate('/login');
+    } else if (usuario.role) {
+      setCurrentView(DEFAULT_VIEW[usuario.role] ?? '');
+    }
+  }, [usuario, navigate]);
+
+  if (!usuario) return null;
+
+  const handleSetView = (view: string) => {
+    setIsSidebarOpen(false);
+
+    if (view in NAVIGATION_VIEWS) {
+      navigate(NAVIGATION_VIEWS[view]);
+    } else {
+      setCurrentView(view);
+    }
+  };
 
   const handlePatientClick = (patient: Patient) => {
     window.open(`/patient/${patient.id}`, '_blank');
   };
 
   const renderContent = () => {
-
     switch (currentView) {
-      case 'patients':
-        return <PatientList onPatientClick={handlePatientClick} role={userRole} />;
-      case 'register':
-        return <PatientForm onCancel={() => setCurrentView('patients')} role={userRole} />;
-      case 'reports':
-        return <Reports />;
-      case 'audit':
-        return <AuditLog />;
-      case 'medRegistration':
-        return (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dashboard-med-registration">
-            <h2 className="dashboard-med-title">Cadastro de Médicos</h2>
-            <div className="dashboard-db-placeholder">
-              [Integração BD: Formulário de Cadastro de Médicos]
-            </div>
-          </motion.div>
-        );
+      case 'all-patients':
+      case 'my-patients':
+        return <PatientList onPatientClick={handlePatientClick} role={usuario.role || 'paciente'} />;
+      case 'all-doctors':
+        return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
+      case 'approvals':
+        return <div className="dashboard-db-placeholder">[MOCK: Aprovações Pendentes de Médicos]</div>;
+      case 'my-history':
+        return <div className="dashboard-db-placeholder">[MOCK: Histórico de Checklists do Paciente (Score Oculto)]</div>;
       default:
-        return <PatientList onPatientClick={handlePatientClick} role={userRole} />;
+        return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }
   };
 
   return (
     <div className="dashboard-wrapper">
-      <Sidebar 
-        role={userRole} 
-        user={{ name: 'Dr. Roberto Alves', photo: 'https://i.pravatar.cc/150?img=11' }}
-        setView={(view) => { setCurrentView(view); setIsSidebarOpen(false); }}
-        onLogout={onLogout}
+      <Sidebar
+        role={usuario.role || ''}
+        user={{ name: usuario.nome }}
+        setView={handleSetView}
+        onLogout={() => { logout(); navigate('/'); }}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />

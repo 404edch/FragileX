@@ -1,4 +1,4 @@
-import React, { use, useState, useEffect } from "react";
+import { use, useState, useEffect } from "react";
 import { Sintoma } from "../../../../shared/classes/sintoma";
 
 interface Props {

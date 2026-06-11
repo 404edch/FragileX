@@ -1,35 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ALTURA_NAVBAR } from '../../../constants/constantes';
 import { useLarguraJanela } from '../../../hooks/useHooks';
 import Logo from '../../Shared/Logo';
 import AnimatedContent from '../../Shared/AnimatedContent';
+import BotaoHamburger from './BotaoHamburger';
 import { motion } from 'motion/react';
 import './Navbar.css';
 
-interface BotaoHamburgerProps {
-  aberto: boolean;
-  onClick: () => void;
-}
-const BotaoHamburger = ({ aberto, onClick }: BotaoHamburgerProps) => (
-  <button
-    onClick={onClick}
-    aria-label={aberto ? "Fechar menu" : "Abrir menu"}
-    aria-expanded={aberto}
-    aria-controls="mobile-nav"
-    className={`hamburger-btn ${aberto ? "hamburger-aberto" : ""}`}
-  >
-    <span className="hamburger-line line-top" />
-    <span className="hamburger-line line-mid" />
-    <span className="hamburger-line line-bot" />
-  </button>
-);
-
-interface NavbarProps {
+interface Props {
   onLoginClick: () => void;
-  usuarioLogado?: { email: string };
+  usuarioLogado?: { email: string; nome?: string };
   onLogout: () => void;
 }
-const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: NavbarProps) => {
+
+const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: Props) => {
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalContatoAberto, setModalContatoAberto] = useState(false);
   const larguraJanela = useLarguraJanela();
@@ -42,7 +26,7 @@ const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: NavbarProps) => {
   const alternarMenu = useCallback(() => setMenuAberto((v) => !v), []);
 
   const textoBotaoLogin = usuarioLogado 
-    ? usuarioLogado.email.split('@')[0].toUpperCase() 
+    ? (usuarioLogado.nome ? usuarioLogado.nome.toUpperCase() : 'DASHBOARD')
     : 'LOGIN';
 
   return (
