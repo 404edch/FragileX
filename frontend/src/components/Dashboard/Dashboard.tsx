@@ -5,6 +5,12 @@ import { type Patient } from './types';
 import './Dashboard.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import DoctorApprovals from './DoctorApprovals';
+import PatientDashboard from './PatientDashboard';
+import EditLanding from './EditLanding';
+import AdminMedics from './AdminMedics';
+import AdminUsers from './AdminUsers';
+import AuditLog from './AuditLog/AuditLog';
 
 const NAVIGATION_VIEWS: Record<string, string> = {
   'register-patient': '/registro',
@@ -17,6 +23,7 @@ const DEFAULT_VIEW: Record<string, string> = {
   instituto: 'all-patients',
   medico: 'my-patients',
   paciente: 'my-history',
+  admin: 'audit-log',
 };
 
 const Dashboard = () => {
@@ -57,9 +64,17 @@ const Dashboard = () => {
       case 'all-doctors':
         return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
       case 'approvals':
-        return <div className="dashboard-db-placeholder">[MOCK: Aprovações Pendentes de Médicos]</div>;
+        return <DoctorApprovals />;
+      case 'edit-landing':
+        return <EditLanding />;
       case 'my-history':
-        return <div className="dashboard-db-placeholder">[MOCK: Histórico de Checklists do Paciente (Score Oculto)]</div>;
+        return <PatientDashboard idUsuario={usuario.id} />;
+      case 'audit-log':
+        return <AuditLog />;
+      case 'manage-medics':
+        return <AdminMedics />;
+      case 'manage-users':
+        return <AdminUsers />;
       default:
         return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }

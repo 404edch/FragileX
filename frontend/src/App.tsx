@@ -10,6 +10,7 @@ import RegistroPaciente from './components/Checklist/RegistroPaciente';
 import PreencherChecklist from './components/Checklist/PreencherChecklist';
 import Login from './components/LandingPage/Login/Login';
 import AplicacaoMedico from './components/LandingPage/AplicacaoMedico/AplicacaoMedico';
+import ActivateAccount from './components/Dashboard/ActivateAccount';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 const LandingPageLayout = () => {
@@ -39,6 +40,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPageLayout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/activate-account" element={<ActivateAccount />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
         <Route path="/registro" element={<RegistroPaciente />} />

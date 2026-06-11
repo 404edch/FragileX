@@ -128,3 +128,122 @@ CREATE TABLE IF NOT EXISTS "session" (
 );
 ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
 CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+
+-- ── EXTENSÕES DE ARQUITETURA ──
+
+-- Campo de status e token de ativação para suporte à Ativação de Conta (Fluxo 1)
+ALTER TABLE usuarios ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE' CHECK (status IN ('PENDING_ACTIVATION', 'ACTIVE'));
+ALTER TABLE usuarios ADD COLUMN token_ativacao VARCHAR(100);
+
+-- Tabela para gerenciar solicitações de novos médicos (Fluxo Sou Médico e Aprovação de Médicos)
+CREATE TABLE solicitacoes_credenciamento (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    crm VARCHAR(20) UNIQUE NOT NULL,
+    especialidade VARCHAR(50),
+    cidade VARCHAR(100),
+    estado VARCHAR(50),
+    email VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20),
+    instituicao VARCHAR(150),
+    status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    motivo_recusa TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela para gerenciar solicitações de vínculo médico-paciente (Fluxo 3)
+CREATE TABLE vinculos_medicos (
+    id SERIAL PRIMARY KEY,
+    id_medico INT NOT NULL,
+    id_paciente INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING_LINK' CHECK (status IN ('PENDING_LINK', 'LINK_APPROVED', 'LINK_DENIED')),
+    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_vinculo_medico FOREIGN KEY (id_medico) REFERENCES medicos(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_vinculo_paciente FOREIGN KEY (id_paciente) REFERENCES pacientes(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT uq_medico_paciente UNIQUE (id_medico, id_paciente)
+);
+
+-- Tabelas para personalização editável da Landing Page (Cards e Seção de Notícias)
+CREATE TABLE landing_cards (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    etiqueta_img VARCHAR(100),
+    imagem_url TEXT, -- Base64 ou URL da Imagem carregada
+    link_href VARCHAR(255)
+);
+
+CREATE TABLE landing_news (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    imagem_url TEXT, -- Base64 ou URL do Destaque
+    link_href VARCHAR(255) NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela para registros de auditoria administrativa e do sistema
+CREATE TABLE logs_auditoria (
+    id SERIAL PRIMARY KEY,
+    id_usuario INT,
+    nome_usuario VARCHAR(100),
+    acao VARCHAR(150) NOT NULL,
+    detalhes TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE SET NULL
+);
+
+-- Role de usuário para suporte aos perfis
+ALTER TABLE usuarios ADD COLUMN role VARCHAR(20) DEFAULT 'paciente' CHECK (role IN ('medico', 'instituto', 'paciente', 'admin'));
+
+-- Campos adicionais na tabela medicos
+ALTER TABLE medicos ADD COLUMN cidade VARCHAR(100);
+ALTER TABLE medicos ADD COLUMN estado VARCHAR(50);
+ALTER TABLE medicos ADD COLUMN instituicao VARCHAR(150);
+
+-- Seeder Inicial de Sintomas
+INSERT INTO sintomas (sintoma, score_f, score_m) VALUES
+('Atraso no desenvolvimento intelectual', 2.0, 3.5),
+('Atraso na fala ou linguagem', 1.5, 3.0),
+('Hiperatividade ou déficit de atenção', 1.0, 2.5),
+('Comportamento autista ou isolamento', 2.0, 3.0),
+('Evitar contato visual', 1.0, 2.0),
+('Orelhas grandes ou proeminentes', 1.0, 4.0),
+('Rosto alongado', 1.0, 3.5),
+('Articulações muito flexíveis', 1.5, 2.5),
+('Ansiedade social ou timidez excessiva', 2.5, 2.0),
+('Pés chatos', 0.5, 1.5);
+
+-- Seeder Inicial de Usuários (Senhas: 123456)
+-- Senha hash gerada para '123456' usando bcryptjs
+INSERT INTO usuarios (id, nome, cpf, email, telefone, senha_hash, role, status) VALUES
+(1, 'Instituto Buko Kaesemodel', '00000000000', 'instituto@teste.com', '4132220000', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'instituto', 'ACTIVE'),
+(2, 'Dr. André Silva', '12345678901', 'medico@teste.com', '41999999999', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'medico', 'ACTIVE'),
+(3, 'Alice Cooper', '11122233344', 'paciente@teste.com', '11999999999', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'paciente', 'ACTIVE'),
+(4, 'Bob Smith', '22233344455', 'bob@teste.com', '41988888888', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'paciente', 'ACTIVE'),
+(8, 'Administrador Geral', '99999999999', 'admin@teste.com', '4132221111', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'admin', 'ACTIVE');
+
+-- Ajustar a sequência do ID de usuarios
+SELECT setval('usuarios_id_seq', 10);
+
+INSERT INTO medicos (id_usuario, crm, especialidade) VALUES
+(2, 'CRM-12345', 'Neuropediatra');
+
+INSERT INTO pacientes (id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais, whatsapp, id_medico_responsavel) VALUES
+(3, '1981-05-15', 'F', 'Feminino', 'normal', 'Mary Cooper', 'Mary Cooper', 'Mãe', '00011122233', 'São Paulo', 'SP', 'Brasil', '11999999999', 2),
+(4, '1994-09-01', 'M', 'Masculino', 'mutacao', 'Jane Smith', 'Jane Smith', 'Mãe', '11122233344', 'Curitiba', 'PR', 'Brasil', '41988888888', 2);
+
+-- Seeder Inicial de Cards da Landing Page
+INSERT INTO landing_cards (id, nome, etiqueta_img, imagem_url, link_href) VALUES
+(1, 'Equipe BK', 'Foto equipe', '/equipe.png', 'https://xfragil.org.br/quem-somos/'),
+(2, 'Nossa missão', 'Foto missão', '/missao.png', 'https://xfragil.org.br/missao-visao-valores/'),
+(3, 'Nosso impacto', 'Foto impacto', '/impacto.png', 'https://xfragil.org.br/projetos/'),
+(4, 'Parceiros', 'Foto parceiros', '/parceiros.png', 'https://xfragil.org.br/parceiros/'),
+(5, 'Projetos', 'Foto projetos', '/projetos.png', 'https://xfragil.org.br/projetos/'),
+(6, 'Voluntários', 'Foto voluntários', '/voluntarios.png', 'https://xfragil.org.br/como-ajudar/');
+
+SELECT setval('landing_cards_id_seq', 7);
+
+-- Seeder Inicial de Notícias
+INSERT INTO landing_news (id, titulo, imagem_url, link_href) VALUES
+(1, 'Novidades do Instituto Buko Kaesemodel', '', 'https://xfragil.org.br/noticias/');
+
+SELECT setval('landing_news_id_seq', 2);

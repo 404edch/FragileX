@@ -16,6 +16,11 @@ const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
           required
         />
         <ItemCadastro
+          label="CPF do Paciente"
+          name="cpfPaciente"
+          required
+        />
+        <ItemCadastro
           label="Data de Nascimento"
           name="dataNascimento"
           type="date"
@@ -116,6 +121,26 @@ const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
           required
         />
       </div>
+
+      {!isMedico && (
+        <>
+          <h2 className="cadastro-section-title">Definição de Credenciais</h2>
+          <div className="cadastro-grid">
+            <ItemCadastro
+              label="Senha de Acesso"
+              name="senha"
+              type="password"
+              required
+            />
+            <ItemCadastro
+              label="Confirmar Senha"
+              name="confirmarSenha"
+              type="password"
+              required
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

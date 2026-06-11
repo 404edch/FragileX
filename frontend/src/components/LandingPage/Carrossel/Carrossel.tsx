@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LARGURA_CARD, ESPACAMENTO_CARD } from '../../../constants/constantes';
 import { useLarguraJanela } from '../../../hooks/useHooks';
+import { useAuth } from '../../../contexts/AuthContext';
 import './Carrossel.css';
 
 interface ImagemPlaceholderProps {
@@ -13,24 +14,96 @@ export const ImagemPlaceholder = ({ etiqueta }: ImagemPlaceholderProps) => (
 );
 
 interface CardCarrosselProps {
+  id: number | string;
   nome: string;
   etiquetaImg: string;
+  imagemUrl?: string;
+  linkHref?: string;
   estilo?: React.CSSProperties;
+  onEdit?: (id: number | string) => void;
 }
-export const CardCarrossel = ({ nome, etiquetaImg, estilo: estiloExtra }: CardCarrosselProps) => (
-  <article
-    className="carousel-card"
-    style={{
-      width: LARGURA_CARD,
-      ...estiloExtra,
-    }}
-  >
-    <div className="carousel-card-title">
-      {nome}
-    </div>
-    <ImagemPlaceholder etiqueta={etiquetaImg} />
-  </article>
-);
+
+export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, estilo: estiloExtra, onEdit }: CardCarrosselProps) => {
+  const { usuario } = useAuth();
+  const isAdmin = usuario?.role === 'admin';
+
+  const cardContent = (
+    <article
+      className="carousel-card"
+      style={{
+        width: LARGURA_CARD,
+        cursor: linkHref ? 'pointer' : 'default',
+        position: 'relative',
+        ...estiloExtra,
+      }}
+    >
+      {isAdmin && onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onEdit(id);
+          }}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: '#1a5fa8',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'transform 0.2s, background-color 0.2s',
+          }}
+          title="Editar Card"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.backgroundColor = '#144d8a';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.backgroundColor = '#1a5fa8';
+          }}
+        >
+          +
+        </button>
+      )}
+      <div className="carousel-card-title">
+        {nome}
+      </div>
+      {imagemUrl ? (
+        <img
+          src={imagemUrl}
+          alt={nome}
+          className="carousel-img-placeholder"
+          style={{ objectFit: 'cover', display: 'block', width: '100%', height: '150px', borderRadius: '12px' }}
+        />
+      ) : (
+        <ImagemPlaceholder etiqueta={etiquetaImg} />
+      )}
+    </article>
+  );
+
+  if (linkHref) {
+    return (
+      <a href={linkHref} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+        {cardContent}
+      </a>
+    );
+  }
+
+  return cardContent;
+};
 
 interface BotaoSetaProps {
   direcao: 'esquerda' | 'direita';
@@ -50,9 +123,10 @@ const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }: BotaoSetaProps) =
 );
 
 interface CarrosselProps {
-  cards: { id: number | string; nome: string; etiquetaImg: string }[];
+  cards: { id: number | string; nome: string; etiquetaImg: string; imagemUrl?: string; linkHref?: string }[];
+  onEdit?: (id: number | string) => void;
 }
-export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
+export const CarrosselDesktop = ({ cards, onEdit }: CarrosselProps) => {
   const larguraJanela = useLarguraJanela();
   const [offset, setOffset] = useState(0);
   const [animando, setAnimando] = useState(false);
@@ -116,9 +190,13 @@ export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
           {cards.map((card) => (
             <CardCarrossel
               key={card.id}
+              id={card.id}
               nome={card.nome}
               etiquetaImg={card.etiquetaImg}
+              imagemUrl={card.imagemUrl}
+              linkHref={card.linkHref}
               estilo={{}}
+              onEdit={onEdit}
             />
           ))}
         </div>
@@ -134,7 +212,7 @@ export const CarrosselDesktop = ({ cards }: CarrosselProps) => {
   );
 };
 
-export const CarrosselMobile = ({ cards }: CarrosselProps) => {
+export const CarrosselMobile = ({ cards, onEdit }: CarrosselProps) => {
   const trilhoRef = useRef<HTMLDivElement>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(0);
 
@@ -164,9 +242,13 @@ export const CarrosselMobile = ({ cards }: CarrosselProps) => {
         {cards.map((card) => (
           <CardCarrossel
             key={card.id}
+            id={card.id}
             nome={card.nome}
             etiquetaImg={card.etiquetaImg}
+            imagemUrl={card.imagemUrl}
+            linkHref={card.linkHref}
             estilo={{ width: "calc(100vw - 60px)", maxWidth: 320 }}
+            onEdit={onEdit}
           />
         ))}
       </div>

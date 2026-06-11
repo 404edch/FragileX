@@ -23,10 +23,16 @@ type MenuOption = {
 };
 
 const MENU_OPTIONS: MenuOption[] = [
+  // Admin
+  { id: 'audit-log', label: 'Registro de Auditoria', roles: ['admin'] },
+  { id: 'manage-medics', label: 'Cadastrar Médicos', roles: ['admin'] },
+  { id: 'manage-users', label: 'Gerenciar Usuários', roles: ['admin'] },
+
   // Instituto
   { id: 'all-patients', label: 'Todos os Pacientes', roles: ['instituto'] },
   { id: 'all-doctors', label: 'Médicos Cadastrados', roles: ['instituto'] },
   { id: 'approvals', label: 'Aprovações Pendentes', roles: ['instituto'] },
+  { id: 'edit-landing', label: 'Editar Landing Page', roles: ['admin'] },
 
   // Medico
   { id: 'my-patients', label: 'Meus Pacientes', roles: ['medico'] },
@@ -35,7 +41,6 @@ const MENU_OPTIONS: MenuOption[] = [
   { id: 'fill-checklist', label: 'Preencher Checklist', roles: ['medico'] },
 
   // Paciente
-  { id: 'patient-fill-checklist', label: 'Novo Checklist', roles: ['paciente'] },
   { id: 'my-history', label: 'Meu Histórico', roles: ['paciente'] },
 ];
 
