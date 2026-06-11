@@ -10,6 +10,7 @@ const AplicacaoMedico = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successData, setSuccessData] = useState<any | null>(null);
 
+<<<<<<< HEAD
   const handleApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage('');
@@ -21,6 +22,28 @@ const AplicacaoMedico = () => {
       setSuccessData(dados);
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao enviar solicitação.');
+=======
+  const handleApply = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const data = {
+      nome: form.get('nomeCompleto'),
+      crm: form.get('crm'),
+      especialidade: form.get('especialidade'),
+      estado: form.get('estado'),
+      email: form.get('email'),
+      telefone: form.get('telefone'),
+      instituicao: form.get('linkCurriculo') || 'Não informada'
+    };
+
+    try {
+      console.log('Payload da Aplicação para Supabase:', data);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert("Sua aplicação foi enviada para análise do Instituto Buko Kaesemodel. Entraremos em contato em breve!");
+      navigate('/');
+    } catch (err) {
+      alert("Erro de conexão.");
+>>>>>>> a03e2149d4fc97779a2edce748d8db94df548ebf
     }
   };
 
