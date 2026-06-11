@@ -94,22 +94,38 @@ const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: Props) => {
             <div className="modal-info-list">
               <p>
                 <strong>Endereço:</strong><br/>
-                <a href="https://maps.google.com/?q=Rua+Exemplo,+123+-+Curitiba,+PR" target="_blank" rel="noreferrer" style={{ color: '#1a5fa8', textDecoration: 'none' }}>
-                  Rua Exemplo, 123 - Curitiba, PR
+                <a href="https://maps.app.goo.gl/FDVXQcNtnsnnVAH98" target="_blank" rel="noreferrer" style={{ color: '#1a5fa8', textDecoration: 'none' }}>
+                  Rua Fernando Simas, 172 – Bigorrilho, Curitiba-PR
                 </a>
               </p>
               <p>
                 <strong>Telefone:</strong><br/>
-                <a href="tel:+5541999999999" style={{ color: '#1a5fa8', textDecoration: 'none' }}>
-                  (41) 99999-9999
-                </a>
+                <a href="https://wa.me/5541991034847?text=Olá,%20gostaria%20de%20mais%20informações."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#1a5fa8', textDecoration: 'none' }}>
+                  (41) 99103-4847
+                  </a>
               </p>
               <p>
-                <strong>E-mail:</strong><br/>
-                <a href="mailto:contato@institutobuko.org.br" style={{ color: '#1a5fa8', textDecoration: 'none' }}>
-                  contato@institutobuko.org.br
-                </a>
-              </p>
+                  <strong>Fixo:</strong><br />
+                  <a
+                    href="tel:+554131560309"
+                    style={{ color: '#1a5fa8', textDecoration: 'none' }}
+                  >
+                    (41) 3156-0309
+                  </a>
+                </p>
+
+                <p>
+                  <strong>E-mail:</strong><br />
+                  <a
+                    href="mailto:contato@institutobk.org.br"
+                    style={{ color: '#1a5fa8', textDecoration: 'none' }}
+                  >
+                    contato@institutobk.org.br
+                  </a>
+                </p>
             </div>
           </motion.div>
         </div>
