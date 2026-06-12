@@ -28,8 +28,14 @@ const Login = () => {
 
   return (
     <div className="checklist-wrapper">
-      <div className="checklist-container" style={{ maxWidth: '450px', width: '100%', padding: '32px' }}>
-        <h1 className="checklist-title">Acesso ao Sistema</h1>
+      <div className="checklist-container" style={{ maxWidth: '450px', width: '100%', padding: '32px', position: 'relative' }}>
+        <button 
+          onClick={() => navigate(-1)} 
+          style={{ position: 'absolute', top: '16px', left: '16px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}
+        >
+          ← Voltar
+        </button>
+        <h1 className="checklist-title" style={{ marginTop: '20px' }}>Acesso ao Sistema</h1>
         <p className="checklist-subtitle">Faça login com sua conta ou utilize o acesso rápido.</p>
 
         {errorMessage && (

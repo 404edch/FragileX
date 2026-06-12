@@ -114,8 +114,15 @@ const ActivateAccount = () => {
   }
 
   return (
-    <div className="checklist-wrapper">
-      <form onSubmit={handleSubmit} className="cadastro-form" style={{ maxWidth: '500px', width: '100%' }}>
+    <div className="checklist-wrapper" style={{ position: 'relative' }}>
+      <button 
+        type="button"
+        onClick={() => navigate(-1)} 
+        style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', zIndex: 10 }}
+      >
+        ← Voltar
+      </button>
+      <form onSubmit={handleSubmit} className="cadastro-form" style={{ maxWidth: '500px', width: '100%', marginTop: '32px' }}>
         <div className="checklist-container" style={{ marginBottom: '24px' }}>
           <h1 className="checklist-title">Ativar Conta</h1>
           <p className="checklist-subtitle">

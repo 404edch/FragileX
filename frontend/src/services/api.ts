@@ -25,6 +25,7 @@ class ApiService {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'GET',
       headers: this.getHeaders(),
+      cache: 'no-store',
     });
 
     if (!response.ok) {

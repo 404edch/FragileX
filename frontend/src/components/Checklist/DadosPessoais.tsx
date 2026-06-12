@@ -1,6 +1,13 @@
 import ItemCadastro from "./ItemCadastro";
 
-const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
+interface Props {
+  isMedico?: boolean;
+  onCpfBlur?: (cpf: string) => void;
+  cpfValue?: string;
+  onCpfChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const DadosPessoais = ({ isMedico = false, onCpfBlur, cpfValue, onCpfChange }: Props) => {
   return (
     <div
       className="checklist-container"
@@ -19,6 +26,9 @@ const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
           label="CPF do Paciente"
           name="cpfPaciente"
           required
+          value={cpfValue}
+          onChange={onCpfChange}
+          onBlur={(e) => onCpfBlur && onCpfBlur(e.target.value)}
         />
         <ItemCadastro
           label="Data de Nascimento"
@@ -92,6 +102,17 @@ const DadosPessoais = ({ isMedico = false }: { isMedico?: boolean }) => {
         <ItemCadastro
           label="País"
           name="pais"
+          required
+        />
+      </div>
+
+      <h2 className="cadastro-section-title">Foto de Perfil</h2>
+      <div className="cadastro-grid">
+        <ItemCadastro
+          label="Adicionar Foto"
+          name="foto_perfil_file"
+          type="file"
+          accept="image/*"
           required
         />
       </div>

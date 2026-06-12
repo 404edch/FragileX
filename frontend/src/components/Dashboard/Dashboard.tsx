@@ -8,11 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import DoctorApprovals from './DoctorApprovals';
 import ChecklistNotifications from './ChecklistNotifications';
 import PatientDashboard from './PatientDashboard';
-import EditLanding from './EditLanding';
 import AdminMedics from './AdminMedics';
 import AdminUsers from './AdminUsers';
 import AuditLog from './AuditLog/AuditLog';
 import AdminRegisterEmployee from './AdminRegisterEmployee';
+import DoctorList from './DoctorList';
+import Reports from './Reports/Reports';
 
 const NAVIGATION_VIEWS: Record<string, string> = {
   'register-patient': '/registro',
@@ -63,13 +64,11 @@ const Dashboard = () => {
       case 'my-patients':
         return <PatientList onPatientClick={handlePatientClick} role={usuario.role || 'paciente'} />;
       case 'all-doctors':
-        return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
+        return <DoctorList />;
       case 'approvals':
         return <DoctorApprovals />;
       case 'checklist-alerts':
         return <ChecklistNotifications />;
-      case 'edit-landing':
-        return <EditLanding />;
       case 'my-history':
         return <PatientDashboard idUsuario={usuario.id} />;
       case 'audit-log':
@@ -80,6 +79,8 @@ const Dashboard = () => {
         return <AdminUsers />;
       case 'register-employee':
         return <AdminRegisterEmployee />;
+      case 'reports':
+        return <Reports />;
       default:
         return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }

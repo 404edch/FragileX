@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { mockDbService, type LandingCard, type MockNews } from '../../services/mockDbService';
+import { backendService, type LandingCard, type MockNews } from '../../services/backendService';
 import './Dashboard.css';
 
 const EditLanding = () => {
@@ -14,8 +14,8 @@ const EditLanding = () => {
 
   const carregarDados = async () => {
     try {
-      const cardsData = await mockDbService.getLandingCards();
-      const newsData = await mockDbService.getLandingNews();
+      const cardsData = await backendService.getLandingCards();
+      const newsData = await backendService.getLandingNews();
       setCards(cardsData);
       setNews(newsData);
     } catch (error) {
@@ -57,7 +57,7 @@ const EditLanding = () => {
 
   const salvarCards = async () => {
     try {
-      await mockDbService.saveLandingCards(cards);
+      await backendService.saveLandingCards(cards);
       alert('Cards do carrossel Quem Somos salvos com sucesso!');
       await carregarDados();
     } catch (error) {
@@ -117,7 +117,7 @@ const EditLanding = () => {
 
     const updated = [...news, newItem];
     try {
-      await mockDbService.saveLandingNews(updated);
+      await backendService.saveLandingNews(updated);
       setNews(updated);
       setNewNewsTitle('');
       setNewNewsLink('');
@@ -131,7 +131,7 @@ const EditLanding = () => {
   const handleRemoveNews = async (id: number) => {
     const updated = news.filter(n => n.id !== id);
     try {
-      await mockDbService.saveLandingNews(updated);
+      await backendService.saveLandingNews(updated);
       setNews(updated);
       alert('Notícia removida.');
     } catch (error) {
@@ -141,7 +141,7 @@ const EditLanding = () => {
 
   const salvarNoticiasModificadas = async () => {
     try {
-      await mockDbService.saveLandingNews(news);
+      await backendService.saveLandingNews(news);
       alert('Alterações nas notícias salvas com sucesso!');
       await carregarDados();
     } catch (error) {

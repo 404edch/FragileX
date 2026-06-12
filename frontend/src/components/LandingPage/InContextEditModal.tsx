@@ -4,11 +4,12 @@ interface InContextEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: { nome: string; imagemUrl: string; linkHref: string }) => void;
+  onDelete?: () => void;
   initialData: { nome: string; imagemUrl?: string; linkHref?: string };
   title: string;
 }
 
-export default function InContextEditModal({ isOpen, onClose, onSave, initialData, title }: InContextEditModalProps) {
+export default function InContextEditModal({ isOpen, onClose, onSave, onDelete, initialData, title }: InContextEditModalProps) {
   const [nome, setNome] = useState('');
   const [linkHref, setLinkHref] = useState('');
   const [imagemUrl, setImagemUrl] = useState('');
@@ -201,6 +202,16 @@ export default function InContextEditModal({ isOpen, onClose, onSave, initialDat
             >
               Cancelar
             </button>
+            {onDelete && initialData?.nome !== '' && (
+              <button
+                type="button"
+                className="hero-btn-secondary"
+                onClick={onDelete}
+                style={{ padding: '10px 18px', fontSize: '13px', margin: 0, backgroundColor: '#fef2f2', color: '#ef4444', borderColor: '#fca5a5' }}
+              >
+                Excluir
+              </button>
+            )}
             <button
               type="submit"
               className="checklist-submit-btn"

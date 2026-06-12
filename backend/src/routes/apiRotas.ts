@@ -31,6 +31,10 @@ router.post("/doctors/solicitar", doctorController.solicitarCredenciamento);
 router.get("/patients/validar-token", patientController.validarTokenAtivacao);
 router.post("/patients/ativar-conta", patientController.ativarConta);
 
+// Landing Editables (GET public)
+router.get("/landing/cards", landingController.getCards);
+router.get("/landing/news", landingController.getNews);
+
 // ── ROTAS PROTEGIDAS ─────────────────────────────────────────────────────────
 
 // A partir daqui, todas as rotas exigem JWT válido
@@ -44,6 +48,8 @@ router.put("/users/:id", requireRole(['instituto', 'admin']), userController.upd
 router.delete("/users/:id", requireRole(['instituto', 'admin']), userController.remove);
 
 // ── Patients ──
+router.get("/patients/check-cpf/:cpf", patientController.checkCpf);
+
 // Médico/instituto cadastram paciente (cria conta PENDING_ACTIVATION)
 router.post(
   "/patients/cadastrar-pelo-medico",
@@ -58,6 +64,7 @@ router.get(
   requireRole(['medico', 'instituto', 'admin']),
   patientController.listPacientesDoMedico
 );
+router.put("/patients/:id/status", requireRole(['instituto', 'admin']), patientController.updateStatus);
 router.get("/patients/:id", requireRole(['medico', 'instituto', 'admin']), patientController.getPaciente);
 router.get("/patients/cpf/:cpf", requireRole(['medico', 'instituto', 'admin', 'paciente']), patientController.getPacienteByCpf);
 
@@ -89,9 +96,7 @@ router.post(
   doctorController.registrarMedicoDireto
 );
 
-// ── Landing Editables ──
-router.get("/landing/cards", landingController.getCards);
-router.get("/landing/news", landingController.getNews);
+// ── Landing Editables (POST protected) ──
 router.post("/landing/cards", requireRole(['instituto', 'admin']), landingController.saveCards);
 router.post("/landing/news", requireRole(['instituto', 'admin']), landingController.saveNews);
 

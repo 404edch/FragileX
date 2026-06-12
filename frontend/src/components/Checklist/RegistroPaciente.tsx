@@ -3,9 +3,9 @@ import DadosPessoais from "./DadosPessoais";
 import BotaoInicio from "../Shared/BotaoInicio";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
+import { backendService, type MockUsuario } from "../../services/backendService";
 import "./Checklist.css";
 import { useNavigate } from "react-router-dom";
-
 
 export default function RegistroPaciente() {
   const { usuario, loginComCredenciais } = useAuth();
@@ -15,15 +15,62 @@ export default function RegistroPaciente() {
   const [errorMessage, setErrorMessage] = useState("");
   const [activationLink, setActivationLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [cpfValue, setCpfValue] = useState("");
+  const [existingUser, setExistingUser] = useState<MockUsuario | null>(null);
+
+  const handleCpfBlur = async (cpf: string) => {
+    if (!cpf || cpf.length < 11 || !isMedico) return;
+    try {
+      const res = await backendService.checkCpf(cpf);
+      if (res.exists && res.user) {
+        setExistingUser(res.user);
+      } else {
+        setExistingUser(null);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleVincular = async () => {
+    if (!usuario || !existingUser) return;
+    try {
+      await backendService.importarPacientePorCpf(usuario.id, cpfValue);
+      alert("Solicitação de vínculo enviada com sucesso!");
+      navigate('/dashboard');
+    } catch (error: any) {
+      setErrorMessage(error.message || "Erro ao solicitar vínculo.");
+    }
+  };
+
+  const toBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
     const formData = new FormData(e.currentTarget);
-    const dadosPessoais = Object.fromEntries(formData.entries());
+    const dadosPessoais: any = Object.fromEntries(formData.entries());
+
+    let foto_perfil = "";
+    const fotoFile = formData.get("foto_perfil_file") as File;
+    if (fotoFile && fotoFile.size > 0) {
+      try {
+        foto_perfil = await toBase64(fotoFile);
+      } catch (err) {
+        setErrorMessage("Erro ao processar a foto.");
+        return;
+      }
+    }
 
     if (isMedico) {
-    try {
+      try {
         const res = await api.post<{ linkAtivacao: string; token: string }>('/patients/cadastrar-pelo-medico', {
           idMedico: usuario!.id,
           nomePaciente: dadosPessoais.nomePaciente,
@@ -43,6 +90,7 @@ export default function RegistroPaciente() {
           pais: dadosPessoais.pais,
           telefone2: dadosPessoais.telefone2,
           whatsapp: dadosPessoais.whatsapp,
+          foto_perfil
         });
         const fullLink = `${window.location.origin}${res.linkAtivacao}`;
         setActivationLink(fullLink);
@@ -76,9 +124,9 @@ export default function RegistroPaciente() {
           pais: dadosPessoais.pais,
           telefone2: dadosPessoais.telefone2,
           whatsapp: dadosPessoais.whatsapp,
+          foto_perfil
         });
         
-        // Logar automaticamente
         await loginComCredenciais(dadosPessoais.cpfPaciente as string, dadosPessoais.senha as string);
         alert("Cadastro realizado com sucesso!");
         navigate('/dashboard');
@@ -102,7 +150,6 @@ export default function RegistroPaciente() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Se o médico acabou de cadastrar e o link de ativação foi gerado, exibe o modal/tela de sucesso
   if (activationLink) {
     return (
       <div className="checklist-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -178,7 +225,15 @@ export default function RegistroPaciente() {
 
   return (
     <div className="checklist-wrapper">
-      <form onSubmit={handleSubmit} className="cadastro-form">
+      <form onSubmit={handleSubmit} className="cadastro-form" style={{ position: 'relative', paddingTop: '40px' }}>
+        <button 
+          type="button"
+          onClick={() => navigate(-1)} 
+          style={{ position: 'absolute', top: '16px', left: '16px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}
+        >
+          ← Voltar
+        </button>
+
         {errorMessage && (
           <div style={{
             background: 'rgba(255, 77, 79, 0.15)',
@@ -195,11 +250,39 @@ export default function RegistroPaciente() {
           </div>
         )}
 
-        <DadosPessoais isMedico={isMedico} />
+        {existingUser && (
+          <div style={{
+            background: '#e0f2fe',
+            border: '1px solid #7dd3fc',
+            padding: '20px',
+            borderRadius: '12px',
+            marginBottom: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px', color: '#0369a1', fontSize: '16px', fontWeight: 'bold' }}>Paciente já existe no sistema!</h3>
+              <p style={{ margin: 0, color: '#0284c7', fontSize: '14px' }}>O paciente <strong>{existingUser.nome}</strong> já possui cadastro.</p>
+            </div>
+            <button type="button" onClick={handleVincular} style={{
+              background: '#0ea5e9', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+            }}>
+              Vincular a este Paciente
+            </button>
+          </div>
+        )}
+
+        <DadosPessoais 
+          isMedico={isMedico} 
+          cpfValue={cpfValue} 
+          onCpfChange={(e) => setCpfValue(e.target.value)} 
+          onCpfBlur={handleCpfBlur} 
+        />
 
         <div className="form-actions" style={{ gap: '16px' }}>
           <BotaoInicio label="Cancelar" />
-          <button type="submit" className="checklist-submit-btn">
+          <button type="submit" className="checklist-submit-btn" disabled={!!existingUser}>
             Finalizar Cadastro do Paciente
           </button>
         </div>
@@ -207,4 +290,3 @@ export default function RegistroPaciente() {
     </div>
   );
 }
-

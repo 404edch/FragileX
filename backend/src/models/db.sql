@@ -235,11 +235,11 @@ INSERT INTO sintomas (sintoma, score_m, score_f) VALUES
 -- Seeder Inicial de Usuários (Senhas: 123456)
 -- Senha hash gerada para '123456' usando bcryptjs
 INSERT INTO usuarios (id, nome, cpf, email, telefone, senha_hash, role, status) VALUES
-(1, 'Instituto Buko Kaesemodel', '00000000000', 'instituto@teste.com', '4132220000', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'instituto', 'ACTIVE'),
-(2, 'Dr. André Silva', '12345678901', 'medico@teste.com', '41999999999', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'medico', 'ACTIVE'),
-(3, 'Alice Cooper', '11122233344', 'paciente@teste.com', '11999999999', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'paciente', 'ACTIVE'),
-(4, 'Bob Smith', '22233344455', 'bob@teste.com', '41988888888', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'paciente', 'ACTIVE'),
-(8, 'Administrador Geral', '99999999999', 'admin@teste.com', '4132221111', '$2a$12$R.S4wN/Lsnf0xI33nO7EpeN2mR2tG0Q1e7jV9/sK2h5fV2Kx0u9Wq', 'admin', 'ACTIVE');
+(1, 'Instituto Buko Kaesemodel', '00000000000', 'instituto@teste.com', '4132220000', '$2b$10$viszJ0tyIuOn08z0iUR3wOfzhX5Ei.49Z/Jcyet6s0TMC0AeIXLg6', 'instituto', 'ACTIVE'),
+(2, 'Dr. André Silva', '12345678901', 'medico@teste.com', '41999999999', '$2b$10$viszJ0tyIuOn08z0iUR3wOfzhX5Ei.49Z/Jcyet6s0TMC0AeIXLg6', 'medico', 'ACTIVE'),
+(3, 'Alice Cooper', '11122233344', 'paciente@teste.com', '11999999999', '$2b$10$viszJ0tyIuOn08z0iUR3wOfzhX5Ei.49Z/Jcyet6s0TMC0AeIXLg6', 'paciente', 'ACTIVE'),
+(4, 'Bob Smith', '22233344455', 'bob@teste.com', '41988888888', '$2b$10$viszJ0tyIuOn08z0iUR3wOfzhX5Ei.49Z/Jcyet6s0TMC0AeIXLg6', 'paciente', 'ACTIVE'),
+(8, 'Administrador Geral', '99999999999', 'admin@teste.com', '4132221111', '$2b$10$viszJ0tyIuOn08z0iUR3wOfzhX5Ei.49Z/Jcyet6s0TMC0AeIXLg6', 'admin', 'ACTIVE');
 
 -- Ajustar a sequência do ID de usuarios
 SELECT setval('usuarios_id_seq', 10);

@@ -198,7 +198,15 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
   };
 
   return (
-    <div className="checklist-wrapper">
+    <div className="checklist-wrapper" style={{ position: 'relative' }}>
+      <button 
+        type="button"
+        onClick={() => navigate(-1)} 
+        style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', zIndex: 10 }}
+      >
+        ← Voltar
+      </button>
+
       {renderReportModal()}
       
       {step === 1 && (

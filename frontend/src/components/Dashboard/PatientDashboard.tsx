@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockDbService, type MockPaciente, type MockChecklist, type MockVinculo } from '../../services/mockDbService';
+import { backendService, type MockPaciente, type MockChecklist, type MockVinculo } from '../../services/backendService';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../services/api';
 import { getSintomas } from '../../services/getSintomas';
@@ -87,7 +87,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   const handleResponderVinculo = async (idVinculo: number, aceitar: boolean) => {
     try {
-      await mockDbService.responderSolicitacaoVinculo(idVinculo, aceitar);
+      await backendService.responderSolicitacaoVinculo(idVinculo, aceitar);
       alert(aceitar ? 'Vínculo com o médico aprovado com sucesso!' : 'Vínculo com o médico recusado.');
       await carregarDados();
       await atualizarUsuarioLogado();

@@ -3,7 +3,7 @@ import { useLarguraJanela, useUmaVezNoViewport } from '../../../hooks/useHooks';
 import { CarrosselDesktop, CarrosselMobile } from '../Carrossel/Carrossel';
 import AnimatedContent from '../../Shared/AnimatedContent';
 import './QuemSomos.css';
-import { mockDbService } from '../../../services/mockDbService';
+import { backendService } from '../../../services/backendService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
 
@@ -20,7 +20,7 @@ const QuemSomos = () => {
 
   const carregarCards = async () => {
     try {
-      const data = await mockDbService.getLandingCards();
+      const data = await backendService.getLandingCards();
       setCards(data);
     } catch (err) {
       console.error(err);
@@ -79,7 +79,20 @@ const QuemSomos = () => {
     }
     
     try {
-      await mockDbService.saveLandingCards(updated);
+      await backendService.saveLandingCards(updated);
+      setCards(updated);
+      setIsModalOpen(false);
+      setSelectedCard(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteCard = async () => {
+    if (!selectedCard || selectedCard.id === 'new') return;
+    const updated = cards.filter(c => c.id !== selectedCard.id);
+    try {
+      await backendService.saveLandingCards(updated);
       setCards(updated);
       setIsModalOpen(false);
       setSelectedCard(null);
@@ -147,12 +160,13 @@ const QuemSomos = () => {
           isOpen={isModalOpen}
           onClose={() => { setIsModalOpen(false); setSelectedCard(null); }}
           onSave={handleSaveCard}
+          onDelete={selectedCard.id !== 'new' ? handleDeleteCard : undefined}
           initialData={{
             nome: selectedCard.nome,
             imagemUrl: selectedCard.imagemUrl,
             linkHref: selectedCard.linkHref
           }}
-          title={`Editar Card: ${selectedCard.nome}`}
+          title={selectedCard.id === 'new' ? 'Novo Card' : `Editar Card: ${selectedCard.nome}`}
         />
       )}
     </section>

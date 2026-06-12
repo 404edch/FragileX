@@ -6,7 +6,7 @@ import AnimatedContent from '../../Shared/AnimatedContent';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Hero.css';
-import { mockDbService } from '../../../services/mockDbService';
+import { backendService } from '../../../services/backendService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
 
@@ -31,7 +31,7 @@ const Hero = () => {
 
   const carregarNews = async () => {
     try {
-      const data = await mockDbService.getLandingNews();
+      const data = await backendService.getLandingNews();
       setNews(data);
     } catch (err) {
       console.error(err);
@@ -94,7 +94,20 @@ const Hero = () => {
     }
     
     try {
-      await mockDbService.saveLandingNews(updated);
+      await backendService.saveLandingNews(updated);
+      setNews(updated);
+      setIsModalOpen(false);
+      setSelectedNews(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteNews = async () => {
+    if (!selectedNews || selectedNews.id === 'new') return;
+    const updated = news.filter(n => n.id !== selectedNews.id);
+    try {
+      await backendService.saveLandingNews(updated);
       setNews(updated);
       setIsModalOpen(false);
       setSelectedNews(null);
@@ -308,12 +321,13 @@ const Hero = () => {
           isOpen={isModalOpen}
           onClose={() => { setIsModalOpen(false); setSelectedNews(null); }}
           onSave={handleSaveNews}
+          onDelete={selectedNews.id !== 'new' ? handleDeleteNews : undefined}
           initialData={{
             nome: selectedNews.titulo,
             imagemUrl: selectedNews.imagemUrl,
             linkHref: selectedNews.linkHref
           }}
-          title={`Editar Notícia: ${selectedNews.titulo}`}
+          title={selectedNews.id === 'new' ? 'Nova Notícia' : `Editar Notícia: ${selectedNews.titulo}`}
         />
       )}
     </section>

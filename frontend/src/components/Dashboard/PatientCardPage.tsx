@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PatientCard from "./PatientCard/PatientCard";
-import { mockDbService } from "../../services/mockDbService";
+import { backendService } from "../../services/backendService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function PatientCardPage() {
@@ -32,8 +32,8 @@ export default function PatientCardPage() {
       }
 
       try {
-        const u = await mockDbService.getUsuario(patientIdNum);
-        const d = await mockDbService.getPaciente(patientIdNum);
+        const u = await backendService.getUsuario(patientIdNum);
+        const d = await backendService.getPaciente(patientIdNum);
         setUser(u);
         setDetails(d);
 
@@ -43,7 +43,7 @@ export default function PatientCardPage() {
         } else if (usuario.role === 'paciente' && usuario.id === patientIdNum) {
           permissao = true;
         } else if (usuario.role === 'medico') {
-          const pacientesDoMedico = await mockDbService.listarPacientesDoMedico(usuario.id);
+          const pacientesDoMedico = await backendService.listarPacientesDoMedico(usuario.id);
           permissao = pacientesDoMedico.some(p => p.id === patientIdNum);
         }
         setTemPermissao(permissao);
@@ -128,7 +128,10 @@ export default function PatientCardPage() {
     lastConsultation: details.id_medico_responsavel ? '2026-05-15' : 'Sem consulta vinculada',
     tag: details.id_medico_responsavel ? 'Acompanhamento' : 'Sem Médico',
     responsibleFigure: details.responsavel_nome,
-    phone: details.whatsapp || details.telefone_2 || ''
+    phone: details.whatsapp || details.telefone_2 || '',
+    foto_perfil: details.foto_perfil,
+    classificacao_oficial: details.classificacao_oficial,
+    encaminhamento_status: details.encaminhamento_status
   } : null;
 
   if (patient) {
@@ -142,7 +145,7 @@ export default function PatientCardPage() {
         padding: '20px'
       }}>
         <div style={{ width: '100%', maxWidth: '800px' }}>
-          <PatientCard patient={patient} onClose={() => window.close()} role="patient" />
+          <PatientCard patient={patient} onClose={() => window.close()} role={usuario.role} />
         </div>
       </div>
     );

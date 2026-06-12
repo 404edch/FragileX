@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { logAction } from "../services/auditService";
 
 export const cadastrarPeloMedico = async (req: Request, res: Response): Promise<any> => {
-  const { idMedico, nomePaciente, cpfPaciente, email, telefone, dataNascimento, sexo_biologico, genero, nomeMae, nomePai, nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais, telefone2, whatsapp } = req.body;
+  const { idMedico, nomePaciente, cpfPaciente, email, telefone, dataNascimento, sexo_biologico, genero, nomeMae, nomePai, nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais, telefone2, whatsapp, foto_perfil } = req.body;
 
   try {
     // Validar CPF e E-mail existentes
@@ -36,8 +36,8 @@ export const cadastrarPeloMedico = async (req: Request, res: Response): Promise<
       INSERT INTO pacientes (
         id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, nome_pai,
         responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais,
-        telefone_2, whatsapp, id_medico_responsavel
-      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        telefone_2, whatsapp, id_medico_responsavel, foto_perfil
+      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `;
     const sexoBiologicoDb = sexo_biologico === 'masculino' || sexo_biologico === 'M' ? 'M' : 'F';
     const generoDb = genero === 'masculino' || genero === 'M' ? 'Masculino' : 'Feminino';
@@ -45,7 +45,7 @@ export const cadastrarPeloMedico = async (req: Request, res: Response): Promise<
     await db.query(insertPacQuery, [
       novoUsuarioId, dataNascimento, sexoBiologicoDb, generoDb, nomeMae, nomePai || '',
       nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais,
-      telefone2 || '', whatsapp || '', idMedico
+      telefone2 || '', whatsapp || '', idMedico, foto_perfil || null
     ]);
 
     const medUser = await db.query('SELECT nome, role FROM usuarios WHERE id = $1', [idMedico]);
@@ -119,7 +119,7 @@ export const ativarConta = async (req: Request, res: Response): Promise<any> => 
 };
 
 export const autocadastro = async (req: Request, res: Response): Promise<any> => {
-  const { nomePaciente, cpfPaciente, email, telefone, dataNascimento, sexo_biologico, genero, nomeMae, nomePai, nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais, telefone2, whatsapp, senha } = req.body;
+  const { nomePaciente, cpfPaciente, email, telefone, dataNascimento, sexo_biologico, genero, nomeMae, nomePai, nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais, telefone2, whatsapp, senha, foto_perfil } = req.body;
 
   try {
     const checkQuery = 'SELECT id, status FROM usuarios WHERE cpf = $1';
@@ -153,8 +153,8 @@ export const autocadastro = async (req: Request, res: Response): Promise<any> =>
       INSERT INTO pacientes (
         id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, nome_pai,
         responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais,
-        telefone_2, whatsapp, id_medico_responsavel
-      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULL)
+        telefone_2, whatsapp, id_medico_responsavel, foto_perfil
+      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULL, $15)
     `;
     const sexoBiologicoDb = sexo_biologico === 'masculino' || sexo_biologico === 'M' ? 'M' : 'F';
     const generoDb = genero === 'masculino' || genero === 'M' ? 'Masculino' : 'Feminino';
@@ -162,7 +162,7 @@ export const autocadastro = async (req: Request, res: Response): Promise<any> =>
     await db.query(insertPacQuery, [
       novoUsuarioId, dataNascimento, sexoBiologicoDb, generoDb, nomeMae, nomePai || '',
       nomeResponsavel, grauParentesco, cpfResponsavel, cidade, estado, pais,
-      telefone2 || '', whatsapp || ''
+      telefone2 || '', whatsapp || '', foto_perfil || null
     ]);
 
     await logAction(novoUsuarioId, nomePaciente, 'Autocadastro', 'Paciente se cadastrou de forma autônoma.');
@@ -184,7 +184,7 @@ export const getPaciente = async (req: Request, res: Response): Promise<any> => 
     const query = `
       SELECT id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, nome_pai,
              responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais,
-             telefone_2, whatsapp, id_medico_responsavel
+             telefone_2, whatsapp, id_medico_responsavel, foto_perfil, encaminhamento_status, classificacao_oficial
       FROM pacientes
       WHERE id_usuario = $1
     `;
@@ -210,7 +210,10 @@ export const getPaciente = async (req: Request, res: Response): Promise<any> => 
       pais: row.pais,
       telefone_2: row.telefone_2,
       whatsapp: row.whatsapp,
-      id_medico_responsavel: row.id_medico_responsavel
+      id_medico_responsavel: row.id_medico_responsavel,
+      foto_perfil: row.foto_perfil,
+      encaminhamento_status: row.encaminhamento_status,
+      classificacao_oficial: row.classificacao_oficial
     };
 
     return res.json(details);
@@ -229,7 +232,7 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
   try {
     const query = `
       SELECT u.id, u.nome, u.cpf, u.email, u.telefone, u.status, u.role,
-             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel
+             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel, p.foto_perfil, p.encaminhamento_status, p.classificacao_oficial
       FROM usuarios u
       JOIN pacientes p ON u.id = p.id_usuario
       WHERE u.role = 'paciente' AND (
@@ -260,7 +263,10 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
         estado: row.estado,
         pais: row.pais,
         whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel
+        id_medico_responsavel: row.id_medico_responsavel,
+        foto_perfil: row.foto_perfil,
+        encaminhamento_status: row.encaminhamento_status,
+        classificacao_oficial: row.classificacao_oficial
       }
     }));
 
@@ -310,7 +316,10 @@ export const getPacienteByCpf = async (req: Request, res: Response): Promise<any
         estado: row.estado,
         pais: row.pais,
         whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel
+        id_medico_responsavel: row.id_medico_responsavel,
+        foto_perfil: row.foto_perfil,
+        encaminhamento_status: row.encaminhamento_status,
+        classificacao_oficial: row.classificacao_oficial
       }
     };
 
@@ -325,7 +334,7 @@ export const listTodosPacientes = async (req: Request, res: Response): Promise<a
   try {
     const query = `
       SELECT u.id, u.nome, u.cpf, u.email, u.telefone, u.status, u.role,
-             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel
+             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel, p.foto_perfil, p.encaminhamento_status, p.classificacao_oficial
       FROM usuarios u
       JOIN pacientes p ON u.id = p.id_usuario
       WHERE u.role = 'paciente'
@@ -351,13 +360,45 @@ export const listTodosPacientes = async (req: Request, res: Response): Promise<a
         estado: row.estado,
         pais: row.pais,
         whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel
+        id_medico_responsavel: row.id_medico_responsavel,
+        foto_perfil: row.foto_perfil,
+        encaminhamento_status: row.encaminhamento_status,
+        classificacao_oficial: row.classificacao_oficial
       }
     }));
 
     return res.json(mapped);
   } catch (error) {
     console.error("Erro ao listar todos os pacientes:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
+export const checkCpf = async (req: Request, res: Response): Promise<any> => {
+  const { cpf } = req.params;
+  try {
+    const result = await db.query('SELECT id, nome, status FROM usuarios WHERE cpf = $1 AND role = $2', [cpf, 'paciente']);
+    if (result.rows.length > 0) {
+      return res.json({ exists: true, user: result.rows[0] });
+    }
+    return res.json({ exists: false });
+  } catch (error) {
+    console.error("Erro ao verificar CPF:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
+export const updateStatus = async (req: Request, res: Response): Promise<any> => {
+  const idUsuario = Number(req.params.id);
+  const { status } = req.body;
+  if (isNaN(idUsuario) || !status) {
+    return res.status(400).json({ error: "ID ou status inválido." });
+  }
+  try {
+    await db.query('UPDATE pacientes SET encaminhamento_status = $1 WHERE id_usuario = $2', [status, idUsuario]);
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao atualizar status:", error);
     return res.status(500).json({ error: "Erro interno no servidor." });
   }
 };

@@ -85,6 +85,17 @@ export const salvarChecklist = async (req: Request, res: Response): Promise<any>
       }
     }
 
+    if (role === 'instituto') {
+      try {
+        await db.query(
+          `UPDATE pacientes SET classificacao_oficial = $1 WHERE id_usuario = $2`,
+          [classificacao, idPaciente]
+        );
+      } catch (err) {
+        console.error("Erro ao atualizar classificacao_oficial do paciente:", err);
+      }
+    }
+
     await logAction(
       idPaciente,
       pacNome,

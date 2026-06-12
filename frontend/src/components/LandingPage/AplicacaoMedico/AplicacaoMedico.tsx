@@ -84,8 +84,15 @@ const AplicacaoMedico = () => {
   }
 
   return (
-    <div className="checklist-wrapper">
-      <form onSubmit={handleApply} className="cadastro-form">
+    <div className="checklist-wrapper" style={{ position: 'relative' }}>
+      <button 
+        type="button"
+        onClick={() => navigate(-1)} 
+        style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', zIndex: 10 }}
+      >
+        ← Voltar
+      </button>
+      <form onSubmit={handleApply} className="cadastro-form" style={{ marginTop: '32px' }}>
         <div className="checklist-container" style={{ marginBottom: "24px" }}>
           <h1 className="checklist-title">Seja um Médico Parceiro</h1>
           <p className="checklist-subtitle">Preencha o formulário abaixo para solicitar acesso ao sistema do Instituto Buko Kaesemodel.</p>

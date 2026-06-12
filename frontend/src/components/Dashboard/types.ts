@@ -7,4 +7,7 @@ export interface Patient {
   tag?: string;
   responsibleFigure?: string;
   phone?: string;
+  foto_perfil?: string | null;
+  classificacao_oficial?: string;
+  encaminhamento_status?: string;
 }
