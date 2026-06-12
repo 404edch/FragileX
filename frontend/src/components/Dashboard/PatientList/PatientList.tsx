@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AnimatedList from '../../Shared/AnimatedList';
+import { AnimatePresence, motion } from 'motion/react';
 import './PatientList.css';
 import { backendService, type MockUsuario, type MockPaciente } from '../../../services/backendService';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -113,13 +113,17 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
         </div>
       ) : (
         <div className="patients-grid">
-          <AnimatedList>
-            {filteredPatients.map((patient) => {
+          <AnimatePresence>
+            {filteredPatients.map((patient, index) => {
               const semAcompanhamento = patient.pacienteDetails?.id_medico_responsavel === null;
               
               return (
-                <div 
+                <motion.div 
                   key={patient.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
                   className="patient-card" 
                   onClick={() => onPatientClick && onPatientClick({ id: patient.id })}
                   style={{ 
@@ -195,10 +199,10 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
                       </span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </AnimatedList>
+          </AnimatePresence>
         </div>
       )}
     </div>

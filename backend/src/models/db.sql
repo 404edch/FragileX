@@ -1,3 +1,4 @@
+
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -38,6 +39,10 @@ CREATE TABLE pacientes (
     CONSTRAINT fk_medico_responsavel FOREIGN KEY (id_medico_responsavel)
 	REFERENCES medicos(id_usuario) ON DELETE SET NULL
 );
+ALTER TABLE pacientes ADD COLUMN foto_perfil TEXT;
+ALTER TABLE pacientes ADD COLUMN encaminhamento_status VARCHAR(50) DEFAULT 'pendente' CHECK (encaminhamento_status IN ('pendente', 'encaminhado', 'encaminhamento negado'));
+ALTER TABLE pacientes ADD COLUMN classificacao_oficial VARCHAR(50) DEFAULT 'Não Avaliado';
+
 
 CREATE TABLE historico_medico (
     id SERIAL PRIMARY KEY,
