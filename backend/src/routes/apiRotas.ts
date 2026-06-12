@@ -42,83 +42,51 @@ router.use(authMiddleware);
 
 // ── Users ──
 router.get("/users/:id", userController.getMe);
-router.get("/users", requireRole(['instituto', 'admin']), userController.listAll);
-router.post("/users/employee", requireRole(['admin']), userController.createEmployee);
-router.put("/users/:id", requireRole(['instituto', 'admin']), userController.update);
-router.delete("/users/:id", requireRole(['instituto', 'admin']), userController.remove);
+router.get("/users", requireRole(["instituto", "admin"]), userController.listAll);
+router.post("/users/employee", requireRole(["admin"]), userController.createEmployee);
+router.put("/users/:id", requireRole(["instituto", "admin"]), userController.update);
+router.delete("/users/:id", requireRole(["instituto", "admin"]), userController.remove);
 
 // ── Patients ──
 router.get("/patients/check-cpf/:cpf", patientController.checkCpf);
 
 // Médico/instituto cadastram paciente (cria conta PENDING_ACTIVATION)
-router.post(
-  "/patients/cadastrar-pelo-medico",
-  requireRole(['medico', 'instituto']),
-  patientController.cadastrarPeloMedico
-);
+router.post("/patients/cadastrar-pelo-medico", requireRole(["medico", "instituto"]), patientController.cadastrarPeloMedico);
 
 // Instituto vê todos os pacientes; médico só vê os seus (via listPacientesDoMedico)
-router.get("/patients", requireRole(['instituto', 'admin']), patientController.listTodosPacientes);
-router.get(
-  "/patients/medico/:idMedico",
-  requireRole(['medico', 'instituto', 'admin']),
-  patientController.listPacientesDoMedico
-);
-router.put("/patients/:id/status", requireRole(['instituto', 'admin']), patientController.updateStatus);
-router.get("/patients/:id", requireRole(['medico', 'instituto', 'admin']), patientController.getPaciente);
-router.get("/patients/cpf/:cpf", requireRole(['medico', 'instituto', 'admin', 'paciente']), patientController.getPacienteByCpf);
+router.get("/patients", requireRole(["instituto", "admin"]), patientController.listTodosPacientes);
+router.get("/patients/medico/:idMedico", requireRole(["medico", "instituto", "admin"]), patientController.listPacientesDoMedico);
+router.put("/patients/:id/status", requireRole(["instituto", "admin"]), patientController.updateStatus);
+router.get("/patients/:id", requireRole(["paciente", "medico", "instituto", "admin"]), patientController.getPaciente);
+router.get("/patients/cpf/:cpf", requireRole(["medico", "instituto", "admin", "paciente"]), patientController.getPacienteByCpf);
 
 // ── Links (Vínculos médico-paciente) ──
-router.post("/links/solicitar", requireRole(['medico']), linkController.solicitarVinculo);
-router.get("/links/paciente/:idPaciente", requireRole(['paciente', 'medico', 'instituto']), linkController.listarSolicitacoesVinculoPaciente);
-router.post("/links/:id/responder", requireRole(['paciente']), linkController.responderSolicitacaoVinculo);
+router.post("/links/solicitar", requireRole(["medico"]), linkController.solicitarVinculo);
+router.get("/links/paciente/:idPaciente", requireRole(["paciente", "medico", "instituto"]), linkController.listarSolicitacoesVinculoPaciente);
+router.post("/links/:id/responder", requireRole(["paciente"]), linkController.responderSolicitacaoVinculo);
 
 // ── Doctors (Credenciamento) ──
-router.get(
-  "/doctors/solicitacoes",
-  requireRole(['instituto', 'admin']),
-  doctorController.listarSolicitacoesCredenciamento
-);
-router.get(
-  "/doctors/solicitacoes/count",
-  requireRole(['instituto', 'admin']),
-  doctorController.contarSolicitacoesPendentes
-);
-router.get("/doctors/:id", requireRole(['medico', 'instituto', 'admin']), doctorController.getMedico);
-router.post(
-  "/doctors/solicitacoes/:id/responder",
-  requireRole(['instituto', 'admin']),
-  doctorController.responderSolicitacaoCredenciamento
-);
-router.post(
-  "/doctors/registrar-direto",
-  requireRole(['instituto', 'admin']),
-  doctorController.registrarMedicoDireto
-);
+router.get("/doctors/solicitacoes", requireRole(["instituto", "admin"]), doctorController.listarSolicitacoesCredenciamento);
+router.get("/doctors/solicitacoes/count", requireRole(["instituto", "admin"]), doctorController.contarSolicitacoesPendentes);
+router.get("/doctors/:id", requireRole(["medico", "instituto", "admin"]), doctorController.getMedico);
+router.post("/doctors/solicitacoes/:id/responder", requireRole(["instituto", "admin"]), doctorController.responderSolicitacaoCredenciamento);
+router.post("/doctors/registrar-direto", requireRole(["instituto", "admin"]), doctorController.registrarMedicoDireto);
 
 // ── Landing Editables (POST protected) ──
-router.post("/landing/cards", requireRole(['instituto', 'admin']), landingController.saveCards);
-router.post("/landing/news", requireRole(['instituto', 'admin']), landingController.saveNews);
+router.post("/landing/cards", requireRole(["instituto", "admin"]), landingController.saveCards);
+router.post("/landing/news", requireRole(["instituto", "admin"]), landingController.saveNews);
 
 // ── Audit ──
-router.get("/audits", requireRole(['instituto', 'admin']), auditController.getAudits);
+router.get("/audits", requireRole(["instituto", "admin"]), auditController.getAudits);
 
 // ── Checklists ──
-router.post("/checklists", requireRole(['medico', 'instituto', 'paciente', 'admin']), checklistController.salvarChecklist);
-router.get(
-  "/checklists/search",
-  requireRole(['instituto', 'admin']),
-  checklistController.buscarChecklistsAvancado
-);
-router.get(
-  "/checklists/paciente/:idPaciente",
-  requireRole(['medico', 'instituto', 'paciente', 'admin']),
-  checklistController.obterChecklistsPaciente
-);
+router.post("/checklists", requireRole(["medico", "instituto", "paciente", "admin"]), checklistController.salvarChecklist);
+router.get("/checklists/search", requireRole(["instituto", "admin"]), checklistController.buscarChecklistsAvancado);
+router.get("/checklists/paciente/:idPaciente", requireRole(["medico", "instituto", "paciente", "admin"]), checklistController.obterChecklistsPaciente);
 
 // ── Notificações PCR ──
-router.get("/notificacoes-pcr", requireRole(['instituto', 'admin']), notificacaoController.getNotificacoesPCR);
-router.get("/notificacoes-pcr/count", requireRole(['instituto', 'admin']), notificacaoController.getNotificacoesPCRCount);
-router.patch("/notificacoes-pcr/:id/lida", requireRole(['instituto', 'admin']), notificacaoController.marcarNotificacaoLida);
+router.get("/notificacoes-pcr", requireRole(["instituto", "admin"]), notificacaoController.getNotificacoesPCR);
+router.get("/notificacoes-pcr/count", requireRole(["instituto", "admin"]), notificacaoController.getNotificacoesPCRCount);
+router.patch("/notificacoes-pcr/:id/lida", requireRole(["instituto", "admin"]), notificacaoController.marcarNotificacaoLida);
 
 export default router;

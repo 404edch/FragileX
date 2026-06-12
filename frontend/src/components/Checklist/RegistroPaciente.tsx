@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 export default function RegistroPaciente() {
   const { usuario, loginComCredenciais } = useAuth();
   const navigate = useNavigate();
-  const isMedico = usuario?.role === 'medico' || usuario?.role === 'instituto';
+  const isMedico = usuario?.role === "medico" || usuario?.role === "instituto";
 
   const [errorMessage, setErrorMessage] = useState("");
   const [activationLink, setActivationLink] = useState("");
@@ -19,7 +19,7 @@ export default function RegistroPaciente() {
   const [existingUser, setExistingUser] = useState<MockUsuario | null>(null);
 
   const handleCpfBlur = async (cpf: string) => {
-    if (!cpf || cpf.length < 11 || !isMedico) return;
+    if (!cpf || cpf.length !== 11 || !isMedico) return;
     try {
       const res = await backendService.checkCpf(cpf);
       if (res.exists && res.user) {
@@ -37,7 +37,7 @@ export default function RegistroPaciente() {
     try {
       await backendService.importarPacientePorCpf(usuario.id, cpfValue);
       alert("Solicitação de vínculo enviada com sucesso!");
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (error: any) {
       setErrorMessage(error.message || "Erro ao solicitar vínculo.");
     }
@@ -48,7 +48,7 @@ export default function RegistroPaciente() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
@@ -71,7 +71,7 @@ export default function RegistroPaciente() {
 
     if (isMedico) {
       try {
-        const res = await api.post<{ linkAtivacao: string; token: string }>('/patients/cadastrar-pelo-medico', {
+        const res = await api.post<{ linkAtivacao: string; token: string }>("/patients/cadastrar-pelo-medico", {
           idMedico: usuario!.id,
           nomePaciente: dadosPessoais.nomePaciente,
           cpfPaciente: dadosPessoais.cpfPaciente,
@@ -90,7 +90,7 @@ export default function RegistroPaciente() {
           pais: dadosPessoais.pais,
           telefone2: dadosPessoais.telefone2,
           whatsapp: dadosPessoais.whatsapp,
-          foto_perfil
+          foto_perfil,
         });
         const fullLink = `${window.location.origin}${res.linkAtivacao}`;
         setActivationLink(fullLink);
@@ -105,7 +105,7 @@ export default function RegistroPaciente() {
       }
 
       try {
-        await api.post('/patients/autocadastro', {
+        await api.post("/patients/autocadastro", {
           nomePaciente: dadosPessoais.nomePaciente,
           cpfPaciente: dadosPessoais.cpfPaciente,
           email: dadosPessoais.email,
@@ -124,18 +124,20 @@ export default function RegistroPaciente() {
           pais: dadosPessoais.pais,
           telefone2: dadosPessoais.telefone2,
           whatsapp: dadosPessoais.whatsapp,
-          foto_perfil
+          foto_perfil,
         });
-        
+
         await loginComCredenciais(dadosPessoais.cpfPaciente as string, dadosPessoais.senha as string);
         alert("Cadastro realizado com sucesso!");
-        navigate('/dashboard');
+        navigate("/dashboard");
       } catch (error: any) {
-        if (error.message === 'REGISTRADO_PELO_MEDICO') {
-          setErrorMessage("Um profissional de saúde já iniciou o seu cadastro no sistema. Por favor, utilize o link de ativação enviado para definir sua senha ou entre em contato com seu médico.");
-        } else if (error.message === 'CPF_EXISTENTE') {
+        if (error.message === "REGISTRADO_PELO_MEDICO") {
+          setErrorMessage(
+            "Um profissional de saúde já iniciou o seu cadastro no sistema. Por favor, utilize o link de ativação enviado para definir sua senha ou entre em contato com seu médico.",
+          );
+        } else if (error.message === "CPF_EXISTENTE") {
           setErrorMessage("Já encontramos um cadastro associado a este CPF. Faça login para acessar sua conta.");
-        } else if (error.message === 'EMAIL_EXISTENTE') {
+        } else if (error.message === "EMAIL_EXISTENTE") {
           setErrorMessage("Já encontramos um cadastro associado a este E-mail. Faça login para acessar sua conta.");
         } else {
           setErrorMessage("Erro ao realizar o cadastro. Tente novamente.");
@@ -152,68 +154,76 @@ export default function RegistroPaciente() {
 
   if (activationLink) {
     return (
-      <div className="checklist-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div className="checklist-container" style={{ maxWidth: '600px', width: '100%', textAlign: 'center', padding: '40px' }}>
-          <div style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }}>✓</div>
+      <div
+        className="checklist-wrapper"
+        style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+      >
+        <div
+          className="checklist-container"
+          style={{ maxWidth: "600px", width: "100%", textAlign: "center", padding: "40px" }}
+        >
+          <div style={{ fontSize: "48px", color: "#52c41a", marginBottom: "16px" }}>✓</div>
           <h1 className="checklist-title">Paciente Cadastrado!</h1>
-          <p className="checklist-subtitle" style={{ marginBottom: '28px' }}>
-            O registro do paciente foi criado no estado <strong>PENDING_ACTIVATION</strong>.
-            Como medida de segurança, o médico não cria nem conhece a senha.
+          <p
+            className="checklist-subtitle"
+            style={{ marginBottom: "28px" }}
+          >
+            O registro do paciente foi criado no estado <strong>PENDING_ACTIVATION</strong>. Como medida de segurança, o médico não cria nem conhece a senha.
           </p>
 
-          <div style={{
-            background: 'rgba(26, 95, 168, 0.05)',
-            border: '1px solid rgba(26, 95, 168, 0.2)',
-            padding: '20px',
-            borderRadius: '12px',
-            textAlign: 'left',
-            marginBottom: '28px'
-          }}>
-            <h4 style={{ color: '#1a5fa8', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              background: "rgba(26, 95, 168, 0.05)",
+              border: "1px solid rgba(26, 95, 168, 0.2)",
+              padding: "20px",
+              borderRadius: "12px",
+              textAlign: "left",
+              marginBottom: "28px",
+            }}
+          >
+            <h4 style={{ color: "#1a5fa8", marginBottom: "8px", fontSize: "14px", fontWeight: "bold", textTransform: "uppercase" }}>
               Link Temporário de Ativação
             </h4>
-            <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>
-              Copie o link abaixo para enviar ao paciente via E-mail ou WhatsApp:
-            </p>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <p style={{ fontSize: "13px", color: "#666", marginBottom: "12px" }}>Copie o link abaixo para enviar ao paciente via E-mail ou WhatsApp:</p>
+            <div style={{ display: "flex", gap: "8px" }}>
               <input
                 type="text"
                 readOnly
                 value={activationLink}
                 style={{
                   flex: 1,
-                  padding: '10px',
-                  borderRadius: '6px',
-                  border: '1px solid #ccc',
-                  fontSize: '12px',
-                  background: '#fff'
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  fontSize: "12px",
+                  background: "#fff",
                 }}
               />
               <button
                 type="button"
                 onClick={copyToClipboard}
                 className="checklist-submit-btn"
-                style={{ padding: '0 16px', margin: 0, fontSize: '13px', whiteSpace: 'nowrap' }}
+                style={{ padding: "0 16px", margin: 0, fontSize: "13px", whiteSpace: "nowrap" }}
               >
                 {copied ? "Copiado!" : "Copiar"}
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <button
               type="button"
               className="checklist-submit-btn"
-              onClick={() => window.open(activationLink, '_blank')}
-              style={{ background: '#52c41a', border: 'none' }}
+              onClick={() => window.open(activationLink, "_blank")}
+              style={{ background: "#52c41a", border: "none" }}
             >
               Simular Ativação (Abrir em nova aba)
             </button>
             <button
               type="button"
               className="hero-btn-secondary"
-              onClick={() => navigate('/dashboard')}
-              style={{ width: '100%' }}
+              onClick={() => navigate("/dashboard")}
+              style={{ width: "100%" }}
             >
               Voltar ao Dashboard
             </button>
@@ -225,64 +235,101 @@ export default function RegistroPaciente() {
 
   return (
     <div className="checklist-wrapper">
-      <form onSubmit={handleSubmit} className="cadastro-form" style={{ position: 'relative', paddingTop: '40px' }}>
-        <button 
+      <form
+        onSubmit={handleSubmit}
+        className="cadastro-form"
+        style={{ position: "relative", paddingTop: "40px" }}
+      >
+        <button
           type="button"
-          onClick={() => navigate(-1)} 
-          style={{ position: 'absolute', top: '16px', left: '16px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}
+          onClick={() => navigate(-1)}
+          style={{
+            position: "absolute",
+            top: "16px",
+            left: "16px",
+            background: "none",
+            border: "none",
+            color: "#1a5fa8",
+            cursor: "pointer",
+            fontWeight: "bold",
+            fontSize: "14px",
+          }}
         >
           ← Voltar
         </button>
 
         {errorMessage && (
-          <div style={{
-            background: 'rgba(255, 77, 79, 0.15)',
-            border: '1px solid #ff4d4f',
-            color: '#ff4d4f',
-            padding: '16px',
-            borderRadius: '12px',
-            fontSize: '14px',
-            marginBottom: '24px',
-            textAlign: 'center',
-            fontWeight: 'bold'
-          }}>
+          <div
+            style={{
+              background: "rgba(255, 77, 79, 0.15)",
+              border: "1px solid #ff4d4f",
+              color: "#ff4d4f",
+              padding: "16px",
+              borderRadius: "12px",
+              fontSize: "14px",
+              marginBottom: "24px",
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          >
             {errorMessage}
           </div>
         )}
 
         {existingUser && (
-          <div style={{
-            background: '#e0f2fe',
-            border: '1px solid #7dd3fc',
-            padding: '20px',
-            borderRadius: '12px',
-            marginBottom: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+          <div
+            style={{
+              background: "#e0f2fe",
+              border: "1px solid #7dd3fc",
+              padding: "20px",
+              borderRadius: "12px",
+              marginBottom: "24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <div>
-              <h3 style={{ margin: '0 0 4px', color: '#0369a1', fontSize: '16px', fontWeight: 'bold' }}>Paciente já existe no sistema!</h3>
-              <p style={{ margin: 0, color: '#0284c7', fontSize: '14px' }}>O paciente <strong>{existingUser.nome}</strong> já possui cadastro.</p>
+              <h3 style={{ margin: "0 0 4px", color: "#0369a1", fontSize: "16px", fontWeight: "bold" }}>Paciente já existe no sistema!</h3>
+              <p style={{ margin: 0, color: "#0284c7", fontSize: "14px" }}>
+                O paciente <strong>{existingUser.nome}</strong> já possui cadastro.
+              </p>
             </div>
-            <button type="button" onClick={handleVincular} style={{
-              background: '#0ea5e9', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
-            }}>
+            <button
+              type="button"
+              onClick={handleVincular}
+              style={{
+                background: "#0ea5e9",
+                color: "#fff",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
               Vincular a este Paciente
             </button>
           </div>
         )}
 
-        <DadosPessoais 
-          isMedico={isMedico} 
-          cpfValue={cpfValue} 
-          onCpfChange={(e) => setCpfValue(e.target.value)} 
-          onCpfBlur={handleCpfBlur} 
+        <DadosPessoais
+          isMedico={isMedico}
+          cpfValue={cpfValue}
+          onCpfChange={(e) => setCpfValue(e.target.value)}
+          onCpfBlur={handleCpfBlur}
         />
 
-        <div className="form-actions" style={{ gap: '16px' }}>
+        <div
+          className="form-actions"
+          style={{ gap: "16px" }}
+        >
           <BotaoInicio label="Cancelar" />
-          <button type="submit" className="checklist-submit-btn" disabled={!!existingUser}>
+          <button
+            type="submit"
+            className="checklist-submit-btn"
+            disabled={!!existingUser}
+          >
             Finalizar Cadastro do Paciente
           </button>
         </div>

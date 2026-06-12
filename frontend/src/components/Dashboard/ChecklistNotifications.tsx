@@ -9,7 +9,7 @@ interface NotificacaoPCR {
   score_final: number;
   classificacao: string;
   lida: boolean;
-  created_at: string;
+  data_criacao: string;
 }
 
 const ChecklistNotifications = () => {
@@ -143,7 +143,7 @@ const ChecklistNotifications = () => {
                   <div style={{ padding: "0 8px" }}>
                     <strong>📅 Data:</strong>
                     <br />
-                    {notif.created_at ? formatarData(notif.created_at) : "N/A"}
+                    {notif.data_criacao ? formatarData(notif.data_criacao) : "N/A"}
                   </div>
                 </div>
 
@@ -200,7 +200,7 @@ const ChecklistNotifications = () => {
                 <div>
                   <h4 style={{ margin: 0, color: "#475569", fontSize: "14px", fontWeight: "bold" }}>{notif.paciente_nome}</h4>
                   <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
-                    Por: {notif.preenchido_por} | Score: {notif.score_final} pts | {notif.created_at ? formatarData(notif.created_at) : "N/A"}
+                    Por: {notif.preenchido_por} | Score: {notif.score_final} pts | {notif.data_criacao ? formatarData(notif.data_criacao) : "N/A"}
                   </p>
                 </div>
                 <span
