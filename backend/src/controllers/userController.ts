@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { logAction } from "../services/auditService";
 
-const SECRET_KEY = process.env.JWT_SECRET || 'chave-super-secreta-ibk';
+const SECRET_KEY = process.env.JWT_SECRET || "chave-super-secreta-ibk";
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { emailOrCpf, senha } = req.body;
@@ -13,19 +13,19 @@ export const login = async (req: Request, res: Response): Promise<any> => {
   }
 
   try {
-    const query = 'SELECT * FROM usuarios WHERE email = $1 OR cpf = $2';
+    const query = "SELECT * FROM usuarios WHERE email = $1 OR cpf = $2";
     const result = await db.query(query, [emailOrCpf, emailOrCpf]);
 
     if (result.rows.length === 0) {
       // Verifica se o usuário é um médico com credenciamento pendente
-      const pendingCheck = await db.query(
-        "SELECT status FROM solicitacoes_credenciamento WHERE email = $1 OR crm = $2 ORDER BY data_criacao DESC LIMIT 1",
-        [emailOrCpf, emailOrCpf]
-      );
+      const pendingCheck = await db.query("SELECT status FROM solicitacoes_credenciamento WHERE email = $1 OR crm = $2 ORDER BY data_criacao DESC LIMIT 1", [
+        emailOrCpf,
+        emailOrCpf,
+      ]);
       if (pendingCheck.rows.length > 0) {
-        if (pendingCheck.rows[0].status === 'PENDING') {
+        if (pendingCheck.rows[0].status === "PENDING") {
           return res.status(403).json({ error: "Sua solicitação de credenciamento está em análise. Aguarde a aprovação do Instituto." });
-        } else if (pendingCheck.rows[0].status === 'REJECTED') {
+        } else if (pendingCheck.rows[0].status === "REJECTED") {
           return res.status(403).json({ error: "Sua solicitação de credenciamento foi recusada. Entre em contato com o Instituto." });
         }
       }
@@ -34,12 +34,12 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
     const user = result.rows[0];
 
-    if (user.status === 'PENDING_ACTIVATION') {
+    if (user.status === "PENDING_ACTIVATION") {
       return res.status(403).json({ error: "Esta conta ainda não foi ativada. Por favor, utilize o link de ativação enviado." });
     }
 
     // Médicos só podem logar se a conta estiver ACTIVE (aprovados pelo instituto)
-    if (user.role === 'medico' && user.status !== 'ACTIVE') {
+    if (user.role === "medico" && user.status !== "ACTIVE") {
       return res.status(403).json({ error: "Sua solicitação de credenciamento ainda não foi aprovada pelo Instituto." });
     }
 
@@ -49,16 +49,12 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     }
 
     // Emitir JWT
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      SECRET_KEY,
-      { expiresIn: '24h' }
-    );
+    const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, { expiresIn: "24h" });
 
-    await logAction(user.id, user.nome, 'Login', 'Efetuou login por credenciais.');
+    await logAction(user.id, user.nome, "Login", "Efetuou login por credenciais.");
 
     return res.status(200).json({
-      message: 'Login bem sucedido',
+      message: "Login bem sucedido",
       token,
       user: {
         id: user.id,
@@ -67,8 +63,8 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         email: user.email,
         telefone: user.telefone,
         role: user.role,
-        status: user.status
-      }
+        status: user.status,
+      },
     });
   } catch (error) {
     console.error("Erro no login:", error);
@@ -83,7 +79,7 @@ export const getMe = async (req: Request, res: Response): Promise<any> => {
   }
 
   try {
-    const query = 'SELECT id, nome, cpf, email, telefone, role, status FROM usuarios WHERE id = $1';
+    const query = "SELECT id, nome, cpf, email, telefone, role, status FROM usuarios WHERE id = $1";
     const result = await db.query(query, [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Usuário não encontrado." });
@@ -104,7 +100,7 @@ export const createEmployee = async (req: Request, res: Response): Promise<any> 
   }
 
   try {
-    const checkEmailCpf = await db.query('SELECT id FROM usuarios WHERE email = $1 OR cpf = $2', [email, cpf]);
+    const checkEmailCpf = await db.query("SELECT id FROM usuarios WHERE email = $1 OR cpf = $2", [email, cpf]);
     if (checkEmailCpf.rows.length > 0) {
       return res.status(409).json({ error: "Já existe um usuário cadastrado com este e-mail ou CPF." });
     }
@@ -122,8 +118,8 @@ export const createEmployee = async (req: Request, res: Response): Promise<any> 
       await logAction(
         adminUser.id,
         adminUser.nome,
-        'Cadastro de Funcionário',
-        `Registrou o funcionário do instituto: ${newUser.nome} (E-mail: ${newUser.email}).`
+        "Cadastro de Funcionário",
+        `Registrou o funcionário do instituto: ${newUser.nome} (E-mail: ${newUser.email}).`,
       );
     }
 
@@ -148,7 +144,7 @@ export const listAll = async (req: Request, res: Response): Promise<any> => {
     const result = await db.query(query);
 
     // Mapear no formato esperado pelo frontend
-    const mapped = result.rows.map(row => {
+    const mapped = result.rows.map((row) => {
       const user: any = {
         id: row.id,
         nome: row.nome,
@@ -157,29 +153,29 @@ export const listAll = async (req: Request, res: Response): Promise<any> => {
         telefone: row.telefone,
         role: row.role,
         status: row.status,
-        data_criacao: row.data_criacao
+        data_criacao: row.data_criacao,
       };
 
-      if (row.role === 'medico') {
+      if (row.role === "medico") {
         user.medicoDetails = {
           crm: row.crm,
           especialidade: row.especialidade,
           instituicao: row.instituicao,
           cidade: row.med_cidade,
-          estado: row.med_estado
+          estado: row.med_estado,
         };
       }
 
-      if (row.role === 'paciente') {
+      if (row.role === "paciente") {
         user.pacienteDetails = {
-          data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split('T')[0] : '',
+          data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
           sexo_biologico: row.sexo_biologico,
           genero: row.genero,
           sindrome: row.sindrome,
           responsavel_nome: row.responsavel_nome,
           cidade: row.pac_cidade,
           estado: row.pac_estado,
-          pais: row.pac_pais
+          pais: row.pac_pais,
         };
       }
 
@@ -203,7 +199,7 @@ export const update = async (req: Request, res: Response): Promise<any> => {
 
   try {
     // Buscar usuário antigo
-    const oldQuery = 'SELECT * FROM usuarios WHERE id = $1';
+    const oldQuery = "SELECT * FROM usuarios WHERE id = $1";
     const oldRes = await db.query(oldQuery, [targetId]);
     if (oldRes.rows.length === 0) {
       return res.status(404).json({ error: "Usuário não encontrado." });
@@ -224,8 +220,8 @@ export const update = async (req: Request, res: Response): Promise<any> => {
     await db.query(updateQuery, [nome, email, cpf, telefone, status, role, targetId]);
 
     // Se for médico e tiver CRM/especialidade, atualiza a tabela medicos
-    if (role === 'medico' || oldUser.role === 'medico') {
-      const checkMedQuery = 'SELECT * FROM medicos WHERE id_usuario = $1';
+    if (role === "medico" || oldUser.role === "medico") {
+      const checkMedQuery = "SELECT * FROM medicos WHERE id_usuario = $1";
       const checkMed = await db.query(checkMedQuery, [targetId]);
       if (checkMed.rows.length > 0) {
         const updateMed = `
@@ -243,17 +239,12 @@ export const update = async (req: Request, res: Response): Promise<any> => {
           INSERT INTO medicos (id_usuario, crm, especialidade, instituicao, cidade, estado)
           VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        await db.query(insertMed, [targetId, crm || 'CRM-TEMP', especialidade || 'Clínico', instituicao, cidade, estado]);
+        await db.query(insertMed, [targetId, crm || "CRM-TEMP", especialidade || "Clínico", instituicao, cidade, estado]);
       }
     }
 
     if (adminUser) {
-      await logAction(
-        adminUser.id,
-        adminUser.nome,
-        'Edição de Usuário',
-        `Editou o perfil do usuário ${oldUser.nome} (ID: ${oldUser.id}).`
-      );
+      await logAction(adminUser.id, adminUser.nome, "Edição de Usuário", `Editou o perfil do usuário ${oldUser.nome} (ID: ${oldUser.id}).`);
     }
 
     return res.json({ success: true });
@@ -265,6 +256,7 @@ export const update = async (req: Request, res: Response): Promise<any> => {
 
 export const remove = async (req: Request, res: Response): Promise<any> => {
   const targetId = Number(req.params.id);
+  console.log(req.body);
   const { adminUser } = req.body;
 
   if (isNaN(targetId)) {
@@ -272,7 +264,7 @@ export const remove = async (req: Request, res: Response): Promise<any> => {
   }
 
   try {
-    const selectQuery = 'SELECT nome, role FROM usuarios WHERE id = $1';
+    const selectQuery = "SELECT nome, role FROM usuarios WHERE id = $1";
     const selectRes = await db.query(selectQuery, [targetId]);
     if (selectRes.rows.length === 0) {
       return res.status(404).json({ error: "Usuário não encontrado." });
@@ -280,16 +272,11 @@ export const remove = async (req: Request, res: Response): Promise<any> => {
     const user = selectRes.rows[0];
 
     // Deletar o usuário (ON DELETE CASCADE cuidará das tabelas medicos/pacientes)
-    const deleteQuery = 'DELETE FROM usuarios WHERE id = $1';
+    const deleteQuery = "DELETE FROM usuarios WHERE id = $1";
     await db.query(deleteQuery, [targetId]);
 
     if (adminUser) {
-      await logAction(
-        adminUser.id,
-        adminUser.nome,
-        'Exclusão de Usuário',
-        `Excluiu a conta do usuário ${user.nome} (ID: ${targetId}, Role: ${user.role}).`
-      );
+      await logAction(adminUser.id, adminUser.nome, "Exclusão de Usuário", `Excluiu a conta do usuário ${user.nome} (ID: ${targetId}, Role: ${user.role}).`);
     }
 
     return res.json({ success: true });
