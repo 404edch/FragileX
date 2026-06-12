@@ -183,7 +183,7 @@ export const listAll = async (req: Request, res: Response): Promise<any> => {
 
 export const update = async (req: Request, res: Response): Promise<any> => {
   const targetId = Number(req.params.id);
-  const { nome, email, cpf, telefone, status, role, crm, especialidade, instituicao, adminUser } = req.body;
+  const { nome, email, cpf, telefone, status, role, crm, especialidade, instituicao, cidade, estado, adminUser } = req.body;
 
   if (isNaN(targetId)) {
     return res.status(400).json({ error: "ID inválido." });
@@ -220,16 +220,18 @@ export const update = async (req: Request, res: Response): Promise<any> => {
           UPDATE medicos 
           SET crm = COALESCE($1, crm),
               especialidade = COALESCE($2, especialidade),
-              instituicao = COALESCE($3, instituicao)
-          WHERE id_usuario = $4
+              instituicao = COALESCE($3, instituicao),
+              cidade = COALESCE($4, cidade),
+              estado = COALESCE($5, estado)
+          WHERE id_usuario = $6
         `;
-        await db.query(updateMed, [crm, especialidade, instituicao, targetId]);
+        await db.query(updateMed, [crm, especialidade, instituicao, cidade, estado, targetId]);
       } else {
         const insertMed = `
-          INSERT INTO medicos (id_usuario, crm, especialidade, instituicao)
-          VALUES ($1, $2, $3, $4)
+          INSERT INTO medicos (id_usuario, crm, especialidade, instituicao, cidade, estado)
+          VALUES ($1, $2, $3, $4, $5, $6)
         `;
-        await db.query(insertMed, [targetId, crm || 'CRM-TEMP', especialidade || 'Clínico', instituicao]);
+        await db.query(insertMed, [targetId, crm || 'CRM-TEMP', especialidade || 'Clínico', instituicao, cidade, estado]);
       }
     }
 

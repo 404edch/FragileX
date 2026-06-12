@@ -14,6 +14,7 @@ interface Solicitacao {
   instituicao: string;
   status: string;
   data_criacao: string;
+  motivo_recusa?: string;
 }
 
 const DoctorApprovals = () => {

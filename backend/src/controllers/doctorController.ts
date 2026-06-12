@@ -131,7 +131,7 @@ export const responderSolicitacaoCredenciamento = async (req: Request, res: Resp
 };
 
 export const registrarMedicoDireto = async (req: Request, res: Response): Promise<any> => {
-  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao, senha, adminUser } = req.body;
+  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao, senha, cpf, adminUser } = req.body;
 
   if (!nomeCompleto || !crm || !email || !senha) {
     return res.status(400).json({ error: "Nome completo, CRM, e-mail e senha são obrigatórios." });
@@ -150,13 +150,22 @@ export const registrarMedicoDireto = async (req: Request, res: Response): Promis
       return res.status(400).json({ error: "E-mail já cadastrado." });
     }
 
+    if (cpf) {
+      const cpfCheck = await db.query("SELECT id FROM usuarios WHERE cpf = $1", [cpf]);
+      if (cpfCheck.rows.length > 0) {
+        return res.status(400).json({ error: "CPF já cadastrado." });
+      }
+    }
+
     const hash = await bcrypt.hash(senha, 12);
+    const finalCpf = cpf || null;
+    
     const insertUserQuery = `
       INSERT INTO usuarios (nome, cpf, email, telefone, senha_hash, role, status)
-      VALUES ($1, '00000000000', $2, $3, $4, 'medico', 'ACTIVE')
+      VALUES ($1, $2, $3, $4, $5, 'medico', 'ACTIVE')
       RETURNING id, nome, email, role, status
     `;
-    const userRes = await db.query(insertUserQuery, [nomeCompleto, email, telefone, hash]);
+    const userRes = await db.query(insertUserQuery, [nomeCompleto, finalCpf, email, telefone, hash]);
     const novoUsuario = userRes.rows[0];
 
     const insertMedQuery = `
@@ -177,9 +186,9 @@ export const registrarMedicoDireto = async (req: Request, res: Response): Promis
     }
 
     return res.status(201).json(novoUsuario);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao registrar médico direto:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: "Erro interno no servidor.", details: error.message });
   }
 };
 

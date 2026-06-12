@@ -22,13 +22,15 @@ export default function AdminUsers() {
   const [editCrm, setEditCrm] = useState('');
   const [editEspecialidade, setEditEspecialidade] = useState('');
   const [editInstituicao, setEditInstituicao] = useState('');
+  const [editCidade, setEditCidade] = useState('');
+  const [editEstado, setEditEstado] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const refreshUsers = async () => {
     try {
-      const { data } = await api.get('/users');
+      const data = await api.get<any[]>('/users');
       setUsers(data);
     } catch (err) {
       console.error("Erro ao carregar usuários:", err);
@@ -52,10 +54,14 @@ export default function AdminUsers() {
       setEditCrm(u.medicoDetails.crm || '');
       setEditEspecialidade(u.medicoDetails.especialidade || '');
       setEditInstituicao(u.medicoDetails.instituicao || '');
+      setEditCidade(u.medicoDetails.cidade || '');
+      setEditEstado(u.medicoDetails.estado || '');
     } else {
       setEditCrm('');
       setEditEspecialidade('');
       setEditInstituicao('');
+      setEditCidade('');
+      setEditEstado('');
     }
     setError('');
   };
@@ -84,6 +90,8 @@ export default function AdminUsers() {
         payload.crm = editCrm;
         payload.especialidade = editEspecialidade;
         payload.instituicao = editInstituicao;
+        payload.cidade = editCidade;
+        payload.estado = editEstado;
       }
 
       payload.adminUser = {
@@ -114,15 +122,7 @@ export default function AdminUsers() {
     const confirm = window.confirm(`Tem certeza de que deseja excluir permanentemente o usuário "${u.nome}"? Esta ação removerá também seus registros de perfil.`);
     if (confirm) {
       try {
-        await api.delete(`/users/${u.id}`, {
-          data: {
-            adminUser: {
-              id: usuario.id,
-              nome: usuario.nome,
-              role: usuario.role || 'admin'
-            }
-          }
-        });
+        await api.delete(`/users/${u.id}`);
         setSuccess(`Usuário "${u.nome}" excluído com sucesso.`);
         refreshUsers();
         setTimeout(() => setSuccess(''), 4000);
@@ -309,6 +309,7 @@ export default function AdminUsers() {
                       <div>
                         CRM: {u.medicoDetails.crm} | {u.medicoDetails.especialidade}
                         {u.medicoDetails.instituicao && <span style={{ display: 'block', fontSize: '11px' }}>{u.medicoDetails.instituicao}</span>}
+                        {(u.medicoDetails.cidade || u.medicoDetails.estado) && <span style={{ display: 'block', fontSize: '11px', color: '#a0aec0' }}>{u.medicoDetails.cidade} - {u.medicoDetails.estado}</span>}
                       </div>
                     )}
                     {u.role === 'paciente' && u.pacienteDetails && (
@@ -517,15 +518,34 @@ export default function AdminUsers() {
                         required={editRole === 'medico'}
                       />
                     </div>
-                    <div className="cadastro-item" style={{ width: '100%', gridColumn: 'span 2' }}>
-                      <label className="cadastro-label">Instituição de Vínculo</label>
-                      <input
-                        type="text"
-                        className="cadastro-input"
-                        value={editInstituicao}
-                        onChange={(e) => setEditInstituicao(e.target.value)}
-                      />
-                    </div>
+                      <div className="cadastro-item" style={{ width: '100%' }}>
+                        <label className="cadastro-label">Instituição</label>
+                        <input
+                          type="text"
+                          className="cadastro-input"
+                          value={editInstituicao}
+                          onChange={(e) => setEditInstituicao(e.target.value)}
+                        />
+                      </div>
+                      <div className="cadastro-item" style={{ width: '100%' }}>
+                        <label className="cadastro-label">Cidade</label>
+                        <input
+                          type="text"
+                          className="cadastro-input"
+                          value={editCidade}
+                          onChange={(e) => setEditCidade(e.target.value)}
+                        />
+                      </div>
+                      <div className="cadastro-item" style={{ width: '100%' }}>
+                        <label className="cadastro-label">Estado (UF)</label>
+                        <input
+                          type="text"
+                          className="cadastro-input"
+                          value={editEstado}
+                          onChange={(e) => setEditEstado(e.target.value)}
+                          maxLength={2}
+                        />
+                      </div>
                   </div>
                 </div>
               )}

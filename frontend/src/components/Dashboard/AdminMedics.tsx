@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { mockDbService } from '../../services/mockDbService';
+import { api } from '../../services/api';
 
 export default function AdminMedics() {
   const { usuario } = useAuth();
@@ -30,25 +30,23 @@ export default function AdminMedics() {
     }
 
     try {
-      await mockDbService.registrarMedicoDireto(
-        {
-          nomeCompleto,
-          crm,
-          especialidade,
-          email,
-          telefone,
-          cidade,
-          estado,
-          instituicao,
-          senha,
-          cpf
-        },
-        {
+      await api.post('/doctors/registrar-direto', {
+        nomeCompleto,
+        crm,
+        especialidade,
+        email,
+        telefone,
+        cidade,
+        estado,
+        instituicao,
+        senha,
+        cpf,
+        adminUser: {
           id: usuario.id,
           nome: usuario.nome,
           role: usuario.role || 'admin'
         }
-      );
+      });
 
       setSuccess(true);
       // Reset form
