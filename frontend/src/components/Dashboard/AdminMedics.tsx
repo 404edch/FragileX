@@ -1,36 +1,36 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { api } from '../../services/api';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../services/api";
 
 export default function AdminMedics() {
   const { usuario } = useAuth();
-  
-  const [nomeCompleto, setNomeCompleto] = useState('');
-  const [crm, setCrm] = useState('');
-  const [especialidade, setEspecialidade] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('');
-  const [instituicao, setInstituicao] = useState('');
-  const [senha, setSenha] = useState('');
-  const [cpf, setCpf] = useState('');
-  
-  const [error, setError] = useState('');
+
+  const [nomeCompleto, setNomeCompleto] = useState("");
+  const [crm, setCrm] = useState("");
+  const [especialidade, setEspecialidade] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
+  const [instituicao, setInstituicao] = useState("");
+  const [senha, setSenha] = useState("");
+  const [cpf, setCpf] = useState("");
+
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setSuccess(false);
 
     if (!usuario) {
-      setError('Ação não autorizada. Faça login novamente.');
+      setError("Ação não autorizada. Faça login novamente.");
       return;
     }
 
     try {
-      await api.post('/doctors/registrar-direto', {
+      await api.post("/doctors/registrar-direto", {
         nomeCompleto,
         crm,
         especialidade,
@@ -44,85 +44,92 @@ export default function AdminMedics() {
         adminUser: {
           id: usuario.id,
           nome: usuario.nome,
-          role: usuario.role || 'admin'
-        }
+          role: usuario.role || "admin",
+        },
       });
 
       setSuccess(true);
       // Reset form
-      setNomeCompleto('');
-      setCrm('');
-      setEspecialidade('');
-      setEmail('');
-      setTelefone('');
-      setCidade('');
-      setEstado('');
-      setInstituicao('');
-      setSenha('');
-      setCpf('');
-      
+      setNomeCompleto("");
+      setCrm("");
+      setEspecialidade("");
+      setEmail("");
+      setTelefone("");
+      setCidade("");
+      setEstado("");
+      setInstituicao("");
+      setSenha("");
+      setCpf("");
+
       // Auto-hide success alert
       setTimeout(() => {
         setSuccess(false);
       }, 5000);
     } catch (err: any) {
-      setError(err.message || 'Erro ao registrar médico.');
+      setError(err.message || "Erro ao registrar médico.");
     }
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1a202c', marginBottom: '8px' }}>
-          Registrar Novo Médico
-        </h2>
-        <p style={{ color: '#4a5568', fontSize: '14px' }}>
+    <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
+      <div style={{ marginBottom: "24px" }}>
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#0f131a", marginBottom: "8px" }}>Registrar Novo Médico</h2>
+        <p style={{ color: "#caced4", fontSize: "14px" }}>
           Cadastre uma conta de médico ativada diretamente no sistema. Ele poderá acessar imediatamente utilizando o e-mail ou CRM e a senha cadastrada.
         </p>
       </div>
 
       {error && (
-        <div style={{
-          background: 'rgba(255, 77, 79, 0.15)',
-          border: '1px solid #ff4d4f',
-          color: '#ff4d4f',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          marginBottom: '20px',
-          fontWeight: '500'
-        }}>
+        <div
+          style={{
+            background: "rgba(255, 77, 79, 0.15)",
+            border: "1px solid #ff4d4f",
+            color: "#ff4d4f",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            marginBottom: "20px",
+            fontWeight: "500",
+          }}
+        >
           {error}
         </div>
       )}
 
       {success && (
-        <div style={{
-          background: 'rgba(82, 196, 26, 0.15)',
-          border: '1px solid #52c41a',
-          color: '#52c41a',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          marginBottom: '20px',
-          fontWeight: '500'
-        }}>
+        <div
+          style={{
+            background: "rgba(82, 196, 26, 0.15)",
+            border: "1px solid #52c41a",
+            color: "#52c41a",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            marginBottom: "20px",
+            fontWeight: "500",
+          }}
+        >
           Médico cadastrado com sucesso! A conta está ativa e pronta para uso.
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{
-        background: '#fff',
-        padding: '28px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          
-          <div className="cadastro-item" style={{ width: '100%' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          background: "#fff",
+          padding: "28px",
+          borderRadius: "12px",
+          boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+        }}
+      >
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Nome Completo *</label>
             <input
               type="text"
@@ -134,7 +141,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">CRM *</label>
             <input
               type="text"
@@ -146,7 +156,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">E-mail *</label>
             <input
               type="email"
@@ -158,7 +171,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">CPF (Opcional)</label>
             <input
               type="text"
@@ -169,7 +185,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Especialidade *</label>
             <input
               type="text"
@@ -181,7 +200,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Telefone</label>
             <input
               type="tel"
@@ -192,7 +214,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Instituição de Saúde</label>
             <input
               type="text"
@@ -203,7 +228,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Senha de Acesso Inicial *</label>
             <input
               type="password"
@@ -216,7 +244,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Cidade</label>
             <input
               type="text"
@@ -227,7 +258,10 @@ export default function AdminMedics() {
             />
           </div>
 
-          <div className="cadastro-item" style={{ width: '100%' }}>
+          <div
+            className="cadastro-item"
+            style={{ width: "100%" }}
+          >
             <label className="cadastro-label">Estado (UF)</label>
             <input
               type="text"
@@ -238,14 +272,13 @@ export default function AdminMedics() {
               maxLength={2}
             />
           </div>
-
         </div>
 
-        <div style={{ marginTop: '12px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+        <div style={{ marginTop: "12px", display: "flex", gap: "12px", justifyContent: "flex-end" }}>
           <button
             type="submit"
             className="checklist-submit-btn"
-            style={{ width: 'auto', padding: '12px 32px', margin: 0 }}
+            style={{ width: "auto", padding: "12px 32px", margin: 0 }}
           >
             Cadastrar e Ativar Médico
           </button>

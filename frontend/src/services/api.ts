@@ -87,6 +87,21 @@ class ApiService {
 
     return response.json();
   }
+
+  async patch<T>(endpoint: string, body: object): Promise<T> {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: "PATCH",
+      headers: this.getHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Erro na requisição: ${response.status}`);
+    }
+
+    return response.json();
+  }
 }
 
 export const api = new ApiService();
