@@ -57,6 +57,17 @@ export const listarSolicitacoesCredenciamento = async (req: Request, res: Respon
   }
 };
 
+export const contarSolicitacoesPendentes = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const query = "SELECT COUNT(*) FROM solicitacoes_credenciamento WHERE status = 'PENDING'";
+    const result = await db.query(query);
+    return res.json({ count: parseInt(result.rows[0].count, 10) });
+  } catch (error) {
+    console.error("Erro ao contar solicitações pendentes:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
 export const responderSolicitacaoCredenciamento = async (req: Request, res: Response): Promise<any> => {
   const idSolicitacao = Number(req.params.id);
   const { aprovar, motivoRecusa } = req.body;
@@ -124,9 +135,9 @@ export const responderSolicitacaoCredenciamento = async (req: Request, res: Resp
 
       return res.json({ message: 'Solicitação rejeitada.' });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao responder credenciamento:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: "Erro interno no servidor.", details: error.message });
   }
 };
 

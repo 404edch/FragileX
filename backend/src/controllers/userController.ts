@@ -17,6 +17,18 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     const result = await db.query(query, [emailOrCpf, emailOrCpf]);
 
     if (result.rows.length === 0) {
+      // Verifica se o usuário é um médico com credenciamento pendente
+      const pendingCheck = await db.query(
+        "SELECT status FROM solicitacoes_credenciamento WHERE email = $1 OR crm = $2 ORDER BY data_criacao DESC LIMIT 1",
+        [emailOrCpf, emailOrCpf]
+      );
+      if (pendingCheck.rows.length > 0) {
+        if (pendingCheck.rows[0].status === 'PENDING') {
+          return res.status(403).json({ error: "Sua solicitação de credenciamento está em análise. Aguarde a aprovação do Instituto." });
+        } else if (pendingCheck.rows[0].status === 'REJECTED') {
+          return res.status(403).json({ error: "Sua solicitação de credenciamento foi recusada. Entre em contato com o Instituto." });
+        }
+      }
       return res.status(401).json({ error: "Credenciais inválidas. Verifique seu e-mail/CPF e senha." });
     }
 

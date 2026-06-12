@@ -1,5 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../../services/api';
 import './Sidebar.css';
 
 interface UserInfo {
@@ -25,19 +27,19 @@ type MenuOption = {
 const MENU_OPTIONS: MenuOption[] = [
   // Admin
   { id: 'audit-log', label: 'Registro de Auditoria', roles: ['admin'] },
-  { id: 'manage-medics', label: 'Cadastrar Médicos', roles: ['admin'] },
   { id: 'manage-users', label: 'Gerenciar Usuários', roles: ['admin'] },
   { id: 'register-employee', label: 'Cadastrar Funcionários', roles: ['admin'] },
 
   // Instituto
+  { id: 'manage-medics', label: 'Cadastrar Médicos', roles: ['admin', 'instituto'] },
   { id: 'all-patients', label: 'Todos os Pacientes', roles: ['instituto'] },
   { id: 'all-doctors', label: 'Médicos Cadastrados', roles: ['instituto'] },
-  { id: 'approvals', label: 'Aprovações Pendentes', roles: ['instituto'] },
+  { id: 'approvals', label: 'Aprovações Pendentes', roles: ['instituto', 'admin'] },
   { id: 'edit-landing', label: 'Editar Landing Page', roles: ['admin'] },
 
   // Medico
   { id: 'my-patients', label: 'Meus Pacientes', roles: ['medico'] },
-  { id: 'register-patient', label: 'Cadastrar Paciente', roles: ['medico', 'instituto'] },
+  { id: 'register-patient', label: 'Cadastrar Paciente', roles: ['medico', 'instituto', 'admin'] },
   { id: 'quick-checklist', label: 'Checklist Rápido', roles: ['medico'] },
   { id: 'fill-checklist', label: 'Preencher Checklist', roles: ['medico'] },
 
@@ -48,7 +50,30 @@ const MENU_OPTIONS: MenuOption[] = [
 
 const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
   const navigate = useNavigate();
+  const [pendingCount, setPendingCount] = useState(0);
+
   const allowedOptions = MENU_OPTIONS.filter(option => option.roles.includes(role));
+
+  useEffect(() => {
+    const fetchCount = () => {
+      if (role === 'instituto' || role === 'admin') {
+        api.get('/doctors/solicitacoes/count')
+          .then((res: any) => {
+            if (res && typeof res.count === 'number') {
+              setPendingCount(res.count);
+            }
+          })
+          .catch(err => console.error("Erro ao buscar solicitações pendentes:", err));
+      }
+    };
+
+    fetchCount();
+
+    window.addEventListener('solicitacoesUpdated', fetchCount);
+    return () => {
+      window.removeEventListener('solicitacoesUpdated', fetchCount);
+    };
+  }, [role]);
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -71,9 +96,27 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
               whileHover={{ scale: 1.02, backgroundColor: 'var(--hover-bg, rgba(26,95,168,0.1))' }}
               whileTap={{ scale: 0.98 }}
               className="sidebar-btn"
-              onClick={() => setView(option.id)}
+              onClick={() => {
+                setView(option.id);
+                if (onClose) onClose();
+              }}
             >
-              {option.label}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>{option.label}</span>
+                {option.id === 'approvals' && pendingCount > 0 && (
+                  <span style={{
+                    background: '#e53e3e',
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    marginLeft: '8px'
+                  }}>
+                    {pendingCount}
+                  </span>
+                )}
+              </div>
             </motion.button>
           ))}
         </div>

@@ -21,7 +21,9 @@ const DoctorApprovals = () => {
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [rejectionId, setRejectionId] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [activationModalLink, setActivationModalLink] = useState<string | null>(null);
+  
+  const [approvalId, setApprovalId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const carregarSolicitacoes = async () => {
     try {
@@ -36,13 +38,22 @@ const DoctorApprovals = () => {
     carregarSolicitacoes();
   }, []);
 
-  const handleApprove = async (id: number) => {
+  const startApprove = (id: number) => {
+    setApprovalId(id);
+  };
+
+  const confirmApprove = async () => {
+    if (approvalId === null) return;
     try {
-      await api.post(`/doctors/solicitacoes/${id}/responder`, { aprovar: true });
+      await api.post(`/doctors/solicitacoes/${approvalId}/responder`, { aprovar: true });
       await carregarSolicitacoes();
-      alert('Médico aprovado com sucesso! Pode acessar o sistema com as credenciais informadas.');
+      window.dispatchEvent(new Event('solicitacoesUpdated'));
+      setApprovalId(null);
+      setSuccessMessage('Médico aprovado com sucesso! A conta agora está ativa para uso no sistema.');
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (e: any) {
       alert(e.message || 'Erro ao aprovar solicitação.');
+      setApprovalId(null);
     }
   };
 
@@ -59,6 +70,7 @@ const DoctorApprovals = () => {
         setRejectionId(null);
         setRejectionReason('');
         await carregarSolicitacoes();
+        window.dispatchEvent(new Event('solicitacoesUpdated'));
         alert('Solicitação de médico rejeitada.');
       } catch (e: any) {
         alert(e.message || 'Erro ao rejeitar solicitação.');
@@ -72,58 +84,46 @@ const DoctorApprovals = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
       
-      {/* Modal de Link de Ativação Gerado (Simulando Envio) */}
-      {activationModalLink && (
+      {/* Modal de Sucesso */}
+      {successMessage && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
+          top: 0, left: 0, width: '100vw', height: '100vh',
           background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1100,
-          padding: '20px'
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 1100, padding: '20px'
         }}>
-          <div className="dashboard-med-registration" style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }}>✓</div>
-            <h3 className="dashboard-med-title" style={{ fontSize: '20px' }}>Médico Credenciado com Sucesso!</h3>
-            <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
-              Uma conta foi criada com status <strong>PENDING_ACTIVATION</strong>.
-              O link de ativação abaixo foi enviado ao e-mail profissional cadastrado.
+          <div className="dashboard-med-registration" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', background: '#fff', padding: '30px', borderRadius: '16px' }}>
+            <div style={{ fontSize: '50px', marginBottom: '10px' }}>🎉</div>
+            <h3 style={{ color: '#10b981', fontSize: '20px', marginBottom: '16px' }}>Sucesso!</h3>
+            <p style={{ color: '#475569', fontSize: '15px', marginBottom: '24px' }}>{successMessage}</p>
+            <button onClick={() => setSuccessMessage(null)} className="checklist-submit-btn" style={{ background: '#10b981', width: '100%' }}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Aprovação */}
+      {approvalId !== null && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 1100, padding: '20px'
+        }}>
+          <div className="dashboard-med-registration" style={{ maxWidth: '450px', width: '100%', background: '#fff', borderRadius: '16px', padding: '32px' }}>
+            <h3 style={{ color: '#1a5fa8', fontSize: '22px', marginBottom: '16px', textAlign: 'center' }}>Confirmar Aprovação</h3>
+            <p style={{ color: '#475569', fontSize: '15px', marginBottom: '24px', textAlign: 'center', lineHeight: '1.5' }}>
+              Tem certeza que deseja aprovar este médico?<br/><br/>
+              Uma vez aprovado, a conta do médico ficará imediatamente <strong>ativa</strong> e ele poderá fazer login no sistema utilizando as credenciais cadastradas.
             </p>
-            <div style={{
-              background: '#f1f5f9',
-              padding: '12px',
-              borderRadius: '8px',
-              border: '1px dashed #cbd5e1',
-              fontSize: '12px',
-              wordBreak: 'break-all',
-              fontFamily: 'monospace',
-              color: '#334155',
-              marginBottom: '20px',
-              textAlign: 'left'
-            }}>
-              {activationModalLink}
-            </div>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                type="button"
-                className="checklist-submit-btn"
-                style={{ flex: 1, margin: 0 }}
-                onClick={() => window.open(activationModalLink, '_blank')}
-              >
-                Simular Ativação (Nova Guia)
+              <button onClick={confirmApprove} className="checklist-submit-btn" style={{ flex: 1, background: '#10b981' }}>
+                Sim, Aprovar
               </button>
-              <button
-                type="button"
-                className="hero-btn-secondary"
-                style={{ flex: 1 }}
-                onClick={() => setActivationModalLink(null)}
-              >
-                Fechar
+              <button onClick={() => setApprovalId(null)} className="hero-btn-secondary" style={{ flex: 1 }}>
+                Cancelar
               </button>
             </div>
           </div>
@@ -241,35 +241,37 @@ const DoctorApprovals = () => {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '8px',
-                  fontSize: '13px',
+                  gap: '12px',
+                  fontSize: '14px',
                   color: '#475569',
                   borderTop: '1px solid #e2e8f0',
                   borderBottom: '1px solid #e2e8f0',
-                  padding: '8px 0'
+                  padding: '12px 0',
+                  background: '#ffffff',
+                  borderRadius: '8px'
                 }}>
-                  <div><strong>E-mail:</strong> {sol.email}</div>
-                  <div><strong>Telefone:</strong> {sol.telefone}</div>
-                  <div><strong>Cidade/UF:</strong> {sol.cidade} - {sol.estado}</div>
-                  <div><strong>Instituição:</strong> {sol.instituicao}</div>
+                  <div style={{ padding: '0 8px' }}><strong>📧 E-mail:</strong><br/>{sol.email}</div>
+                  <div style={{ padding: '0 8px' }}><strong>📱 Telefone:</strong><br/>{sol.telefone}</div>
+                  <div style={{ padding: '0 8px' }}><strong>📍 Cidade/UF:</strong><br/>{sol.cidade} - {sol.estado}</div>
+                  <div style={{ padding: '0 8px' }}><strong>🏥 Instituição:</strong><br/>{sol.instituicao}</div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '8px' }}>
                   <button
                     type="button"
-                    onClick={() => handleApprove(sol.id)}
+                    onClick={() => startApprove(sol.id)}
                     className="checklist-submit-btn"
-                    style={{ margin: 0, background: '#22c55e', color: 'white', padding: '8px 16px', fontSize: '13px' }}
+                    style={{ margin: 0, background: '#10b981', color: 'white', padding: '10px 24px', fontSize: '14px', fontWeight: 'bold', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)', transition: 'all 0.2s ease', cursor: 'pointer' }}
                   >
-                    Aprovar Médico
+                    ✅ Aprovar Médico
                   </button>
                   <button
                     type="button"
                     onClick={() => startReject(sol.id)}
                     className="checklist-submit-btn"
-                    style={{ margin: 0, background: '#ef4444', color: 'white', padding: '8px 16px', fontSize: '13px' }}
+                    style={{ margin: 0, background: '#ef4444', color: 'white', padding: '10px 24px', fontSize: '14px', fontWeight: 'bold', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2)', transition: 'all 0.2s ease', cursor: 'pointer' }}
                   >
-                    Rejeitar
+                    ❌ Rejeitar
                   </button>
                 </div>
               </div>
