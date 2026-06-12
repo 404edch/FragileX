@@ -16,7 +16,7 @@ export default function AdminUsers() {
   const [editCpf, setEditCpf] = useState("");
   const [editTelefone, setEditTelefone] = useState("");
   const [editStatus, setEditStatus] = useState<"PENDING_ACTIVATION" | "ACTIVE">("ACTIVE");
-  const [editRole, setEditRole] = useState<"paciente" | "medico" | "instituto" | "admin">("paciente");
+  const [editRole, setEditRole] = useState<"paciente" | "medico" | "instituto">("paciente");
 
   // Doctor fields
   const [editCrm, setEditCrm] = useState("");
@@ -291,106 +291,110 @@ export default function AdminUsers() {
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((u, i) => (
-                <tr
-                  key={u.id}
-                  style={{ borderBottom: i < filteredUsers.length - 1 ? "1px solid #edf2f7" : "none" }}
-                >
-                  <td style={{ padding: "16px 20px" }}>
-                    <div style={{ fontWeight: "600", color: "#2d3748" }}>{u.nome}</div>
-                    <div style={{ fontSize: "12px", color: "#718096", display: "flex", gap: "6px", marginTop: "2px" }}>
+              filteredUsers.map((u, i) => {
+                return (
+                  <tr
+                    key={u.id}
+                    style={{ borderBottom: i < filteredUsers.length - 1 ? "1px solid #edf2f7" : "none" }}
+                  >
+                    <td style={{ padding: "16px 20px" }}>
+                      <div style={{ fontWeight: "600", color: "#2d3748" }}>{u.nome}</div>
+                      <div style={{ fontSize: "12px", color: "#718096", display: "flex", gap: "6px", marginTop: "2px" }}>
+                        <span
+                          style={{
+                            background: u.role === "admin" ? "#fef3c7" : u.role === "medico" ? "#e0f2fe" : u.role === "instituto" ? "#dcfce7" : "#f3f4f6",
+                            color: u.role === "admin" ? "#d97706" : u.role === "medico" ? "#0284c7" : u.role === "instituto" ? "#15803d" : "#4b5563",
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                            fontSize: "10px",
+                          }}
+                        >
+                          {u.role}
+                        </span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "16px 20px", color: "#4a5568", fontSize: "14px" }}>{u.email}</td>
+                    <td style={{ padding: "16px 20px", color: "#4a5568", fontSize: "14px" }}>{u.cpf}</td>
+                    <td style={{ padding: "16px 20px" }}>
                       <span
                         style={{
-                          background: u.role === "admin" ? "#fef3c7" : u.role === "medico" ? "#e0f2fe" : u.role === "instituto" ? "#dcfce7" : "#f3f4f6",
-                          color: u.role === "admin" ? "#d97706" : u.role === "medico" ? "#0284c7" : u.role === "instituto" ? "#15803d" : "#4b5563",
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          fontWeight: "bold",
-                          textTransform: "uppercase",
-                          fontSize: "10px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          fontSize: "12px",
+                          fontWeight: "500",
+                          color: u.status === "ACTIVE" ? "#2f855a" : "#c05621",
+                          background: u.status === "ACTIVE" ? "#c6f6d5" : "#feebc8",
+                          padding: "4px 8px",
+                          borderRadius: "9999px",
                         }}
                       >
-                        {u.role}
+                        {u.status === "ACTIVE" ? "Ativo" : "Pendente de Ativação"}
                       </span>
-                    </div>
-                  </td>
-                  <td style={{ padding: "16px 20px", color: "#4a5568", fontSize: "14px" }}>{u.email}</td>
-                  <td style={{ padding: "16px 20px", color: "#4a5568", fontSize: "14px" }}>{u.cpf}</td>
-                  <td style={{ padding: "16px 20px" }}>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        fontSize: "12px",
-                        fontWeight: "500",
-                        color: u.status === "ACTIVE" ? "#2f855a" : "#c05621",
-                        background: u.status === "ACTIVE" ? "#c6f6d5" : "#feebc8",
-                        padding: "4px 8px",
-                        borderRadius: "9999px",
-                      }}
-                    >
-                      {u.status === "ACTIVE" ? "Ativo" : "Pendente de Ativação"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "16px 20px", color: "#718096", fontSize: "13px" }}>
-                    {u.role === "medico" && u.medicoDetails && (
-                      <div>
-                        CRM: {u.medicoDetails.crm} | {u.medicoDetails.especialidade}
-                        {u.medicoDetails.instituicao && <span style={{ display: "block", fontSize: "11px" }}>{u.medicoDetails.instituicao}</span>}
-                        {(u.medicoDetails.cidade || u.medicoDetails.estado) && (
-                          <span style={{ display: "block", fontSize: "11px", color: "#a0aec0" }}>
-                            {u.medicoDetails.cidade} - {u.medicoDetails.estado}
-                          </span>
+                    </td>
+                    <td style={{ padding: "16px 20px", color: "#718096", fontSize: "13px" }}>
+                      {u.role === "medico" && u.medicoDetails && (
+                        <div>
+                          CRM: {u.medicoDetails.crm} | {u.medicoDetails.especialidade}
+                          {u.medicoDetails.instituicao && <span style={{ display: "block", fontSize: "11px" }}>{u.medicoDetails.instituicao}</span>}
+                          {(u.medicoDetails.cidade || u.medicoDetails.estado) && (
+                            <span style={{ display: "block", fontSize: "11px", color: "#a0aec0" }}>
+                              {u.medicoDetails.cidade} - {u.medicoDetails.estado}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {u.role === "paciente" && u.pacienteDetails && (
+                        <div>
+                          {u.pacienteDetails.cidade} - {u.pacienteDetails.estado}
+                          <span style={{ display: "block", fontSize: "11px" }}>Responsável: {u.pacienteDetails.responsavel_nome}</span>
+                        </div>
+                      )}
+                      {u.role === "instituto" && "Perfil Institucional"}
+                      {u.role === "admin" && "Administrador Geral"}
+                    </td>
+                    <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                      <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                        <button
+                          onClick={() => handleEditClick(u)}
+                          style={{
+                            background: "#edf2f7",
+                            border: "none",
+                            color: "#4a5568",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            transition: "background 0.2s",
+                          }}
+                        >
+                          Editar
+                        </button>
+                        {u.role !== "admin" && (
+                          <button
+                            onClick={() => handleDeleteClick(u)}
+                            style={{
+                              background: "rgba(255, 77, 79, 0.15)",
+                              border: "none",
+                              color: "#ff4d4f",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              fontWeight: "600",
+                              transition: "background 0.2s",
+                            }}
+                          >
+                            Excluir
+                          </button>
                         )}
                       </div>
-                    )}
-                    {u.role === "paciente" && u.pacienteDetails && (
-                      <div>
-                        {u.pacienteDetails.cidade} - {u.pacienteDetails.estado}
-                        <span style={{ display: "block", fontSize: "11px" }}>Responsável: {u.pacienteDetails.responsavel_nome}</span>
-                      </div>
-                    )}
-                    {u.role === "instituto" && "Perfil Institucional"}
-                    {u.role === "admin" && "Administrador Geral"}
-                  </td>
-                  <td style={{ padding: "16px 20px", textAlign: "right" }}>
-                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                      <button
-                        onClick={() => handleEditClick(u)}
-                        style={{
-                          background: "#edf2f7",
-                          border: "none",
-                          color: "#4a5568",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          transition: "background 0.2s",
-                        }}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(u)}
-                        style={{
-                          background: "rgba(255, 77, 79, 0.15)",
-                          border: "none",
-                          color: "#ff4d4f",
-                          padding: "6px 12px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: "600",
-                          transition: "background 0.2s",
-                        }}
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -537,7 +541,6 @@ export default function AdminUsers() {
                     <option value="paciente">Paciente</option>
                     <option value="medico">Médico</option>
                     <option value="instituto">Instituto</option>
-                    <option value="admin">Administrador</option>
                   </select>
                 </div>
               </div>
