@@ -101,6 +101,11 @@ router.get("/audits", requireRole(['instituto', 'admin']), auditController.getAu
 // ── Checklists ──
 router.post("/checklists", requireRole(['medico', 'instituto', 'paciente', 'admin']), checklistController.salvarChecklist);
 router.get(
+  "/checklists/search",
+  requireRole(['instituto', 'admin']),
+  checklistController.buscarChecklistsAvancado
+);
+router.get(
   "/checklists/paciente/:idPaciente",
   requireRole(['medico', 'instituto', 'paciente', 'admin']),
   checklistController.obterChecklistsPaciente

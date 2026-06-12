@@ -187,3 +187,80 @@ export const obterChecklistsPaciente = async (req: Request, res: Response): Prom
     return res.status(500).json({ error: "Erro interno no servidor." });
   }
 };
+
+export const buscarChecklistsAvancado = async (req: Request, res: Response): Promise<any> => {
+  const search = req.query.search as string;
+  if (!search) {
+    return res.status(400).json({ error: "Parâmetro de busca não fornecido." });
+  }
+
+  const role = (req as any).user?.role;
+  const isPaciente = role === 'paciente';
+
+  try {
+    const query = `
+      SELECT 
+        c.id, c.id_paciente, c.preenchido_por, c.score_final, c.classificacao, c.data_preenchimento,
+        u.nome as paciente_nome, u.cpf as paciente_cpf
+      FROM checklists c
+      JOIN pacientes p ON c.id_paciente = p.id_usuario
+      JOIN usuarios u ON p.id_usuario = u.id
+      WHERE u.nome ILIKE $1 OR u.cpf ILIKE $1
+      ORDER BY c.data_preenchimento DESC
+      LIMIT 50
+    `;
+    const searchParam = `%${search}%`;
+    const checklistsRes = await db.query(query, [searchParam]);
+    const checklists = checklistsRes.rows;
+
+    if (checklists.length === 0) {
+      return res.json([]);
+    }
+
+    const checklistIds = checklists.map(c => c.id);
+
+    const symptomsQuery = `
+      SELECT cs.id_checklist, cs.id_sintoma, s.sintoma AS nome_sintoma
+      FROM checklist_sintomas cs
+      JOIN sintomas s ON cs.id_sintoma = s.id
+      WHERE cs.id_checklist = ANY($1::int[])
+    `;
+    const symptomsRes = await db.query(symptomsQuery, [checklistIds]);
+    
+    const symptomsMap: Record<number, number[]> = {};
+    const symptomsNamesMap: Record<number, string[]> = {};
+    symptomsRes.rows.forEach(row => {
+      if (!symptomsMap[row.id_checklist]) {
+        symptomsMap[row.id_checklist] = [];
+        symptomsNamesMap[row.id_checklist] = [];
+      }
+      symptomsMap[row.id_checklist].push(row.id_sintoma);
+      symptomsNamesMap[row.id_checklist].push(row.nome_sintoma);
+    });
+
+    const mapped = checklists.map(c => {
+      const entry: any = {
+        id: c.id,
+        id_paciente: c.id_paciente,
+        paciente_nome: c.paciente_nome,
+        paciente_cpf: c.paciente_cpf,
+        preenchido_por: c.preenchido_por,
+        sintomas_selecionados: symptomsMap[c.id] || [],
+        sintomas_nomes: symptomsNamesMap[c.id] || [],
+        data_preenchimento: c.data_preenchimento ? new Date(c.data_preenchimento).toISOString() : new Date().toISOString()
+      };
+
+      if (!isPaciente) {
+        entry.score_final = Number(c.score_final);
+        entry.classificacao = c.classificacao;
+      }
+
+      return entry;
+    });
+
+    return res.json(mapped);
+  } catch (error) {
+    console.error("Erro ao buscar checklists avançado:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};

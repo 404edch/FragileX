@@ -1,0 +1,93 @@
+.checklist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.checklist-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.checklist-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checklist-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: #0f172a;
+}
+
+.checklist-modal-body {
+  padding: 24px;
+}
+
+.info-group {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.info-group p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #334155;
+}
+
+.symptoms-group h3 {
+  font-size: 16px;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.symptoms-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.symptoms-list li {
+  padding: 8px 12px;
+  background: #f0fdf4;
+  color: #10b981;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #a7f3d0;
+}
