@@ -84,6 +84,11 @@ router.post("/checklists", requireRole(["medico", "instituto", "paciente", "admi
 router.get("/checklists/search", requireRole(["instituto", "admin"]), checklistController.buscarChecklistsAvancado);
 router.get("/checklists/paciente/:idPaciente", requireRole(["medico", "instituto", "paciente", "admin"]), checklistController.obterChecklistsPaciente);
 
+// ── Consultas (Anotações) ──
+import * as consultasController from "../controllers/consultasController";
+router.post("/consultas/:idPaciente", requireRole(["medico", "instituto", "admin"]), consultasController.adicionarNota);
+router.get("/consultas/paciente/:idPaciente", requireRole(["medico", "instituto", "paciente", "admin"]), consultasController.listarNotasPaciente);
+
 // ── Notificações PCR ──
 router.get("/notificacoes-pcr", requireRole(["instituto", "admin"]), notificacaoController.getNotificacoesPCR);
 router.get("/notificacoes-pcr/count", requireRole(["instituto", "admin"]), notificacaoController.getNotificacoesPCRCount);

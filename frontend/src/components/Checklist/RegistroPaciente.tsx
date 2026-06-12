@@ -324,7 +324,7 @@ export default function RegistroPaciente() {
           className="form-actions"
           style={{ gap: "16px" }}
         >
-          <BotaoInicio label="Cancelar" />
+          <BotaoInicio label="Cancelar" to="/dashboard" />
           <button
             type="submit"
             className="checklist-submit-btn"

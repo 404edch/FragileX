@@ -14,6 +14,7 @@ import AuditLog from "./AuditLog/AuditLog";
 import AdminRegisterEmployee from "./AdminRegisterEmployee";
 import DoctorList from "./DoctorList";
 import Reports from "./Reports/Reports";
+import ImportPatient from "./ImportPatient";
 
 const NAVIGATION_VIEWS: Record<string, string> = {
   "register-patient": "/registro",
@@ -98,6 +99,8 @@ const Dashboard = () => {
         return <AdminUsers />;
       case "register-employee":
         return <AdminRegisterEmployee />;
+      case "import-patient":
+        return <ImportPatient />;
       case "reports":
         return <Reports />;
       default:

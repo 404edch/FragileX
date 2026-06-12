@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { backendService } from "../../services/backendService";
+import { backendService, type MockConsulta } from "../../services/backendService";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSintomas } from "../../services/getSintomas";
 import "./Dashboard.css";
@@ -68,6 +68,9 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const [paciente, setPaciente] = useState<PacienteReal | null>(null);
   const [checklists, setChecklists] = useState<ChecklistPaciente[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<VinculoPaciente[]>([]);
+  const [notas, setNotas] = useState<MockConsulta[]>([]);
+  const [novaNota, setNovaNota] = useState("");
+  const [enviandoNota, setEnviandoNota] = useState(false);
   const [usuarioInfo, setUsuarioInfo] = useState<UsuarioReal | null>(null);
   const [medicoResponsavelText, setMedicoResponsavelText] = useState<string>("Buscando...");
   const [sintomasMap, setSintomasMap] = useState<Record<number, string>>({});
@@ -103,13 +106,15 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
         setMedicoResponsavelText("Nenhum médico vinculado diretamente. Utilize o CPF para vincular a um médico parceiro.");
       }
 
-      const [checklistsData, sintomasList, solicitacoesData] = await Promise.all([
+      const [checklistsData, sintomasList, solicitacoesData, notasData] = await Promise.all([
         backendService.obterChecklistsPaciente(idUsuario).catch(() => [] as ChecklistPaciente[]),
         getSintomas().catch(() => []),
         backendService.listarSolicitacoesVinculoPaciente(idUsuario).catch(() => [] as VinculoPaciente[]),
+        backendService.listarNotasPaciente(idUsuario).catch(() => [] as MockConsulta[]),
       ]);
 
       setChecklists(Array.isArray(checklistsData) ? checklistsData : []);
+      setNotas(Array.isArray(notasData) ? notasData : []);
 
       const map: Record<number, string> = {};
       sintomasList.forEach((s) => {
@@ -533,7 +538,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
-        {/* Histórico de Consultas */}
+        {/* Histórico de Consultas / Notas */}
         <div className="dashboard-med-registration">
           <h3
             style={{
@@ -545,36 +550,78 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
               fontWeight: "bold",
             }}
           >
-            Histórico de Consultas
+            Histórico de Consultas / Notas
           </h3>
-          <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px", padding: 0 }}>
-            <li style={{ fontSize: "13px", borderBottom: "1px solid #f1f5f9", paddingBottom: "8px", display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <strong>Consulta Inicial de Triagem</strong>
-                <br />
-                <span style={{ color: "#888" }}>Instituto Buko Kaesemodel</span>
-              </div>
-              <span style={{ color: "#22c55e", fontWeight: "bold" }}>Concluída</span>
-            </li>
-            {paciente.id_medico_responsavel && (
-              <li style={{ fontSize: "13px", borderBottom: "1px solid #f1f5f9", paddingBottom: "8px", display: "flex", justifyContent: "space-between" }}>
-                <div>
-                  <strong>Consulta de Avaliação Clínica</strong>
-                  <br />
-                  <span style={{ color: "#888" }}>Dr. André Silva (Neurologista)</span>
+
+          {(usuario?.role === "medico" || usuario?.role === "instituto") && (
+            <div style={{ marginBottom: "24px", background: "#f8fafc", padding: "16px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: "bold", color: "#334155", marginBottom: "8px" }}>Adicionar Nova Nota</label>
+              <textarea
+                value={novaNota}
+                onChange={(e) => setNovaNota(e.target.value)}
+                placeholder="Digite as anotações da consulta ou acompanhamento..."
+                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none", minHeight: "100px", resize: "vertical", marginBottom: "12px" }}
+              />
+              <button
+                disabled={enviandoNota || !novaNota.trim()}
+                onClick={async () => {
+                  if (!novaNota.trim() || !usuario) return;
+                  setEnviandoNota(true);
+                  try {
+                    await backendService.adicionarNota(paciente.id_usuario, novaNota, usuario.id, usuario.nome, usuario.role);
+                    setNovaNota("");
+                    const notasAtualizadas = await backendService.listarNotasPaciente(paciente.id_usuario);
+                    setNotas(notasAtualizadas);
+                  } catch (err) {
+                    console.error("Erro ao adicionar nota", err);
+                  } finally {
+                    setEnviandoNota(false);
+                  }
+                }}
+                style={{
+                  padding: "10px 16px",
+                  background: "#1a5fa8",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: (enviandoNota || !novaNota.trim()) ? "not-allowed" : "pointer",
+                  opacity: (enviandoNota || !novaNota.trim()) ? 0.7 : 1,
+                  transition: "background 0.2s"
+                }}
+              >
+                {enviandoNota ? "Salvando..." : "Salvar Nota"}
+              </button>
+            </div>
+          )}
+
+          {notas.length === 0 ? (
+            <p style={{ fontSize: "14px", color: "#64748b", textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px dashed #cbd5e1" }}>
+              Nenhuma consulta ou nota registrada até o momento.
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {notas.map((nota) => (
+                <div key={nota.id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <strong style={{ fontSize: "16px", color: "#0f172a" }}>{nota.titulo}</strong>
+                      <span style={{ fontSize: "12px", background: "#e0e7ff", color: "#3730a3", padding: "4px 10px", borderRadius: "12px", fontWeight: "bold" }}>
+                        Autor: {nota.autor_nome} ({nota.role_autor})
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "500", background: "#f1f5f9", padding: "4px 10px", borderRadius: "12px" }}>
+                      {new Date(nota.data_consulta).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "14px", color: "#334155", whiteSpace: "pre-wrap", margin: 0, lineHeight: "1.6", background: "#f8fafc", padding: "12px", borderRadius: "8px" }}>
+                    {nota.observacoes}
+                  </p>
                 </div>
-                <span style={{ color: "#22c55e", fontWeight: "bold" }}>Concluída</span>
-              </li>
-            )}
-            <li style={{ fontSize: "13px", paddingBottom: "4px", display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <strong>Retorno de Exames Genéticos</strong>
-                <br />
-                <span style={{ color: "#888" }}>A agendar após resultado da PCR</span>
-              </div>
-              <span style={{ color: "#ef4444", fontWeight: "bold" }}>Aguardando Exame</span>
-            </li>
-          </ul>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Suporte e Contatos Úteis */}

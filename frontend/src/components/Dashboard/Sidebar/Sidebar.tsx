@@ -40,6 +40,7 @@ const MENU_OPTIONS: MenuOption[] = [
 
   // Medico
   { id: "my-patients", label: "Meus Pacientes", roles: ["admin", "medico"] },
+  { id: "import-patient", label: "Importar Paciente", roles: ["admin", "medico"] },
   { id: "register-patient", label: "Cadastrar Paciente", roles: ["admin", "medico", "instituto"] },
   { id: "fill-checklist", label: "Preencher Nova Checklist", roles: ["admin", "instituto"] },
 

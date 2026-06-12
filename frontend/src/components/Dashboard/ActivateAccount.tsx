@@ -115,9 +115,9 @@ const ActivateAccount = () => {
 
   return (
     <div className="checklist-wrapper" style={{ position: 'relative' }}>
-      <button 
+      <button
         type="button"
-        onClick={() => navigate(-1)} 
+        onClick={() => navigate(-1)}
         style={{ position: 'absolute', top: '24px', left: '24px', background: 'none', border: 'none', color: '#1a5fa8', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', zIndex: 10 }}
       >
         ← Voltar
@@ -178,7 +178,7 @@ const ActivateAccount = () => {
         </div>
 
         <div className="form-actions" style={{ gap: '16px' }}>
-          <BotaoInicio label="Cancelar" />
+          <BotaoInicio label="Cancelar" to="/dashboard" />
           <button type="submit" className="checklist-submit-btn">
             Ativar Minha Conta
           </button>

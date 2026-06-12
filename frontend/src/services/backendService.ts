@@ -88,6 +88,17 @@ export interface MockAudit {
   timestamp: string;
 }
 
+export interface MockConsulta {
+  id: number;
+  id_paciente: number;
+  autor_id: number;
+  autor_nome: string;
+  role_autor: string;
+  titulo: string;
+  observacoes: string;
+  data_consulta: string;
+}
+
 export interface MockNews {
   id: number;
   titulo: string;
@@ -249,5 +260,13 @@ export const backendService = {
 
   async updatePatientStatus(id: number, status: string): Promise<void> {
     await api.put(`/patients/${id}/status`, { status });
+  },
+
+  async adicionarNota(idPaciente: number, observacoes: string, idAutor: number, nomeAutor: string, roleAutor: string): Promise<MockConsulta> {
+    return api.post<MockConsulta>(`/consultas/${idPaciente}`, { observacoes, idAutor, nomeAutor, roleAutor });
+  },
+
+  async listarNotasPaciente(idPaciente: number): Promise<MockConsulta[]> {
+    return api.get<MockConsulta[]>(`/consultas/paciente/${idPaciente}`);
   }
 };
