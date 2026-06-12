@@ -64,7 +64,7 @@ interface VinculoPaciente {
 
 const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const navigate = useNavigate();
-  const { atualizarUsuarioLogado } = useAuth();
+  const { atualizarUsuarioLogado, usuario } = useAuth();
   const [paciente, setPaciente] = useState<PacienteReal | null>(null);
   const [checklists, setChecklists] = useState<ChecklistPaciente[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<VinculoPaciente[]>([]);
@@ -202,6 +202,32 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
     }
   };
 
+  const handleCycleStatus = async () => {
+    if (usuarioInfo?.role !== "instituto") return;
+    
+    let nextStatus = "pendente";
+    if (paciente.encaminhamento_status === "pendente") nextStatus = "encaminhado";
+    else if (paciente.encaminhamento_status === "encaminhado") nextStatus = "encaminhamento negado";
+    else nextStatus = "pendente";
+
+    try {
+      await backendService.updatePatientStatus(paciente.id_usuario, nextStatus);
+      if (paciente) {
+        setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
+      }
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
+    }
+  };
+
+  const getStatusColor = (status: string | undefined) => {
+    if (status === "encaminhado") return { bg: "rgba(34, 197, 94, 0.1)", border: "rgba(34, 197, 94, 0.3)", text: "#16a34a" };
+    if (status === "encaminhamento negado") return { bg: "rgba(239, 68, 68, 0.1)", border: "rgba(239, 68, 68, 0.3)", text: "#ef4444" };
+    return { bg: "rgba(234, 179, 8, 0.1)", border: "rgba(234, 179, 8, 0.3)", text: "#ca8a04" }; // pendente
+  };
+
+  const statusColors = getStatusColor(paciente.encaminhamento_status);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Mensagem de Boas-Vindas */}
@@ -282,40 +308,79 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
               Encaminhamento de Exame (PCR)
             </h3>
 
-            <div
-              style={{
-                background: paciente.encaminhamento_status === "encaminhado" ? "rgba(34, 197, 94, 0.1)" : "rgba(234, 179, 8, 0.1)",
-                border: paciente.encaminhamento_status === "encaminhado" ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(234, 179, 8, 0.3)",
-                borderRadius: "10px",
-                padding: "16px",
-                textAlign: "center",
-                marginBottom: "16px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: "#64748b", display: "block", textTransform: "uppercase", fontWeight: "bold", marginBottom: "4px" }}>
-                Status Atual do Processo
-              </span>
-              <strong
+            {usuario?.role === "instituto" ? (
+              <div style={{ marginBottom: "16px" }}>
+                <span style={{ fontSize: "12px", color: "#64748b", display: "block", textTransform: "uppercase", fontWeight: "bold", marginBottom: "4px" }}>
+                  Status Atual do Processo ✏️
+                </span>
+                <select
+                  value={paciente.encaminhamento_status}
+                  onChange={async (e) => {
+                    const nextStatus = e.target.value;
+                    try {
+                      await backendService.updatePatientStatus(paciente.id_usuario, nextStatus);
+                      setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
+                    } catch (err) {
+                      console.error("Erro ao atualizar status:", err);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "16px",
+                    borderRadius: "10px",
+                    border: `1px solid ${statusColors.border}`,
+                    background: statusColors.bg,
+                    color: statusColors.text,
+                    fontSize: "18px",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    outline: "none",
+                    textAlign: "center",
+                    appearance: "menulist",
+                  }}
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="encaminhado">Encaminhado</option>
+                  <option value="encaminhamento negado">Não Encaminhado</option>
+                </select>
+              </div>
+            ) : (
+              <div
                 style={{
-                  fontSize: "18px",
-                  color: paciente.encaminhamento_status === "encaminhado" ? "#16a34a" : "#ca8a04",
-                  textTransform: "uppercase",
+                  background: statusColors.bg,
+                  border: `1px solid ${statusColors.border}`,
+                  borderRadius: "10px",
+                  padding: "16px",
+                  textAlign: "center",
+                  marginBottom: "16px",
                 }}
               >
-                {paciente.encaminhamento_status === "encaminhado"
-                  ? "Encaminhado para PCR"
-                  : paciente.encaminhamento_status === "encaminhamento negado"
-                    ? "Encaminhamento negado"
-                    : "Aguardando Checklist Inicial"}
-              </strong>
-            </div>
+                <span style={{ fontSize: "12px", color: "#64748b", display: "block", textTransform: "uppercase", fontWeight: "bold", marginBottom: "4px" }}>
+                  Status Atual do Processo
+                </span>
+                <strong
+                  style={{
+                    fontSize: "18px",
+                    color: statusColors.text,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {paciente.encaminhamento_status === "encaminhado"
+                    ? "Encaminhado"
+                    : paciente.encaminhamento_status === "encaminhamento negado"
+                      ? "Não Encaminhado"
+                      : "Pendente"}
+                </strong>
+              </div>
+            )}
 
             <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.5" }}>
               {paciente.encaminhamento_status === "encaminhado"
                 ? "Com base no checklist preenchido, os critérios clínicos foram atendidos. O encaminhamento do exame genético de PCR de X Frágil foi emitido."
                 : paciente.encaminhamento_status === "encaminhamento negado"
-                  ? "No momento o encaminhamento não foi aprovado. Fale com o médico responsável para revisar os dados do acompanhamento."
-                  : "Você precisa ter um checklist preenchido pelo médico para avaliar os sintomas e emitir o encaminhamento ao exame molecular."}
+                  ? "Com base no checklist, os sintomas indicam paciente não afetado no momento."
+                  : "Você precisa ter um checklist preenchido pelo médico ou instituto para avaliar os sintomas e emitir o encaminhamento ao exame molecular."}
             </p>
           </div>
 
@@ -328,14 +393,19 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       </div>
 
       {/* Solicitações de Vínculo de Médicos (Seção 5) */}
-      {solicitacoes.length > 0 && (
-        <div
-          className="dashboard-med-registration"
-          style={{ border: "2px solid #1a5fa8" }}
-        >
-          <h3 style={{ fontSize: "18px", color: "#1a5fa8", marginBottom: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>🔔</span> Solicitações de Vínculo Médico Pendentes
-          </h3>
+      <div
+        className="dashboard-med-registration"
+        style={{ border: solicitacoes.length > 0 ? "2px solid #1a5fa8" : "1px solid #e2e8f0" }}
+      >
+        <h3 style={{ fontSize: "18px", color: solicitacoes.length > 0 ? "#1a5fa8" : "#1a3a6e", marginBottom: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span>🔔</span> Solicitações de Vínculo Médico
+        </h3>
+
+        <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "10px", color: "#64748b", fontSize: "14px", border: "1px dashed #cbd5e1", marginBottom: solicitacoes.length > 0 ? "16px" : "0" }}>
+          Caso você tenha um médico que acompanha seu caso, quando ele te importar a solicitação aparecerá aqui.
+        </div>
+
+        {solicitacoes.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {solicitacoes.map((req) => (
               <div
@@ -376,8 +446,8 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Seção 2: CHECKLISTS */}
       <div className="dashboard-med-registration">
@@ -387,7 +457,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
             type="button"
             className="checklist-submit-btn"
             style={{ margin: 0, padding: "8px 16px", fontSize: "13px" }}
-            onClick={() => navigate("/preencher-checklist")}
+            onClick={() => navigate(`/preencher-checklist?cpf=${usuarioInfo.cpf}`)}
           >
             + Preencher Nova Checklist
           </button>
@@ -410,8 +480,24 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
-                  <div style={{ fontSize: "14px", color: "#1e293b", fontWeight: "bold" }}>
+                  <div style={{ fontSize: "14px", color: "#1e293b", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
                     Checklist de Sintomas ({ch.sintomas_selecionados?.length || 0} sintomas identificados)
+                    {ch.classificacao && (
+                      <span
+                        style={{
+                          background: ch.classificacao === "Suspeito" ? "#fef2f2" : "#ecfdf5",
+                          color: ch.classificacao === "Suspeito" ? "#ef4444" : "#10b981",
+                          border: `1px solid ${ch.classificacao === "Suspeito" ? "#fecaca" : "#a7f3d0"}`,
+                          padding: "2px 8px",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          textTransform: "uppercase",
+                          fontWeight: "bold"
+                        }}
+                      >
+                        {ch.classificacao === "Suspeito" ? "⚠️ Suspeito" : "✅ Negativo"}
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontSize: "12px", color: "#64748b" }}>
                     {new Date(ch.data_preenchimento).toLocaleDateString("pt-BR")} às{" "}

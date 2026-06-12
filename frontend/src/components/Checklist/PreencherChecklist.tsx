@@ -5,7 +5,7 @@ import ChecklistItems from "./ChecklistItems";
 import ItemCadastro from "./ItemCadastro";
 import BotaoInicio from "../Shared/BotaoInicio";
 import "./Checklist.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 
@@ -38,6 +38,10 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const cpfParam = searchParams.get('cpf');
+
   useEffect(() => {
     // Se for paciente logado, busca os próprios dados automaticamente
     if (!isRapido && usuario && usuario.role === "paciente") {
@@ -52,8 +56,21 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
           alert("Erro ao carregar dados do paciente.");
         })
         .finally(() => setIsLoadingPatient(false));
+    } else if (!isRapido && cpfParam) {
+      setCpfBusca(cpfParam);
+      setIsLoadingPatient(true);
+      api
+        .get(`/patients/cpf/${cpfParam}`)
+        .then((res) => {
+          setPatientDetails(res);
+          setStep(2);
+        })
+        .catch(() => {
+          alert("Paciente não encontrado pelo CPF passado.");
+        })
+        .finally(() => setIsLoadingPatient(false));
     }
-  }, [usuario, isRapido]);
+  }, [usuario, isRapido, cpfParam]);
 
   const handleBuscarPaciente = async (e: React.FormEvent) => {
     e.preventDefault();

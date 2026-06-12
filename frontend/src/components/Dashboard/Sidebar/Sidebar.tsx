@@ -41,11 +41,11 @@ const MENU_OPTIONS: MenuOption[] = [
   // Medico
   { id: "my-patients", label: "Meus Pacientes", roles: ["admin", "medico"] },
   { id: "register-patient", label: "Cadastrar Paciente", roles: ["admin", "medico", "instituto"] },
-  { id: "fill-checklist", label: "Preencher Nova Checklist", roles: ["admin", "medico", "instituto", "paciente"] },
+  { id: "fill-checklist", label: "Preencher Nova Checklist", roles: ["admin", "medico", "instituto"] },
 
   // Paciente
-  { id: "my-history", label: "Meu Histórico", roles: ["admin", "paciente"] },
-  { id: "link-requests", label: "Solicitações de Vínculo", roles: ["admin", "paciente"] },
+  { id: "my-history", label: "Meu Perfil", roles: ["admin", "paciente"] },
+  { id: "link-requests", label: "Solicitações de Vínculo", roles: ["admin"] },
 ];
 
 const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {

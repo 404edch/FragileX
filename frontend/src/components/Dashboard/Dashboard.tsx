@@ -33,6 +33,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!usuario) {
@@ -55,7 +56,8 @@ const Dashboard = () => {
   };
 
   const handlePatientClick = (patient: Patient) => {
-    navigate(`/patient/${patient.id}`);
+    setSelectedPatientId(patient.id);
+    setCurrentView("view-patient");
   };
 
   const renderContent = () => {
@@ -68,6 +70,18 @@ const Dashboard = () => {
             role={usuario.role || "paciente"}
           />
         );
+      case "view-patient":
+        return selectedPatientId ? (
+          <div>
+            <button 
+              onClick={() => setCurrentView(DEFAULT_VIEW[usuario.role] ?? "")}
+              style={{ marginBottom: '16px', padding: '8px 16px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', color: '#475569', fontWeight: 'bold' }}
+            >
+              ← Voltar para a lista
+            </button>
+            <PatientDashboard idUsuario={selectedPatientId} />
+          </div>
+        ) : null;
       case "all-doctors":
         return <DoctorList />;
       case "approvals":
