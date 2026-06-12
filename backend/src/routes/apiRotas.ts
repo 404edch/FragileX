@@ -6,48 +6,92 @@ import * as doctorController from "../controllers/doctorController";
 import * as landingController from "../controllers/landingController";
 import * as auditController from "../controllers/auditController";
 import * as checklistController from "../controllers/checklistController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { requireRole } from "../middlewares/roleMiddleware";
 
 const router = Router();
 
-// Auth & Users
-router.post("/auth/login", userController.login);
-router.get("/users/:id", userController.getMe);
-router.get("/users", userController.listAll);
-router.put("/users/:id", userController.update);
-router.delete("/users/:id", userController.remove);
+// ── ROTAS PÚBLICAS ──────────────────────────────────────────────────────────
 
-// Patients
-router.post("/patients/cadastrar-pelo-medico", patientController.cadastrarPeloMedico);
+// Login
+router.post("/auth/login", userController.login);
+
+// Autocadastro de paciente (qualquer pessoa)
+router.post("/patients/autocadastro", patientController.autocadastro);
+
+// Solicitação de credenciamento de médico (qualquer pessoa)
+router.post("/doctors/solicitar", doctorController.solicitarCredenciamento);
+
+// Ativação de conta por token (paciente cadastrado pelo médico)
 router.get("/patients/validar-token", patientController.validarTokenAtivacao);
 router.post("/patients/ativar-conta", patientController.ativarConta);
-router.post("/patients/autocadastro", patientController.autocadastro);
-router.get("/patients/:id", patientController.getPaciente);
-router.get("/patients/medico/:idMedico", patientController.listPacientesDoMedico);
-router.get("/patients", patientController.listTodosPacientes);
 
-// Links (Vínculos)
-router.post("/links/solicitar", linkController.solicitarVinculo);
-router.get("/links/paciente/:idPaciente", linkController.listarSolicitacoesVinculoPaciente);
-router.post("/links/:id/responder", linkController.responderSolicitacaoVinculo);
+// ── ROTAS PROTEGIDAS ─────────────────────────────────────────────────────────
 
-// Doctors (Credenciamento)
-router.get("/doctors/:id", doctorController.getMedico);
-router.post("/doctors/solicitar", doctorController.solicitarCredenciamento);
-router.get("/doctors/solicitacoes", doctorController.listarSolicitacoesCredenciamento);
-router.post("/doctors/solicitacoes/:id/responder", doctorController.responderSolicitacaoCredenciamento);
-router.post("/doctors/registrar-direto", doctorController.registrarMedicoDireto);
+// A partir daqui, todas as rotas exigem JWT válido
+router.use(authMiddleware);
 
-// Landing Editables
+// ── Users ──
+router.get("/users/:id", userController.getMe);
+router.get("/users", requireRole(['instituto', 'admin']), userController.listAll);
+router.put("/users/:id", requireRole(['instituto', 'admin']), userController.update);
+router.delete("/users/:id", requireRole(['instituto', 'admin']), userController.remove);
+
+// ── Patients ──
+// Médico/instituto cadastram paciente (cria conta PENDING_ACTIVATION)
+router.post(
+  "/patients/cadastrar-pelo-medico",
+  requireRole(['medico', 'instituto']),
+  patientController.cadastrarPeloMedico
+);
+
+// Instituto vê todos os pacientes; médico só vê os seus (via listPacientesDoMedico)
+router.get("/patients", requireRole(['instituto', 'admin']), patientController.listTodosPacientes);
+router.get(
+  "/patients/medico/:idMedico",
+  requireRole(['medico', 'instituto', 'admin']),
+  patientController.listPacientesDoMedico
+);
+router.get("/patients/:id", requireRole(['medico', 'instituto', 'admin']), patientController.getPaciente);
+
+// ── Links (Vínculos médico-paciente) ──
+router.post("/links/solicitar", requireRole(['medico']), linkController.solicitarVinculo);
+router.get("/links/paciente/:idPaciente", requireRole(['paciente', 'medico', 'instituto']), linkController.listarSolicitacoesVinculoPaciente);
+router.post("/links/:id/responder", requireRole(['paciente']), linkController.responderSolicitacaoVinculo);
+
+// ── Doctors (Credenciamento) ──
+router.get("/doctors/:id", requireRole(['medico', 'instituto', 'admin']), doctorController.getMedico);
+router.get(
+  "/doctors/solicitacoes",
+  requireRole(['instituto', 'admin']),
+  doctorController.listarSolicitacoesCredenciamento
+);
+router.post(
+  "/doctors/solicitacoes/:id/responder",
+  requireRole(['instituto', 'admin']),
+  doctorController.responderSolicitacaoCredenciamento
+);
+router.post(
+  "/doctors/registrar-direto",
+  requireRole(['instituto', 'admin']),
+  doctorController.registrarMedicoDireto
+);
+
+// ── Landing Editables ──
 router.get("/landing/cards", landingController.getCards);
-router.post("/landing/cards", landingController.saveCards);
 router.get("/landing/news", landingController.getNews);
-router.post("/landing/news", landingController.saveNews);
+router.post("/landing/cards", requireRole(['instituto', 'admin']), landingController.saveCards);
+router.post("/landing/news", requireRole(['instituto', 'admin']), landingController.saveNews);
 
-// Audit
-router.get("/audits", auditController.getAudits);
+// ── Audit ──
+router.get("/audits", requireRole(['instituto', 'admin']), auditController.getAudits);
 
-// Checklists
-router.post("/checklists", checklistController.salvarChecklist);
-router.get("/checklists/paciente/:idPaciente", checklistController.obterChecklistsPaciente);
+// ── Checklists ──
+router.post("/checklists", requireRole(['medico', 'instituto', 'paciente']), checklistController.salvarChecklist);
+router.get(
+  "/checklists/paciente/:idPaciente",
+  requireRole(['medico', 'instituto', 'paciente']),
+  checklistController.obterChecklistsPaciente
+);
 
 export default router;

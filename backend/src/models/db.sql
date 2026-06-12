@@ -145,6 +145,7 @@ CREATE TABLE solicitacoes_credenciamento (
     estado VARCHAR(50),
     email VARCHAR(100) NOT NULL,
     telefone VARCHAR(20),
+    senha_hash VARCHAR(255) NOT NULL,
     instituicao VARCHAR(150),
     status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
     motivo_recusa TEXT,

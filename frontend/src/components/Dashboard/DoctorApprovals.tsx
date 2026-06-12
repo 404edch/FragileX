@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { mockDbService, type MockSolicitacaoCredenciamento } from '../../services/mockDbService';
+import { api } from '../../services/api';
 import './Dashboard.css';
 
+interface Solicitacao {
+  id: number;
+  nome: string;
+  crm: string;
+  especialidade: string;
+  cidade: string;
+  estado: string;
+  email: string;
+  telefone: string;
+  instituicao: string;
+  status: string;
+  data_criacao: string;
+}
+
 const DoctorApprovals = () => {
-  const [solicitacoes, setSolicitacoes] = useState<MockSolicitacaoCredenciamento[]>([]);
+  const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [rejectionId, setRejectionId] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [activationModalLink, setActivationModalLink] = useState<string | null>(null);
 
   const carregarSolicitacoes = async () => {
     try {
-      const data = await mockDbService.listarSolicitacoesCredenciamento();
+      const data = await api.get<Solicitacao[]>('/doctors/solicitacoes');
       setSolicitacoes(data);
     } catch (error) {
       console.error(error);
@@ -23,14 +37,9 @@ const DoctorApprovals = () => {
 
   const handleApprove = async (id: number) => {
     try {
-      const res = await mockDbService.responderSolicitacaoCredenciamento(id, true);
+      await api.post(`/doctors/solicitacoes/${id}/responder`, { aprovar: true });
       await carregarSolicitacoes();
-      if (res.linkAtivacao) {
-        const fullLink = `${window.location.origin}${res.linkAtivacao}`;
-        setActivationModalLink(fullLink);
-      } else {
-        alert('Médico aprovado com sucesso! E-mail de ativação enviado.');
-      }
+      alert('Médico aprovado com sucesso! Pode acessar o sistema com as credenciais informadas.');
     } catch (e: any) {
       alert(e.message || 'Erro ao aprovar solicitação.');
     }
@@ -45,7 +54,7 @@ const DoctorApprovals = () => {
     e.preventDefault();
     if (rejectionId !== null) {
       try {
-        await mockDbService.responderSolicitacaoCredenciamento(rejectionId, false, rejectionReason);
+        await api.post(`/doctors/solicitacoes/${rejectionId}/responder`, { aprovar: false, motivoRecusa: rejectionReason });
         setRejectionId(null);
         setRejectionReason('');
         await carregarSolicitacoes();

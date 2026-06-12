@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import DadosPessoais from "./DadosPessoais";
 import BotaoInicio from "../Shared/BotaoInicio";
 import { useAuth } from "../../contexts/AuthContext";
-import { mockDbService } from "../../services/mockDbService";
+import { api } from "../../services/api";
 import "./Checklist.css";
 import { useNavigate } from "react-router-dom";
+
 
 export default function RegistroPaciente() {
   const { usuario, loginComCredenciais } = useAuth();
   const navigate = useNavigate();
   const isMedico = usuario?.role === 'medico' || usuario?.role === 'instituto';
 
-<<<<<<< HEAD
   const [errorMessage, setErrorMessage] = useState("");
   const [activationLink, setActivationLink] = useState("");
   const [copied, setCopied] = useState(false);
@@ -23,8 +23,27 @@ export default function RegistroPaciente() {
     const dadosPessoais = Object.fromEntries(formData.entries());
 
     if (isMedico) {
-      try {
-        const res = await mockDbService.cadastrarPacientePeloMedico(usuario!.id, dadosPessoais);
+    try {
+        const res = await api.post<{ linkAtivacao: string; token: string }>('/patients/cadastrar-pelo-medico', {
+          idMedico: usuario!.id,
+          nomePaciente: dadosPessoais.nomePaciente,
+          cpfPaciente: dadosPessoais.cpfPaciente,
+          email: dadosPessoais.email,
+          telefone: dadosPessoais.telefone,
+          dataNascimento: dadosPessoais.dataNascimento,
+          sexo_biologico: dadosPessoais.sexo_biologico,
+          genero: dadosPessoais.genero,
+          nomeMae: dadosPessoais.nomeMae,
+          nomePai: dadosPessoais.nomePai,
+          nomeResponsavel: dadosPessoais.nomeResponsavel,
+          grauParentesco: dadosPessoais.grauParentesco,
+          cpfResponsavel: dadosPessoais.cpfResponsavel,
+          cidade: dadosPessoais.cidade,
+          estado: dadosPessoais.estado,
+          pais: dadosPessoais.pais,
+          telefone2: dadosPessoais.telefone2,
+          whatsapp: dadosPessoais.whatsapp,
+        });
         const fullLink = `${window.location.origin}${res.linkAtivacao}`;
         setActivationLink(fullLink);
       } catch (error: any) {
@@ -38,7 +57,27 @@ export default function RegistroPaciente() {
       }
 
       try {
-        await mockDbService.autocadastroPaciente(dadosPessoais);
+        await api.post('/patients/autocadastro', {
+          nomePaciente: dadosPessoais.nomePaciente,
+          cpfPaciente: dadosPessoais.cpfPaciente,
+          email: dadosPessoais.email,
+          telefone: dadosPessoais.telefone,
+          senha: dadosPessoais.senha,
+          dataNascimento: dadosPessoais.dataNascimento,
+          sexo_biologico: dadosPessoais.sexo_biologico,
+          genero: dadosPessoais.genero,
+          nomeMae: dadosPessoais.nomeMae,
+          nomePai: dadosPessoais.nomePai,
+          nomeResponsavel: dadosPessoais.nomeResponsavel,
+          grauParentesco: dadosPessoais.grauParentesco,
+          cpfResponsavel: dadosPessoais.cpfResponsavel,
+          cidade: dadosPessoais.cidade,
+          estado: dadosPessoais.estado,
+          pais: dadosPessoais.pais,
+          telefone2: dadosPessoais.telefone2,
+          whatsapp: dadosPessoais.whatsapp,
+        });
+        
         // Logar automaticamente
         await loginComCredenciais(dadosPessoais.cpfPaciente as string, dadosPessoais.senha as string);
         alert("Cadastro realizado com sucesso!");
@@ -54,34 +93,6 @@ export default function RegistroPaciente() {
           setErrorMessage("Erro ao realizar o cadastro. Tente novamente.");
         }
       }
-=======
-  const formAction = async (formData: FormData) => {
-    const rawData = Object.fromEntries(formData.entries());
-    
-    // Mapeamento dos campos para a API
-    const payload = {
-        nome: rawData.nomePaciente,
-        cpf: rawData.cpfPaciente,
-        email: rawData.email,
-        telefone: rawData.telefone,
-        data_nascimento: rawData.dataNascimento,
-        sexo_biologico: rawData.sexo_biologico === 'masculino' ? 'M' : 'F',
-        genero: rawData.genero === 'masculino' ? 'Masculino' : 'Feminino',
-        sindrome: 'normal', // Default or asked?
-        senha: rawData.senha,
-        id_medico: isMedico ? 1 : undefined // Mock ID medico for testing
-    };
-
-    try {
-      // Mock da requisição que no futuro será feita via Supabase
-      console.log('Payload para Supabase:', payload);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      alert(isMedico ? "Paciente registrado! Aguardando ativação." : "Conta criada com sucesso!");
-      navigate('/dashboard');
-    } catch (error) {
-      alert("Erro ao registrar.");
->>>>>>> a03e2149d4fc97779a2edce748d8db94df548ebf
     }
   };
 

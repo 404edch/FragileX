@@ -1,5 +1,6 @@
 import { Pool } from "pg";
-require('dotenv').config({ path: __dirname+'/.env' });
+import path from "path";
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 
 export const db = new Pool({

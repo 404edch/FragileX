@@ -3,14 +3,13 @@ import ItemCadastro from '../../Checklist/ItemCadastro';
 import BotaoInicio from '../../Shared/BotaoInicio';
 import '../../Checklist/Checklist.css';
 import { useNavigate } from 'react-router-dom';
-import { mockDbService } from '../../../services/mockDbService';
+import { api } from '../../../services/api';
 
 const AplicacaoMedico = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
   const [successData, setSuccessData] = useState<any | null>(null);
 
-<<<<<<< HEAD
   const handleApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage('');
@@ -18,32 +17,20 @@ const AplicacaoMedico = () => {
     const dados = Object.fromEntries(formData.entries());
 
     try {
-      await mockDbService.solicitarCredenciamentoMedico(dados);
+      await api.post('/doctors/solicitar', {
+        nomeCompleto: dados.nomeCompleto,
+        crm: dados.crm,
+        especialidade: dados.especialidade,
+        cidade: dados.cidade,
+        estado: dados.estado,
+        email: dados.email,
+        telefone: dados.telefone,
+        instituicao: dados.instituicao,
+        senha: dados.senha,
+      });
       setSuccessData(dados);
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao enviar solicitação.');
-=======
-  const handleApply = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const data = {
-      nome: form.get('nomeCompleto'),
-      crm: form.get('crm'),
-      especialidade: form.get('especialidade'),
-      estado: form.get('estado'),
-      email: form.get('email'),
-      telefone: form.get('telefone'),
-      instituicao: form.get('linkCurriculo') || 'Não informada'
-    };
-
-    try {
-      console.log('Payload da Aplicação para Supabase:', data);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert("Sua aplicação foi enviada para análise do Instituto Buko Kaesemodel. Entraremos em contato em breve!");
-      navigate('/');
-    } catch (err) {
-      alert("Erro de conexão.");
->>>>>>> a03e2149d4fc97779a2edce748d8db94df548ebf
     }
   };
 
@@ -131,6 +118,12 @@ const AplicacaoMedico = () => {
           </div>
 
           <div style={{ marginTop: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <ItemCadastro label="Senha de Acesso" name="senha" type="password" required />
+              <ItemCadastro label="Confirmar Senha" name="confirmarSenha" type="password" required />
+            </div>
+          </div>
+          <div style={{ marginTop: '16px' }}>
             <ItemCadastro label="Link para Currículo Lattes ou LinkedIn (Opcional)" name="linkCurriculo" type="url" />
           </div>
         </div>

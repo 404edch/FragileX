@@ -6,10 +6,10 @@ import bcrypt from "bcryptjs";
 
 export const solicitarCredenciamento = async (req: Request, res: Response): Promise<any> => {
   const dados = req.body;
-  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao } = dados;
+  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao, senha } = dados;
 
-  if (!nomeCompleto || !crm || !email) {
-    return res.status(400).json({ error: "Nome completo, CRM e e-mail são obrigatórios." });
+  if (!nomeCompleto || !crm || !email || !senha) {
+    return res.status(400).json({ error: "Nome completo, CRM, e-mail e senha são obrigatórios." });
   }
 
   try {
@@ -25,19 +25,21 @@ export const solicitarCredenciamento = async (req: Request, res: Response): Prom
       return res.status(400).json({ error: "Já existe uma solicitação de credenciamento pendente para este CRM." });
     }
 
+    const senhaHash = await bcrypt.hash(senha, 12);
+
     const insertQuery = `
       INSERT INTO solicitacoes_credenciamento (
-        nome, crm, especialidade, cidade, estado, email, telefone, instituicao, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDING')
+        nome, crm, especialidade, cidade, estado, email, telefone, instituicao, senha_hash, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'PENDING')
       RETURNING *
     `;
     const insertRes = await db.query(insertQuery, [
-      nomeCompleto, crm, especialidade, cidade || '', estado, email, telefone, instituicao || ''
+      nomeCompleto, crm, especialidade, cidade || '', estado, email, telefone, instituicao || '', senhaHash
     ]);
 
     await logAction(null, nomeCompleto, 'Solicitação de Credenciamento', `Médico CRM ${crm} enviou pedido de credenciamento.`);
 
-    return res.status(201).json(insertRes.rows[0]);
+    return res.status(201).json({ message: 'Solicitação enviada com sucesso. Aguarde aprovação do Instituto.' });
   } catch (error) {
     console.error("Erro ao solicitar credenciamento:", error);
     return res.status(500).json({ error: "Erro interno no servidor." });
@@ -71,34 +73,46 @@ export const responderSolicitacaoCredenciamento = async (req: Request, res: Resp
     }
     const solicitacao = solRes.rows[0];
 
-    if (aprovar) {
-      const token = crypto.randomBytes(20).toString('hex');
+    if (solicitacao.status !== 'PENDING') {
+      return res.status(400).json({ error: "Esta solicitação já foi processada." });
+    }
 
-      // Update solicitação
+    if (aprovar) {
+      // Verificar se e-mail já existe em usuarios
+      const emailCheck = await db.query('SELECT id FROM usuarios WHERE email = $1', [solicitacao.email]);
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ error: "E-mail já possui conta no sistema." });
+      }
+
+      // Usar senha_hash da solicitação (médico informou ao solicitar)
+      if (!solicitacao.senha_hash) {
+        return res.status(400).json({ error: "Solicitação sem senha definida. Não é possível aprovar." });
+      }
+
       await db.query("UPDATE solicitacoes_credenciamento SET status = 'APPROVED' WHERE id = $1", [idSolicitacao]);
 
-      // Criar usuário pendente
+      // Criar usuário já ATIVO com a senha do credenciamento
       const insertUserQuery = `
-        INSERT INTO usuarios (nome, cpf, email, telefone, senha_hash, role, status, token_ativacao)
-        VALUES ($1, '00000000000', $2, $3, 'MOCK_HASH', 'medico', 'PENDING_ACTIVATION', $4)
+        INSERT INTO usuarios (nome, email, telefone, senha_hash, role, status)
+        VALUES ($1, $2, $3, $4, 'medico', 'ACTIVE')
         RETURNING id
       `;
-      const userRes = await db.query(insertUserQuery, [solicitacao.nome, solicitacao.email, solicitacao.telefone, token]);
+      const userRes = await db.query(insertUserQuery, [
+        solicitacao.nome, solicitacao.email, solicitacao.telefone, solicitacao.senha_hash
+      ]);
       const novoUsuarioId = userRes.rows[0].id;
 
       // Criar registro na tabela medicos
-      const insertMedQuery = `
-        INSERT INTO medicos (id_usuario, crm, especialidade, cidade, estado, instituicao)
-        VALUES ($1, $2, $3, $4, $5, $6)
-      `;
-      await db.query(insertMedQuery, [
-        novoUsuarioId, solicitacao.crm, solicitacao.especialidade,
-        solicitacao.cidade, solicitacao.estado, solicitacao.instituicao
-      ]);
+      await db.query(
+        `INSERT INTO medicos (id_usuario, crm, especialidade, cidade, estado, instituicao)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [novoUsuarioId, solicitacao.crm, solicitacao.especialidade,
+         solicitacao.cidade, solicitacao.estado, solicitacao.instituicao]
+      );
 
-      await logAction(1, 'Instituto/Admin', 'Aprovação de Médico', `Aprovado credenciamento do médico ${solicitacao.nome} (CRM: ${solicitacao.crm}).`);
+      await logAction(null, 'Instituto', 'Aprovação de Médico', `Aprovado credenciamento do médico ${solicitacao.nome} (CRM: ${solicitacao.crm}).`);
 
-      return res.json({ linkAtivacao: `/activate-account?token=${token}` });
+      return res.json({ message: `Médico ${solicitacao.nome} aprovado com sucesso. Conta criada e ativa.` });
     } else {
       const recusadoMotivo = motivoRecusa || 'Não atende aos critérios institucionais.';
       await db.query(
@@ -106,9 +120,9 @@ export const responderSolicitacaoCredenciamento = async (req: Request, res: Resp
         [recusadoMotivo, idSolicitacao]
       );
 
-      await logAction(1, 'Instituto/Admin', 'Rejeição de Médico', `Rejeitado credenciamento do médico ${solicitacao.nome}. Motivo: ${recusadoMotivo}`);
+      await logAction(null, 'Instituto', 'Rejeição de Médico', `Rejeitado credenciamento do médico ${solicitacao.nome}. Motivo: ${recusadoMotivo}`);
 
-      return res.json({});
+      return res.json({ message: 'Solicitação rejeitada.' });
     }
   } catch (error) {
     console.error("Erro ao responder credenciamento:", error);

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { mockDbService, type MockUsuario } from '../services/mockDbService';
+import { api } from '../services/api';
 
 export type Role = 'medico' | 'instituto' | 'paciente' | 'admin' | null;
 
@@ -30,16 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const sessao = localStorage.getItem('fragilex_sessao');
     if (sessao) {
-      const user = JSON.parse(sessao);
-      mockDbService.getUsuario(user.id).then((atualizado) => {
-        if (atualizado) {
-          setUsuario(atualizado);
-        } else {
-          setUsuario(user);
-        }
-      }).catch(() => {
+      try {
+        const user = JSON.parse(sessao);
         setUsuario(user);
-      });
+      } catch (e) {
+        console.error('Erro ao ler sessão', e);
+      }
     }
   }, []);
 
@@ -63,15 +60,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginComCredenciais = async (emailOuCpf: string, senha: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const user = await mockDbService.login(emailOuCpf, senha);
-      if (!user) {
-        return { success: false, error: 'Credenciais inválidas. Verifique seu e-mail/CPF e senha.' };
-      }
-      if (user.status === 'PENDING_ACTIVATION') {
-        return { success: false, error: 'Esta conta ainda não foi ativada. Por favor, utilize o link de ativação enviado.' };
-      }
-      setUsuario(user);
-      localStorage.setItem('fragilex_sessao', JSON.stringify(user));
+      // Usar a api real apontando para o backend
+      const response = await api.post<{ message: string; token: string; user: any }>('/auth/login', {
+        emailOrCpf: emailOuCpf,
+        senha
+      });
+
+      const userToStore = {
+        ...response.user,
+        token: response.token,
+      };
+
+      setUsuario(userToStore);
+      localStorage.setItem('fragilex_sessao', JSON.stringify(userToStore));
       return { success: true };
     } catch (e: any) {
       return { success: false, error: e.message || 'Erro ao tentar fazer login.' };
@@ -84,17 +85,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const atualizarUsuarioLogado = async () => {
-    if (usuario) {
-      try {
-        const atualizado = await mockDbService.getUsuario(usuario.id);
-        if (atualizado) {
-          setUsuario(atualizado);
-          localStorage.setItem('fragilex_sessao', JSON.stringify(atualizado));
-        }
-      } catch (error) {
-        console.error("Erro ao atualizar dados do usuário logado:", error);
-      }
-    }
+    // Implementar busca do /auth/me futuro, caso necessário.
+    // Por enquanto confiamos no payload salvo no localStorage + token
   };
 
   return (

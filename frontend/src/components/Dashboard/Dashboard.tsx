@@ -64,7 +64,6 @@ const Dashboard = () => {
       case 'all-doctors':
         return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
       case 'approvals':
-<<<<<<< HEAD
         return <DoctorApprovals />;
       case 'edit-landing':
         return <EditLanding />;
@@ -76,13 +75,6 @@ const Dashboard = () => {
         return <AdminMedics />;
       case 'manage-users':
         return <AdminUsers />;
-=======
-        return <div className="dashboard-db-placeholder">[MOCK: Aprovações Pendentes de Médicos (Ação: Admin acessa adminRotas)]</div>;
-      case 'my-history':
-        return <div className="dashboard-db-placeholder">[MOCK: Histórico de Checklists do Paciente]</div>;
-      case 'link-requests':
-        return <div className="dashboard-db-placeholder">[MOCK: Solicitações de Vínculo do Médico aguardando Aprovação/Recusa do Paciente]</div>;
->>>>>>> a03e2149d4fc97779a2edce748d8db94df548ebf
       default:
         return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }

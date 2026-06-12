@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { db } from "../config/database";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { logAction } from "../services/auditService";
+
+const SECRET_KEY = process.env.JWT_SECRET || 'chave-super-secreta-ibk';
 
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { emailOrCpf, senha } = req.body;
@@ -23,27 +26,38 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(403).json({ error: "Esta conta ainda não foi ativada. Por favor, utilize o link de ativação enviado." });
     }
 
-    const match = await bcrypt.compare(senha, user.senha_hash);
-    if (!match && senha !== user.senha_hash) { // fallback para senhas mock/não encriptadas
-      if (senha !== user.senha_hash) {
-        return res.status(401).json({ error: "Credenciais inválidas. Verifique seu e-mail/CPF e senha." });
-      }
+    // Médicos só podem logar se a conta estiver ACTIVE (aprovados pelo instituto)
+    if (user.role === 'medico' && user.status !== 'ACTIVE') {
+      return res.status(403).json({ error: "Sua solicitação de credenciamento ainda não foi aprovada pelo Instituto." });
     }
 
-    // Gravar log de auditoria
+    const match = await bcrypt.compare(senha, user.senha_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Credenciais inválidas. Verifique seu e-mail/CPF e senha." });
+    }
+
+    // Emitir JWT
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      SECRET_KEY,
+      { expiresIn: '24h' }
+    );
+
     await logAction(user.id, user.nome, 'Login', 'Efetuou login por credenciais.');
 
-    const responseUser = {
-      id: user.id,
-      nome: user.nome,
-      cpf: user.cpf,
-      email: user.email,
-      telefone: user.telefone,
-      role: user.role,
-      status: user.status
-    };
-
-    return res.status(200).json(responseUser);
+    return res.status(200).json({
+      message: 'Login bem sucedido',
+      token,
+      user: {
+        id: user.id,
+        nome: user.nome,
+        cpf: user.cpf,
+        email: user.email,
+        telefone: user.telefone,
+        role: user.role,
+        status: user.status
+      }
+    });
   } catch (error) {
     console.error("Erro no login:", error);
     return res.status(500).json({ error: "Erro interno ao efetuar login." });
