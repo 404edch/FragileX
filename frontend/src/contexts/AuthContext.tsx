@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { mockDbService, type MockUsuario } from '../services/mockDbService';
 import { api } from '../services/api';
 
 export type Role = 'medico' | 'instituto' | 'paciente' | 'admin' | null;
@@ -16,7 +15,6 @@ export interface Usuario {
 
 interface AuthContextType {
   usuario: Usuario | null;
-  login: (role: Role) => Promise<boolean>;
   loginComCredenciais: (emailOuCpf: string, senha: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   atualizarUsuarioLogado: () => Promise<void>;
@@ -39,24 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, []);
-
-  const login = async (role: Role): Promise<boolean> => {
-    if (!role) return false;
-    const emailMap: Record<string, string> = {
-      instituto: 'instituto@teste.com',
-      medico: 'medico@teste.com',
-      paciente: 'paciente@teste.com',
-      admin: 'admin@teste.com',
-    };
-    const email = emailMap[role];
-    const user = await mockDbService.login(email, '123456');
-    if (user) {
-      setUsuario(user);
-      localStorage.setItem('fragilex_sessao', JSON.stringify(user));
-      return true;
-    }
-    return false;
-  };
 
   const loginComCredenciais = async (emailOuCpf: string, senha: string): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -90,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, login, loginComCredenciais, logout, atualizarUsuarioLogado }}>
+    <AuthContext.Provider value={{ usuario, loginComCredenciais, logout, atualizarUsuarioLogado }}>
       {children}
     </AuthContext.Provider>
   );

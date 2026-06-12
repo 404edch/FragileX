@@ -27,6 +27,7 @@ const MENU_OPTIONS: MenuOption[] = [
   { id: 'audit-log', label: 'Registro de Auditoria', roles: ['admin'] },
   { id: 'manage-medics', label: 'Cadastrar Médicos', roles: ['admin'] },
   { id: 'manage-users', label: 'Gerenciar Usuários', roles: ['admin'] },
+  { id: 'register-employee', label: 'Cadastrar Funcionários', roles: ['admin'] },
 
   // Instituto
   { id: 'all-patients', label: 'Todos os Pacientes', roles: ['instituto'] },

@@ -34,6 +34,7 @@ router.use(authMiddleware);
 // ── Users ──
 router.get("/users/:id", userController.getMe);
 router.get("/users", requireRole(['instituto', 'admin']), userController.listAll);
+router.post("/users/employee", requireRole(['admin']), userController.createEmployee);
 router.put("/users/:id", requireRole(['instituto', 'admin']), userController.update);
 router.delete("/users/:id", requireRole(['instituto', 'admin']), userController.remove);
 

@@ -11,6 +11,7 @@ import EditLanding from './EditLanding';
 import AdminMedics from './AdminMedics';
 import AdminUsers from './AdminUsers';
 import AuditLog from './AuditLog/AuditLog';
+import AdminRegisterEmployee from './AdminRegisterEmployee';
 
 const NAVIGATION_VIEWS: Record<string, string> = {
   'register-patient': '/registro',
@@ -75,6 +76,8 @@ const Dashboard = () => {
         return <AdminMedics />;
       case 'manage-users':
         return <AdminUsers />;
+      case 'register-employee':
+        return <AdminRegisterEmployee />;
       default:
         return <div className="dashboard-db-placeholder">Selecione uma opção no menu.</div>;
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { mockDbService } from '../../services/mockDbService';
+import { api } from '../../services/api';
 
 export default function AdminUsers() {
   const { usuario } = useAuth();
@@ -28,7 +28,7 @@ export default function AdminUsers() {
 
   const refreshUsers = async () => {
     try {
-      const data = await mockDbService.listarTodosUsuarios();
+      const { data } = await api.get('/users');
       setUsers(data);
     } catch (err) {
       console.error("Erro ao carregar usuários:", err);
@@ -86,11 +86,13 @@ export default function AdminUsers() {
         payload.instituicao = editInstituicao;
       }
 
-      await mockDbService.atualizarUsuario(editingUser.id, payload, {
+      payload.adminUser = {
         id: usuario.id,
         nome: usuario.nome,
         role: usuario.role || 'admin'
-      });
+      };
+
+      await api.put(`/users/${editingUser.id}`, payload);
 
       setSuccess(`Usuário "${editNome}" atualizado com sucesso!`);
       setEditingUser(null);
@@ -112,10 +114,14 @@ export default function AdminUsers() {
     const confirm = window.confirm(`Tem certeza de que deseja excluir permanentemente o usuário "${u.nome}"? Esta ação removerá também seus registros de perfil.`);
     if (confirm) {
       try {
-        await mockDbService.deletarUsuario(u.id, {
-          id: usuario.id,
-          nome: usuario.nome,
-          role: usuario.role || 'admin'
+        await api.delete(`/users/${u.id}`, {
+          data: {
+            adminUser: {
+              id: usuario.id,
+              nome: usuario.nome,
+              role: usuario.role || 'admin'
+            }
+          }
         });
         setSuccess(`Usuário "${u.nome}" excluído com sucesso.`);
         refreshUsers();

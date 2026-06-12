@@ -83,6 +83,45 @@ export const getMe = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+export const createEmployee = async (req: Request, res: Response): Promise<any> => {
+  const { nome, email, cpf, telefone, senha } = req.body;
+  const adminUser = req.body.adminUser;
+
+  if (!nome || !email || !cpf || !senha) {
+    return res.status(400).json({ error: "Nome, e-mail, CPF e senha são obrigatórios." });
+  }
+
+  try {
+    const checkEmailCpf = await db.query('SELECT id FROM usuarios WHERE email = $1 OR cpf = $2', [email, cpf]);
+    if (checkEmailCpf.rows.length > 0) {
+      return res.status(409).json({ error: "Já existe um usuário cadastrado com este e-mail ou CPF." });
+    }
+
+    const senhaHash = await bcrypt.hash(senha, 10);
+    const insertQuery = `
+      INSERT INTO usuarios (nome, email, cpf, senha_hash, telefone, role, status)
+      VALUES ($1, $2, $3, $4, $5, 'instituto', 'ACTIVE')
+      RETURNING id, nome, email, role
+    `;
+    const result = await db.query(insertQuery, [nome, email, cpf, senhaHash, telefone]);
+    const newUser = result.rows[0];
+
+    if (adminUser) {
+      await logAction(
+        adminUser.id,
+        adminUser.nome,
+        'Cadastro de Funcionário',
+        `Registrou o funcionário do instituto: ${newUser.nome} (E-mail: ${newUser.email}).`
+      );
+    }
+
+    return res.status(201).json({ success: true, user: newUser });
+  } catch (error) {
+    console.error("Erro ao criar funcionário:", error);
+    return res.status(500).json({ error: "Erro interno ao cadastrar funcionário." });
+  }
+};
+
 export const listAll = async (req: Request, res: Response): Promise<any> => {
   try {
     const query = `
