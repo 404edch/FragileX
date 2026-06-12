@@ -45,7 +45,6 @@ export default function App() {
 
         <Route path="/registro" element={<RegistroPaciente />} />
         <Route path="/preencher-checklist" element={<PreencherChecklist />} />
-        <Route path="/checklist-rapido" element={<PreencherChecklist isRapido />} />
 
         <Route path="/aplicacao-medico" element={<AplicacaoMedico />} />
 

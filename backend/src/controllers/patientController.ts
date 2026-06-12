@@ -271,6 +271,56 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
   }
 };
 
+export const getPacienteByCpf = async (req: Request, res: Response): Promise<any> => {
+  const cpf = req.params.cpf;
+  if (!cpf) {
+    return res.status(400).json({ error: "CPF não fornecido." });
+  }
+
+  try {
+    const query = `
+      SELECT u.id, u.nome, u.cpf, u.email, u.telefone, u.status, u.role,
+             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel
+      FROM usuarios u
+      JOIN pacientes p ON u.id = p.id_usuario
+      WHERE u.cpf = $1 AND u.role = 'paciente'
+    `;
+    const result = await db.query(query, [cpf]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente não encontrado." });
+    }
+
+    const row = result.rows[0];
+    const mapped = {
+      id: row.id,
+      nome: row.nome,
+      cpf: row.cpf,
+      email: row.email,
+      telefone: row.telefone,
+      role: row.role,
+      status: row.status,
+      pacienteDetails: {
+        data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split('T')[0] : '',
+        sexo_biologico: row.sexo_biologico,
+        genero: row.genero,
+        sindrome: row.sindrome,
+        responsavel_nome: row.responsavel_nome,
+        cidade: row.cidade,
+        estado: row.estado,
+        pais: row.pais,
+        whatsapp: row.whatsapp,
+        id_medico_responsavel: row.id_medico_responsavel
+      }
+    };
+
+    return res.json(mapped);
+  } catch (error) {
+    console.error("Erro ao obter paciente por CPF:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
 export const listTodosPacientes = async (req: Request, res: Response): Promise<any> => {
   try {
     const query = `

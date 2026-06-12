@@ -6,6 +6,7 @@ import './Dashboard.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DoctorApprovals from './DoctorApprovals';
+import ChecklistNotifications from './ChecklistNotifications';
 import PatientDashboard from './PatientDashboard';
 import EditLanding from './EditLanding';
 import AdminMedics from './AdminMedics';
@@ -15,7 +16,6 @@ import AdminRegisterEmployee from './AdminRegisterEmployee';
 
 const NAVIGATION_VIEWS: Record<string, string> = {
   'register-patient': '/registro',
-  'quick-checklist': '/checklist-rapido',
   'fill-checklist': '/preencher-checklist',
   'patient-fill-checklist': '/preencher-checklist',
 };
@@ -66,6 +66,8 @@ const Dashboard = () => {
         return <div className="dashboard-db-placeholder">[MOCK: Lista de Médicos Parceiros]</div>;
       case 'approvals':
         return <DoctorApprovals />;
+      case 'checklist-alerts':
+        return <ChecklistNotifications />;
       case 'edit-landing':
         return <EditLanding />;
       case 'my-history':

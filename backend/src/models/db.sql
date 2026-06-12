@@ -87,6 +87,8 @@ CREATE TABLE checklists (
     id_medico INT,
     preenchido_por VARCHAR(50) NOT NULL,
     score_final DECIMAL(4,2),
+    classificacao VARCHAR(20) DEFAULT 'Negativo',
+    memoria_calculo TEXT,
     data_preenchimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_checklist_paciente FOREIGN KEY (id_paciente) 
 	REFERENCES pacientes(id_usuario) ON DELETE CASCADE,
@@ -102,6 +104,21 @@ CREATE TABLE checklist_sintomas (
     PRIMARY KEY (id_checklist, id_sintoma),
     CONSTRAINT fk_cs_checklist FOREIGN KEY (id_checklist) REFERENCES checklists(id) ON DELETE CASCADE,
     CONSTRAINT fk_cs_sintoma FOREIGN KEY (id_sintoma) REFERENCES sintomas(id) ON DELETE CASCADE
+);
+
+-- notificações PCR para alertas ao instituto/admin
+CREATE TABLE notificacoes_pcr (
+    id SERIAL PRIMARY KEY,
+    id_checklist INT NOT NULL,
+    id_paciente INT NOT NULL,
+    nome_paciente VARCHAR(255),
+    preenchido_por VARCHAR(100),
+    score_final DECIMAL(4,2),
+    classificacao VARCHAR(20),
+    lida BOOLEAN DEFAULT FALSE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notpcr_checklist FOREIGN KEY (id_checklist) REFERENCES checklists(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notpcr_paciente FOREIGN KEY (id_paciente) REFERENCES pacientes(id_usuario) ON DELETE CASCADE
 );
 
 -- consultas (independentes de checklists)
@@ -201,17 +218,19 @@ ALTER TABLE medicos ADD COLUMN estado VARCHAR(50);
 ALTER TABLE medicos ADD COLUMN instituicao VARCHAR(150);
 
 -- Seeder Inicial de Sintomas
-INSERT INTO sintomas (sintoma, score_f, score_m) VALUES
-('Atraso no desenvolvimento intelectual', 2.0, 3.5),
-('Atraso na fala ou linguagem', 1.5, 3.0),
-('Hiperatividade ou déficit de atenção', 1.0, 2.5),
-('Comportamento autista ou isolamento', 2.0, 3.0),
-('Evitar contato visual', 1.0, 2.0),
-('Orelhas grandes ou proeminentes', 1.0, 4.0),
-('Rosto alongado', 1.0, 3.5),
-('Articulações muito flexíveis', 1.5, 2.5),
-('Ansiedade social ou timidez excessiva', 2.5, 2.0),
-('Pés chatos', 0.5, 1.5);
+INSERT INTO sintomas (sintoma, score_m, score_f) VALUES
+('Atraso na fala', 0.14, 0.01),
+('Dificuldades de aprendizagem', 0.18, 0.28),
+('Déficit de atenção', 0.17, 0.12),
+('Deficiência intelectual (DI)', 0.32, 0.20),
+('Hiperatividade', 0.12, 0.04),
+('Agressividade', 0.01, 0.02),
+('Evita contato visual', 0.06, 0.08),
+('Evita contato físico', 0.04, 0.07),
+('Movimentos intencionais, repetitivos e rítmicos', 0.17, 0.05),
+('Hiperflexibilidade articular (hipermobilidade)', 0.19, 0.04),
+('Rosto alongado, mandíbula proeminente e/ou orelhas proeminentes', 0.29, 0.09),
+('Macroorquidismo', 0.26, 0.00);
 
 -- Seeder Inicial de Usuários (Senhas: 123456)
 -- Senha hash gerada para '123456' usando bcryptjs
@@ -247,4 +266,4 @@ SELECT setval('landing_cards_id_seq', 7);
 INSERT INTO landing_news (id, titulo, imagem_url, link_href) VALUES
 (1, 'Novidades do Instituto Buko Kaesemodel', '', 'https://xfragil.org.br/noticias/');
 
-SELECT setval('landing_news_id_seq', 2);
+SELECT setval('landing_news_id_seq', 2);

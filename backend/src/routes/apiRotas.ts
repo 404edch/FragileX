@@ -6,12 +6,17 @@ import * as doctorController from "../controllers/doctorController";
 import * as landingController from "../controllers/landingController";
 import * as auditController from "../controllers/auditController";
 import * as checklistController from "../controllers/checklistController";
+import * as notificacaoController from "../controllers/notificacaoController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { requireRole } from "../middlewares/roleMiddleware";
 
 const router = Router();
 
 // ── ROTAS PÚBLICAS ──────────────────────────────────────────────────────────
+
+// Sintomas (usado pelo checklist rápido também)
+import { sendSintomas } from "../controllers/sintomasController";
+router.get("/sintomas", sendSintomas);
 
 // Login
 router.post("/auth/login", userController.login);
@@ -54,6 +59,7 @@ router.get(
   patientController.listPacientesDoMedico
 );
 router.get("/patients/:id", requireRole(['medico', 'instituto', 'admin']), patientController.getPaciente);
+router.get("/patients/cpf/:cpf", requireRole(['medico', 'instituto', 'admin', 'paciente']), patientController.getPacienteByCpf);
 
 // ── Links (Vínculos médico-paciente) ──
 router.post("/links/solicitar", requireRole(['medico']), linkController.solicitarVinculo);
@@ -93,11 +99,16 @@ router.post("/landing/news", requireRole(['instituto', 'admin']), landingControl
 router.get("/audits", requireRole(['instituto', 'admin']), auditController.getAudits);
 
 // ── Checklists ──
-router.post("/checklists", requireRole(['medico', 'instituto', 'paciente']), checklistController.salvarChecklist);
+router.post("/checklists", requireRole(['medico', 'instituto', 'paciente', 'admin']), checklistController.salvarChecklist);
 router.get(
   "/checklists/paciente/:idPaciente",
-  requireRole(['medico', 'instituto', 'paciente']),
+  requireRole(['medico', 'instituto', 'paciente', 'admin']),
   checklistController.obterChecklistsPaciente
 );
+
+// ── Notificações PCR ──
+router.get("/notificacoes-pcr", requireRole(['instituto', 'admin']), notificacaoController.getNotificacoesPCR);
+router.get("/notificacoes-pcr/count", requireRole(['instituto', 'admin']), notificacaoController.getNotificacoesPCRCount);
+router.patch("/notificacoes-pcr/:id/lida", requireRole(['instituto', 'admin']), notificacaoController.marcarNotificacaoLida);
 
 export default router;

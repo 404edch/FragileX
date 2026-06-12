@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { mockDbService, type MockAudit } from '../../../services/mockDbService';
+import { api } from '../../../services/api';
 import './AuditLog.css';
 
 const AuditLog = () => {
-  const [logs, setLogs] = useState<MockAudit[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const carregarAudits = async () => {
       try {
-        const data = await mockDbService.getAudits();
+        const data = await api.get('/audits');
         setLogs(data);
       } catch (error) {
         console.error("Erro ao obter logs de auditoria:", error);

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockDbService, type MockPaciente, type MockChecklist, type MockVinculo } from '../../services/mockDbService';
 import { useAuth } from '../../contexts/AuthContext';
+import { api } from '../../services/api';
+import { getSintomas } from '../../services/getSintomas';
 import './Dashboard.css';
 
 interface PatientDashboardProps {
@@ -12,33 +14,70 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const navigate = useNavigate();
   const { atualizarUsuarioLogado } = useAuth();
   const [paciente, setPaciente] = useState<MockPaciente | null>(null);
-  const [checklists, setChecklists] = useState<MockChecklist[]>([]);
+  const [checklists, setChecklists] = useState<any[]>([]);
   const [solicitacoes, setSolicitacoes] = useState<MockVinculo[]>([]);
   const [usuarioInfo, setUsuarioInfo] = useState<any | null>(null);
   const [medicoResponsavelText, setMedicoResponsavelText] = useState<string>('Buscando...');
+  const [sintomasMap, setSintomasMap] = useState<Record<number, string>>({});
 
   const carregarDados = async () => {
     try {
-      const user = await mockDbService.getUsuario(idUsuario);
+      // 1. Buscar usuário
+      const user = await api.get(`/users/${idUsuario}`);
       setUsuarioInfo(user);
+      
       if (user) {
-        const p = await mockDbService.getPaciente(idUsuario);
-        setPaciente(p);
-        const c = await mockDbService.obterChecklistsPaciente(idUsuario);
-        setChecklists(c);
-        const s = await mockDbService.listarSolicitacoesVinculoPaciente(idUsuario);
-        setSolicitacoes(s);
+        // 2. Buscar paciente
+        try {
+          const p = await api.get(`/patients/${idUsuario}`);
+          setPaciente(p);
 
-        if (p && p.id_medico_responsavel) {
-          const medUser = await mockDbService.getUsuario(p.id_medico_responsavel);
-          const medDet = await mockDbService.getMedico(p.id_medico_responsavel);
-          setMedicoResponsavelText(medUser ? `${medUser.nome} (CRM: ${medDet?.crm || 'N/A'})` : 'Médico Associado');
-        } else {
-          setMedicoResponsavelText('Nenhum médico vinculado diretamente. Utilize o CPF para vincular a um médico parceiro.');
+          // Buscar dados do médico responsável, se houver
+          if (p && p.id_medico_responsavel) {
+            try {
+              const medUser = await api.get(`/users/${p.id_medico_responsavel}`);
+              const medDet = await api.get(`/doctors/${p.id_medico_responsavel}`);
+              setMedicoResponsavelText(medUser ? `${medUser.nome} (CRM: ${medDet?.crm || 'N/A'})` : 'Médico Associado');
+            } catch (e) {
+              setMedicoResponsavelText('Médico Associado');
+            }
+          } else {
+            setMedicoResponsavelText('Nenhum médico vinculado diretamente. Utilize o CPF para vincular a um médico parceiro.');
+          }
+        } catch (e) {
+          console.error("Erro ao buscar paciente", e);
+          // Set to an empty object to bypass the infinite loading screen
+          setPaciente({} as any);
+        }
+
+        // 3. Buscar checklists da API real
+        try {
+          const checklistsData = await api.get(`/checklists/paciente/${idUsuario}`);
+          setChecklists(Array.isArray(checklistsData) ? checklistsData : []);
+        } catch {
+          setChecklists([]);
+        }
+
+        // 4. Buscar mapa de sintomas para exibir nomes
+        try {
+          const sintomasList = await getSintomas();
+          const map: Record<number, string> = {};
+          sintomasList.forEach(s => { map[s.id] = s.nome; });
+          setSintomasMap(map);
+        } catch {
+          // fallback: sintomas vazio
+        }
+
+        // 5. Buscar solicitações de vínculo
+        try {
+          const s = await api.get(`/links/paciente/${idUsuario}`);
+          setSolicitacoes(Array.isArray(s) ? s : []);
+        } catch {
+          setSolicitacoes([]);
         }
       }
     } catch (error) {
-      console.error("Erro ao carregar dados do dashboard do paciente:", error);
+      console.error('Erro ao carregar dados do dashboard do paciente:', error);
     }
   };
 
@@ -213,8 +252,16 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       <div className="dashboard-med-registration">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <h3 style={{ fontSize: '18px', color: '#1a3a6e', margin: 0, fontWeight: 'bold' }}>
-            Checklist de Sintomas do Paciente
+            Histórico de Checklists
           </h3>
+          <button
+            type="button"
+            className="checklist-submit-btn"
+            style={{ margin: 0, padding: '8px 16px', fontSize: '13px' }}
+            onClick={() => navigate('/preencher-checklist')}
+          >
+            + Preencher Nova Checklist
+          </button>
         </div>
 
         {checklists.length === 0 ? (
@@ -225,7 +272,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {checklists.map(ch => (
+            {checklists.map((ch: any) => (
               <div
                 key={ch.id}
                 style={{
@@ -233,24 +280,38 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   border: '1px solid #e2e8f0',
                   borderRadius: '10px',
                   padding: '14px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px'
                 }}
               >
-                <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 'bold' }}>
-                    Checklist de Sintomas ({ch.sintomas_selecionados.length} sintomas detectados)
+                    Checklist de Sintomas ({ch.sintomas_selecionados?.length || 0} sintomas identificados)
                   </div>
                   <div style={{ fontSize: '12px', color: '#64748b' }}>
-                    Preenchido por: {ch.preenchido_por} | Realizado em: {new Date(ch.data_preenchimento).toLocaleDateString('pt-BR')} às {new Date(ch.data_preenchimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(ch.data_preenchimento).toLocaleDateString('pt-BR')} às {new Date(ch.data_preenchimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
-                <div style={{ background: 'rgba(26,95,168,0.1)', color: '#1a5fa8', padding: '6px 12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px' }}>
-                  Score Clínico: {ch.score_final} pts
+                <div style={{ fontSize: '13px', color: '#475569', marginBottom: '8px' }}>
+                  <strong>Preenchido por:</strong> {ch.preenchido_por}
                 </div>
+                {ch.sintomas_selecionados && ch.sintomas_selecionados.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {ch.sintomas_selecionados.map((idSintoma: number) => (
+                      <span
+                        key={idSintoma}
+                        style={{
+                          background: '#e0e7ff',
+                          color: '#3730a3',
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        {sintomasMap[idSintoma] || `Sintoma #${idSintoma}`}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -35,13 +35,13 @@ const MENU_OPTIONS: MenuOption[] = [
   { id: 'all-patients', label: 'Todos os Pacientes', roles: ['instituto'] },
   { id: 'all-doctors', label: 'Médicos Cadastrados', roles: ['instituto'] },
   { id: 'approvals', label: 'Aprovações Pendentes', roles: ['instituto', 'admin'] },
+  { id: 'checklist-alerts', label: 'Alertas de Checklist', roles: ['instituto', 'admin'] },
   { id: 'edit-landing', label: 'Editar Landing Page', roles: ['admin'] },
 
   // Medico
   { id: 'my-patients', label: 'Meus Pacientes', roles: ['medico'] },
   { id: 'register-patient', label: 'Cadastrar Paciente', roles: ['medico', 'instituto', 'admin'] },
-  { id: 'quick-checklist', label: 'Checklist Rápido', roles: ['medico'] },
-  { id: 'fill-checklist', label: 'Preencher Checklist', roles: ['medico'] },
+  { id: 'fill-checklist', label: 'Preencher Nova Checklist', roles: ['medico', 'instituto', 'admin', 'paciente'] },
 
   // Paciente
   { id: 'my-history', label: 'Meu Histórico', roles: ['paciente'] },
@@ -51,6 +51,7 @@ const MENU_OPTIONS: MenuOption[] = [
 const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
   const navigate = useNavigate();
   const [pendingCount, setPendingCount] = useState(0);
+  const [checklistAlertCount, setChecklistAlertCount] = useState(0);
 
   const allowedOptions = MENU_OPTIONS.filter(option => option.roles.includes(role));
 
@@ -67,11 +68,26 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
       }
     };
 
+    const fetchChecklistAlertCount = () => {
+      if (role === 'instituto' || role === 'admin') {
+        api.get('/notificacoes-pcr/count')
+          .then((res: any) => {
+            if (res && typeof res.count === 'number') {
+              setChecklistAlertCount(res.count);
+            }
+          })
+          .catch(err => console.error("Erro ao buscar alertas de checklist:", err));
+      }
+    };
+
     fetchCount();
+    fetchChecklistAlertCount();
 
     window.addEventListener('solicitacoesUpdated', fetchCount);
+    window.addEventListener('checklistAlertsUpdated', fetchChecklistAlertCount);
     return () => {
       window.removeEventListener('solicitacoesUpdated', fetchCount);
+      window.removeEventListener('checklistAlertsUpdated', fetchChecklistAlertCount);
     };
   }, [role]);
 
@@ -114,6 +130,19 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
                     marginLeft: '8px'
                   }}>
                     {pendingCount}
+                  </span>
+                )}
+                {option.id === 'checklist-alerts' && checklistAlertCount > 0 && (
+                  <span style={{
+                    background: '#e53e3e',
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    marginLeft: '8px'
+                  }}>
+                    {checklistAlertCount}
                   </span>
                 )}
               </div>
