@@ -29,6 +29,11 @@ export default function AdminMedics() {
       return;
     }
 
+    if (cpf && (cpf.length !== 11 || /^\d{11}$/.test(cpf) === false)) {
+      setError("CPF Inválido.");
+      return;
+    }
+
     try {
       await api.post("/doctors/registrar-direto", {
         nomeCompleto,
