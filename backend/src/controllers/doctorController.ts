@@ -142,7 +142,8 @@ export const responderSolicitacaoCredenciamento = async (req: Request, res: Resp
 };
 
 export const registrarMedicoDireto = async (req: Request, res: Response): Promise<any> => {
-  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao, senha, cpf, adminUser } = req.body;
+  const { nomeCompleto, crm, especialidade, cidade, estado, email, telefone, instituicao, senha, cpf } = req.body;
+  const adminUser = (req as any).user;
 
   if (!nomeCompleto || !crm || !email || !senha) {
     return res.status(400).json({ error: "Nome completo, CRM, e-mail e senha são obrigatórios." });
@@ -189,8 +190,8 @@ export const registrarMedicoDireto = async (req: Request, res: Response): Promis
 
     if (adminUser) {
       await logAction(
-        adminUser.id,
-        adminUser.nome,
+        adminUser.userId,
+        "Usuário do Sistema",
         'Registro Direto de Médico',
         `Registrou o médico ${nomeCompleto} (CRM: ${crm}) diretamente.`
       );

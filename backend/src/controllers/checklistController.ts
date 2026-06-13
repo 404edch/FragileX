@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { db } from "../config/database";
 import { logAction } from "../services/auditService";
+import { calculateChecklistScore, mapSymptomsToChecklists } from "../services/checklistService";
 
 export const salvarChecklist = async (req: Request, res: Response): Promise<any> => {
   const { idPaciente, idMedico, preenchidoPor, sintomasSelecionados } = req.body;
@@ -22,27 +23,8 @@ export const salvarChecklist = async (req: Request, res: Response): Promise<any>
     const sexo_biologico = pacRes.rows[0].sexo_biologico; // 'M' ou 'F'
     const pacNome = pacRes.rows[0].nome;
 
-    // Calcular score
-    let scoreCalculado = 0;
-    let memoriaCalculo = '';
-    let classificacao = 'Negativo';
-    let sintomasEncontrados: any[] = [];
-
-    if (sintomasSelecionados.length > 0) {
-      const sintomasRes = await client.query(`SELECT id, sintoma, score_m, score_f FROM sintomas WHERE id = ANY($1::int[])`, [sintomasSelecionados]);
-      sintomasEncontrados = sintomasRes.rows;
-
-      const calculos: string[] = [];
-      for (const s of sintomasEncontrados) {
-        const peso = sexo_biologico === 'M' ? Number(s.score_m) : Number(s.score_f);
-        scoreCalculado += peso;
-        calculos.push(`${s.sintoma}: ${peso.toFixed(2)}`);
-      }
-      memoriaCalculo = calculos.join('\n');
-    }
-
-    if (sexo_biologico === 'M' && scoreCalculado >= 0.56) classificacao = 'Suspeito';
-    if (sexo_biologico === 'F' && scoreCalculado >= 0.55) classificacao = 'Suspeito';
+    const { scoreCalculado, memoriaCalculo, classificacao, sintomasEncontrados } = 
+      await calculateChecklistScore(client, sintomasSelecionados, sexo_biologico);
 
     // Inserir na tabela checklists
     const insertChecklistQuery = `
@@ -61,12 +43,14 @@ export const salvarChecklist = async (req: Request, res: Response): Promise<any>
     const checklistId = checklistRes.rows[0].id;
 
     // Inserir cada sintoma selecionado
-    for (const idSintoma of sintomasSelecionados) {
-      const insertSintomaQuery = `
-        INSERT INTO checklist_sintomas (id_checklist, id_sintoma, possui)
-        VALUES ($1, $2, true)
-      `;
-      await client.query(insertSintomaQuery, [checklistId, idSintoma]);
+    if (sintomasSelecionados.length > 0) {
+      for (const idSintoma of sintomasSelecionados) {
+        const insertSintomaQuery = `
+          INSERT INTO checklist_sintomas (id_checklist, id_sintoma, possui)
+          VALUES ($1, $2, true)
+        `;
+        await client.query(insertSintomaQuery, [checklistId, idSintoma]);
+      }
     }
 
     await client.query("COMMIT");
@@ -135,7 +119,6 @@ export const obterChecklistsPaciente = async (req: Request, res: Response): Prom
   const role = (req as any).user?.role;
 
   try {
-    // Buscar todos os checklists do paciente (incluindo classificacao)
     const query = `
       SELECT id, id_paciente, id_medico, preenchido_por, score_final, classificacao, data_preenchimento
       FROM checklists
@@ -149,7 +132,6 @@ export const obterChecklistsPaciente = async (req: Request, res: Response): Prom
       return res.json([]);
     }
 
-    // Buscar os sintomas de todos os checklists do paciente, incluindo nomes
     const symptomsQuery = `
       SELECT cs.id_checklist, cs.id_sintoma, s.sintoma AS nome_sintoma
       FROM checklist_sintomas cs
@@ -158,19 +140,8 @@ export const obterChecklistsPaciente = async (req: Request, res: Response): Prom
       WHERE c.id_paciente = $1
     `;
     const symptomsRes = await db.query(symptomsQuery, [idPaciente]);
-    const symptoms = symptomsRes.rows;
-
-    // Agrupar sintomas por checklist id
-    const symptomsMap: Record<number, number[]> = {};
-    const symptomsNamesMap: Record<number, string[]> = {};
-    symptoms.forEach(row => {
-      if (!symptomsMap[row.id_checklist]) {
-        symptomsMap[row.id_checklist] = [];
-        symptomsNamesMap[row.id_checklist] = [];
-      }
-      symptomsMap[row.id_checklist].push(row.id_sintoma);
-      symptomsNamesMap[row.id_checklist].push(row.nome_sintoma);
-    });
+    
+    const { symptomsMap, symptomsNamesMap } = mapSymptomsToChecklists(symptomsRes.rows);
 
     const mapped = checklists.map(c => {
       const entry: any = {
@@ -183,7 +154,6 @@ export const obterChecklistsPaciente = async (req: Request, res: Response): Prom
         data_preenchimento: c.data_preenchimento ? new Date(c.data_preenchimento).toISOString() : new Date().toISOString()
       };
 
-      // Paciente não vê score e classificação
       if (role !== 'paciente') {
         entry.score_final = Number(c.score_final);
         entry.classificacao = c.classificacao;
@@ -237,17 +207,8 @@ export const buscarChecklistsAvancado = async (req: Request, res: Response): Pro
       WHERE cs.id_checklist = ANY($1::int[])
     `;
     const symptomsRes = await db.query(symptomsQuery, [checklistIds]);
-
-    const symptomsMap: Record<number, number[]> = {};
-    const symptomsNamesMap: Record<number, string[]> = {};
-    symptomsRes.rows.forEach(row => {
-      if (!symptomsMap[row.id_checklist]) {
-        symptomsMap[row.id_checklist] = [];
-        symptomsNamesMap[row.id_checklist] = [];
-      }
-      symptomsMap[row.id_checklist].push(row.id_sintoma);
-      symptomsNamesMap[row.id_checklist].push(row.nome_sintoma);
-    });
+    
+    const { symptomsMap, symptomsNamesMap } = mapSymptomsToChecklists(symptomsRes.rows);
 
     const mapped = checklists.map(c => {
       const entry: any = {
@@ -308,23 +269,8 @@ export const atualizarChecklist = async (req: Request, res: Response): Promise<a
     const sexo_biologico = pacRes.rows[0]?.sexo_biologico || 'M';
     const pacNome = pacRes.rows[0]?.nome || 'Usuário Desconhecido';
 
-    let scoreCalculado = 0;
-    let memoriaCalculo = '';
-    let classificacao = 'Negativo';
-
-    if (sintomasSelecionados.length > 0) {
-      const sintomasRes = await client.query(`SELECT id, sintoma, score_m, score_f FROM sintomas WHERE id = ANY($1::int[])`, [sintomasSelecionados]);
-      const calculos: string[] = [];
-      for (const s of sintomasRes.rows) {
-        const peso = sexo_biologico === 'M' ? Number(s.score_m) : Number(s.score_f);
-        scoreCalculado += peso;
-        calculos.push(`${s.sintoma}: ${peso.toFixed(2)}`);
-      }
-      memoriaCalculo = calculos.join('\n');
-    }
-
-    if (sexo_biologico === 'M' && scoreCalculado >= 0.56) classificacao = 'Suspeito';
-    if (sexo_biologico === 'F' && scoreCalculado >= 0.55) classificacao = 'Suspeito';
+    const { scoreCalculado, memoriaCalculo, classificacao } = 
+      await calculateChecklistScore(client, sintomasSelecionados, sexo_biologico);
 
     await client.query(
       `UPDATE checklists SET score_final = $1, classificacao = $2, memoria_calculo = $3 WHERE id = $4`,
@@ -332,11 +278,13 @@ export const atualizarChecklist = async (req: Request, res: Response): Promise<a
     );
 
     await client.query(`DELETE FROM checklist_sintomas WHERE id_checklist = $1`, [idChecklist]);
-    for (const idSintoma of sintomasSelecionados) {
-      await client.query(
-        `INSERT INTO checklist_sintomas (id_checklist, id_sintoma, possui) VALUES ($1, $2, true)`,
-        [idChecklist, idSintoma]
-      );
+    if (sintomasSelecionados.length > 0) {
+      for (const idSintoma of sintomasSelecionados) {
+        await client.query(
+          `INSERT INTO checklist_sintomas (id_checklist, id_sintoma, possui) VALUES ($1, $2, true)`,
+          [idChecklist, idSintoma]
+        );
+      }
     }
 
     await client.query("COMMIT");
@@ -344,7 +292,9 @@ export const atualizarChecklist = async (req: Request, res: Response): Promise<a
     if (role === 'instituto') {
       try {
         await db.query(`UPDATE pacientes SET classificacao_oficial = $1 WHERE id_usuario = $2`, [classificacao, idPaciente]);
-      } catch (err) {}
+      } catch (err) {
+        console.error("Erro ao atualizar classificacao_oficial do paciente durante atualização de checklist:", err);
+      }
     }
 
     await logAction(user.userId, user.nome || "Usuário", "Edição de Checklist", `Editou checklist do paciente ${pacNome}.`);

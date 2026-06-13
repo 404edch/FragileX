@@ -46,11 +46,6 @@ export default function AdminMedics() {
         instituicao,
         senha,
         cpf,
-        adminUser: {
-          id: usuario.id,
-          nome: usuario.nome,
-          role: usuario.role || "admin",
-        },
       });
 
       setSuccess(true);

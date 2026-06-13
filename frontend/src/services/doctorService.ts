@@ -11,8 +11,8 @@ export const doctorService = {
     }
   },
 
-  async registrarMedicoDireto(dados: object, adminUser: Usuario): Promise<MockUsuario> {
-    return api.post<MockUsuario>("/doctors/registrar-direto", { ...dados, adminUser });
+  async registrarMedicoDireto(dados: object): Promise<MockUsuario> {
+    return api.post<MockUsuario>("/doctors/registrar-direto", dados);
   },
 
   async listarPacientesDoMedico(idMedico: number): Promise<(MockUsuario & { pacienteDetails?: MockPaciente })[]> {
