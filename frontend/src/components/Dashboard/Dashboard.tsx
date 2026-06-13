@@ -57,7 +57,7 @@ const Dashboard = () => {
   };
 
   const handlePatientClick = (patient: Patient) => {
-    setSelectedPatientId(patient.id);
+    setSelectedPatientId(patient.id as number);
     setCurrentView("view-patient");
   };
 
@@ -74,9 +74,18 @@ const Dashboard = () => {
       case "view-patient":
         return selectedPatientId ? (
           <div>
-            <button 
-              onClick={() => setCurrentView(DEFAULT_VIEW[usuario.role] ?? "")}
-              style={{ marginBottom: '16px', padding: '8px 16px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', color: '#475569', fontWeight: 'bold' }}
+            <button
+              onClick={() => setCurrentView(DEFAULT_VIEW[usuario.role || "paciente"] ?? "")}
+              style={{
+                marginBottom: "16px",
+                padding: "8px 16px",
+                background: "#f1f5f9",
+                border: "1px solid #cbd5e1",
+                borderRadius: "8px",
+                cursor: "pointer",
+                color: "#475569",
+                fontWeight: "bold",
+              }}
             >
               ← Voltar para a lista
             </button>

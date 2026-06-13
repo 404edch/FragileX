@@ -25,28 +25,27 @@ type MenuOption = {
 };
 
 const MENU_OPTIONS: MenuOption[] = [
+  // Instituto
+  { id: "all-patients", label: "Todos os Pacientes", roles: ["admin", "instituto"] },
+  { id: "all-doctors", label: "Médicos Cadastrados", roles: ["admin", "instituto"] },
+  { id: "manage-medics", label: "Cadastrar Médicos", roles: ["admin", "instituto"] },
+  { id: "reports", label: "Relatórios Estatísticos", roles: ["admin", "instituto"] },
+  { id: "approvals", label: "Aprovações Pendentes", roles: ["admin", "instituto"] },
+  { id: "checklist-alerts", label: "Alertas de Checklist", roles: ["admin", "instituto"] },
   // Admin
   { id: "audit-log", label: "Registro de Auditoria", roles: ["admin"] },
   { id: "manage-users", label: "Gerenciar Usuários", roles: ["admin"] },
   { id: "register-employee", label: "Cadastrar Funcionários", roles: ["admin"] },
 
-  // Instituto
-  { id: "reports", label: "Relatórios Estatísticos", roles: ["admin", "instituto"] },
-  { id: "manage-medics", label: "Cadastrar Médicos", roles: ["admin", "instituto"] },
-  { id: "all-patients", label: "Todos os Pacientes", roles: ["admin", "instituto"] },
-  { id: "all-doctors", label: "Médicos Cadastrados", roles: ["admin", "instituto"] },
-  { id: "approvals", label: "Aprovações Pendentes", roles: ["admin", "instituto"] },
-  { id: "checklist-alerts", label: "Alertas de Checklist", roles: ["admin", "instituto"] },
-
   // Medico
-  { id: "my-patients", label: "Meus Pacientes", roles: ["admin", "medico"] },
-  { id: "import-patient", label: "Importar Paciente", roles: ["admin", "medico"] },
+  { id: "my-patients", label: "Meus Pacientes", roles: ["medico"] },
+  { id: "import-patient", label: "Importar Paciente", roles: ["medico"] },
   { id: "register-patient", label: "Cadastrar Paciente", roles: ["admin", "medico", "instituto"] },
-  { id: "fill-checklist", label: "Preencher Nova Checklist", roles: ["admin", "instituto"] },
+  // { id: "fill-checklist", label: "Preencher Nova Checklist", roles: ["admin", "instituto"] },
 
   // Paciente
-  { id: "my-history", label: "Meu Perfil", roles: ["admin", "paciente"] },
-  { id: "link-requests", label: "Solicitações de Vínculo", roles: ["admin"] },
+  { id: "my-history", label: "Meu Perfil", roles: ["paciente"] },
+  // { id: "link-requests", label: "Solicitações de Vínculo", roles: ["admin"] },
 ];
 
 const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {

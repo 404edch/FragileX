@@ -141,6 +141,14 @@ CREATE TABLE consultas (
     CONSTRAINT fk_consulta_checklist FOREIGN KEY (id_checklist)
 	REFERENCES checklists(id) ON DELETE SET NULL
 );
+ALTER TABLE consultas DROP CONSTRAINT IF EXISTS fk_consulta_medico;
+ALTER TABLE consultas ALTER COLUMN id_medico DROP NOT NULL;
+ALTER TABLE consultas ADD COLUMN autor_id INT;
+ALTER TABLE consultas ADD CONSTRAINT fk_consulta_autor FOREIGN KEY (autor_id) REFERENCES usuarios(id) ON DELETE CASCADE;
+ALTER TABLE consultas ADD COLUMN titulo VARCHAR(100);
+ALTER TABLE consultas ADD COLUMN autor_nome VARCHAR(255);
+ALTER TABLE consultas ADD COLUMN role_autor VARCHAR(50);
+
 
 -- sessoes (connect-pg-simple)
 CREATE TABLE IF NOT EXISTS "session" (

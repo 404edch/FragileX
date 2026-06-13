@@ -88,6 +88,8 @@ router.get("/checklists/paciente/:idPaciente", requireRole(["medico", "instituto
 import * as consultasController from "../controllers/consultasController";
 router.post("/consultas/:idPaciente", requireRole(["medico", "instituto", "admin"]), consultasController.adicionarNota);
 router.get("/consultas/paciente/:idPaciente", requireRole(["medico", "instituto", "paciente", "admin"]), consultasController.listarNotasPaciente);
+router.put("/consultas/:id", requireRole(["medico", "instituto", "admin"]), consultasController.atualizarNota);
+router.delete("/consultas/:id", requireRole(["medico", "instituto", "admin"]), consultasController.deletarNota);
 
 // ── Notificações PCR ──
 router.get("/notificacoes-pcr", requireRole(["instituto", "admin"]), notificacaoController.getNotificacoesPCR);

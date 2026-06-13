@@ -76,6 +76,43 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const [sintomasMap, setSintomasMap] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [editandoNotaId, setEditandoNotaId] = useState<number | null>(null);
+  const [textoEdicao, setTextoEdicao] = useState("");
+
+  const iniciarEdicaoNota = (nota: MockConsulta) => {
+    setEditandoNotaId(nota.id);
+    setTextoEdicao(nota.observacoes);
+  };
+
+  const cancelarEdicaoNota = () => {
+    setEditandoNotaId(null);
+    setTextoEdicao("");
+  };
+
+  const salvarEdicaoNota = async (idNota: number) => {
+    if (!textoEdicao.trim()) return;
+    try {
+      await backendService.atualizarNota(idNota, textoEdicao);
+      const notasAtualizadas = await backendService.listarNotasPaciente(idUsuario);
+      setNotas(notasAtualizadas);
+      setEditandoNotaId(null);
+    } catch (err) {
+      console.error("Erro ao atualizar nota", err);
+      alert("Erro ao atualizar nota");
+    }
+  };
+
+  const handleDeletarNota = async (idNota: number) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta nota?")) return;
+    try {
+      await backendService.deletarNota(idNota);
+      const notasAtualizadas = await backendService.listarNotasPaciente(idUsuario);
+      setNotas(notasAtualizadas);
+    } catch (err) {
+      console.error("Erro ao deletar nota", err);
+      alert("Erro ao excluir nota");
+    }
+  };
 
   const carregarDados = useCallback(async () => {
     setIsLoading(true);
@@ -209,7 +246,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   const handleCycleStatus = async () => {
     if (usuarioInfo?.role !== "instituto") return;
-    
+
     let nextStatus = "pendente";
     if (paciente.encaminhamento_status === "pendente") nextStatus = "encaminhado";
     else if (paciente.encaminhamento_status === "encaminhado") nextStatus = "encaminhamento negado";
@@ -402,11 +439,31 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
         className="dashboard-med-registration"
         style={{ border: solicitacoes.length > 0 ? "2px solid #1a5fa8" : "1px solid #e2e8f0" }}
       >
-        <h3 style={{ fontSize: "18px", color: solicitacoes.length > 0 ? "#1a5fa8" : "#1a3a6e", marginBottom: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+        <h3
+          style={{
+            fontSize: "18px",
+            color: solicitacoes.length > 0 ? "#1a5fa8" : "#1a3a6e",
+            marginBottom: "12px",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
           <span>🔔</span> Solicitações de Vínculo Médico
         </h3>
 
-        <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "10px", color: "#64748b", fontSize: "14px", border: "1px dashed #cbd5e1", marginBottom: solicitacoes.length > 0 ? "16px" : "0" }}>
+        <div
+          style={{
+            background: "#f8fafc",
+            padding: "16px",
+            borderRadius: "10px",
+            color: "#64748b",
+            fontSize: "14px",
+            border: "1px dashed #cbd5e1",
+            marginBottom: solicitacoes.length > 0 ? "16px" : "0",
+          }}
+        >
           Caso você tenha um médico que acompanha seu caso, quando ele te importar a solicitação aparecerá aqui.
         </div>
 
@@ -497,7 +554,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                           borderRadius: "12px",
                           fontSize: "11px",
                           textTransform: "uppercase",
-                          fontWeight: "bold"
+                          fontWeight: "bold",
                         }}
                       >
                         {ch.classificacao === "Suspeito" ? "⚠️ Suspeito" : "✅ Negativo"}
@@ -560,7 +617,17 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                 value={novaNota}
                 onChange={(e) => setNovaNota(e.target.value)}
                 placeholder="Digite as anotações da consulta ou acompanhamento..."
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none", minHeight: "100px", resize: "vertical", marginBottom: "12px" }}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid #cbd5e1",
+                  fontSize: "14px",
+                  outline: "none",
+                  minHeight: "100px",
+                  resize: "vertical",
+                  marginBottom: "12px",
+                }}
               />
               <button
                 disabled={enviandoNota || !novaNota.trim()}
@@ -586,9 +653,9 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   borderRadius: "8px",
                   fontSize: "14px",
                   fontWeight: "bold",
-                  cursor: (enviandoNota || !novaNota.trim()) ? "not-allowed" : "pointer",
-                  opacity: (enviandoNota || !novaNota.trim()) ? 0.7 : 1,
-                  transition: "background 0.2s"
+                  cursor: enviandoNota || !novaNota.trim() ? "not-allowed" : "pointer",
+                  opacity: enviandoNota || !novaNota.trim() ? 0.7 : 1,
+                  transition: "background 0.2s",
                 }}
               >
                 {enviandoNota ? "Salvando..." : "Salvar Nota"}
@@ -597,27 +664,109 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           )}
 
           {notas.length === 0 ? (
-            <p style={{ fontSize: "14px", color: "#64748b", textAlign: "center", padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px dashed #cbd5e1" }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#64748b",
+                textAlign: "center",
+                padding: "20px",
+                background: "#f8fafc",
+                borderRadius: "10px",
+                border: "1px dashed #cbd5e1",
+              }}
+            >
               Nenhuma consulta ou nota registrada até o momento.
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {notas.map((nota) => (
-                <div key={nota.id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+                <div
+                  key={nota.id}
+                  style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                       <strong style={{ fontSize: "16px", color: "#0f172a" }}>{nota.titulo}</strong>
-                      <span style={{ fontSize: "12px", background: "#e0e7ff", color: "#3730a3", padding: "4px 10px", borderRadius: "12px", fontWeight: "bold" }}>
+                      <span
+                        style={{ fontSize: "12px", background: "#e0e7ff", color: "#3730a3", padding: "4px 10px", borderRadius: "12px", fontWeight: "bold" }}
+                      >
                         Autor: {nota.autor_nome} ({nota.role_autor})
                       </span>
                     </div>
-                    <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "500", background: "#f1f5f9", padding: "4px 10px", borderRadius: "12px" }}>
-                      {new Date(nota.data_consulta).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
-                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "500", background: "#f1f5f9", padding: "4px 10px", borderRadius: "12px" }}>
+                        {new Date(nota.data_consulta).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                      </span>
+                      {(usuario?.role === "admin" || usuario?.id === nota.autor_id) && (
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          {editandoNotaId === nota.id ? (
+                            <>
+                              <button 
+                                onClick={() => salvarEdicaoNota(nota.id)}
+                                style={{ padding: "4px 8px", fontSize: "12px", background: "#10b981", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                              >
+                                Salvar
+                              </button>
+                              <button 
+                                onClick={cancelarEdicaoNota}
+                                style={{ padding: "4px 8px", fontSize: "12px", background: "#64748b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button 
+                                onClick={() => iniciarEdicaoNota(nota)}
+                                style={{ padding: "4px 8px", fontSize: "12px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                              >
+                                Editar
+                              </button>
+                              <button 
+                                onClick={() => handleDeletarNota(nota.id)}
+                                style={{ padding: "4px 8px", fontSize: "12px", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                              >
+                                Excluir
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p style={{ fontSize: "14px", color: "#334155", whiteSpace: "pre-wrap", margin: 0, lineHeight: "1.6", background: "#f8fafc", padding: "12px", borderRadius: "8px" }}>
-                    {nota.observacoes}
-                  </p>
+                  {editandoNotaId === nota.id ? (
+                    <textarea
+                      value={textoEdicao}
+                      onChange={(e) => setTextoEdicao(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #3b82f6",
+                        fontSize: "14px",
+                        outline: "none",
+                        minHeight: "80px",
+                        resize: "vertical",
+                        background: "#f8fafc",
+                        fontFamily: "inherit"
+                      }}
+                    />
+                  ) : (
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "#334155",
+                        whiteSpace: "pre-wrap",
+                        margin: 0,
+                        lineHeight: "1.6",
+                        background: "#f8fafc",
+                        padding: "12px",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      {nota.observacoes}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -625,68 +774,70 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
         </div>
 
         {/* Suporte e Contatos Úteis */}
-        <div
-          className="dashboard-med-registration"
-          style={{ background: "linear-gradient(to bottom right, #ffffff, #f0f7ff)" }}
-        >
-          <h3
-            style={{
-              fontSize: "18px",
-              color: "#1a3a6e",
-              borderBottom: "2px solid rgba(26,95,168,0.1)",
-              paddingBottom: "8px",
-              marginBottom: "16px",
-              fontWeight: "bold",
-            }}
+        {usuario?.role !== "admin" && usuario?.role !== "instituto" && (
+          <div
+            className="dashboard-med-registration"
+            style={{ background: "linear-gradient(to bottom right, #ffffff, #f0f7ff)" }}
           >
-            Suporte e Contatos Úteis
-          </h3>
-          <p style={{ fontSize: "13px", color: "#475569", marginBottom: "16px", lineHeight: "1.5" }}>
-            O Programa de Ajuda do Instituto Buko Kaesemodel oferece acolhimento e orientações sobre a Síndrome do X Frágil.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <button
-              type="button"
-              className="patient-card-whatsapp-btn"
+            <h3
               style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                padding: "10px 14px",
-                fontSize: "13px",
-                background: "#25D366",
-                border: "none",
-                color: "white",
+                fontSize: "18px",
+                color: "#1a3a6e",
+                borderBottom: "2px solid rgba(26,95,168,0.1)",
+                paddingBottom: "8px",
+                marginBottom: "16px",
                 fontWeight: "bold",
-                borderRadius: "8px",
               }}
-              onClick={() => window.open("https://wa.me/5541999999999?text=Olá,%20gostaria%20de%20suporte%20sobre%20o%20Programa%20X%20Frágil", "_blank")}
             >
-              Falar no WhatsApp Suporte
-            </button>
-            <div style={{ fontSize: "12px", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px", marginTop: "6px" }}>
-              <div>
-                📞 <strong>Instituto:</strong> (41) 3222-0000
-              </div>
-              <div>
-                ✉ <strong>E-mail:</strong> contato@bukokaesemodel.org.br
-              </div>
-              <div>
-                🌐 <strong>Guia Síndrome X Frágil:</strong>{" "}
-                <a
-                  href="https://xfragil.org.br/"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ color: "#1a5fa8", textDecoration: "underline" }}
-                >
-                  Acesse o Portal
-                </a>
+              Suporte e Contatos Úteis
+            </h3>
+            <p style={{ fontSize: "13px", color: "#475569", marginBottom: "16px", lineHeight: "1.5" }}>
+              O Programa de Ajuda do Instituto Buko Kaesemodel oferece acolhimento e orientações sobre a Síndrome do X Frágil.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button
+                type="button"
+                className="patient-card-whatsapp-btn"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "10px 14px",
+                  fontSize: "13px",
+                  background: "#25D366",
+                  border: "none",
+                  color: "white",
+                  fontWeight: "bold",
+                  borderRadius: "8px",
+                }}
+                onClick={() => window.open("https://wa.me/5541999999999?text=Olá,%20gostaria%20de%20suporte%20sobre%20o%20Programa%20X%20Frágil", "_blank")}
+              >
+                Falar no WhatsApp Suporte
+              </button>
+              <div style={{ fontSize: "12px", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px", marginTop: "6px" }}>
+                <div>
+                  📞 <strong>Instituto:</strong> (41) 3222-0000
+                </div>
+                <div>
+                  ✉ <strong>E-mail:</strong> contato@bukokaesemodel.org.br
+                </div>
+                <div>
+                  🌐 <strong>Guia Síndrome X Frágil:</strong>{" "}
+                  <a
+                    href="https://xfragil.org.br/"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: "#1a5fa8", textDecoration: "underline" }}
+                  >
+                    Acesse o Portal
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

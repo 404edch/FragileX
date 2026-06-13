@@ -51,3 +51,53 @@ export const listarNotasPaciente = async (req: Request, res: Response): Promise<
     return res.status(500).json({ error: "Erro interno no servidor." });
   }
 };
+
+export const atualizarNota = async (req: Request, res: Response): Promise<any> => {
+  const idNota = Number(req.params.id);
+  const { observacoes } = req.body;
+
+  if (isNaN(idNota) || !observacoes) {
+    return res.status(400).json({ error: "Dados inválidos." });
+  }
+
+  try {
+    const updateQuery = `
+      UPDATE consultas
+      SET observacoes = $1
+      WHERE id = $2
+      RETURNING id, id_paciente, autor_id, autor_nome, role_autor, titulo, observacoes, data_consulta
+    `;
+    const result = await db.query(updateQuery, [observacoes, idNota]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Nota não encontrada." });
+    }
+
+    return res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Erro ao atualizar nota:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
+export const deletarNota = async (req: Request, res: Response): Promise<any> => {
+  const idNota = Number(req.params.id);
+
+  if (isNaN(idNota)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  try {
+    const deleteQuery = "DELETE FROM consultas WHERE id = $1 RETURNING id";
+    const result = await db.query(deleteQuery, [idNota]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Nota não encontrada." });
+    }
+
+    return res.json({ message: "Nota deletada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao deletar nota:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
