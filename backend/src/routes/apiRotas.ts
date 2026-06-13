@@ -68,7 +68,7 @@ router.post("/links/:id/responder", requireRole(["paciente"]), linkController.re
 // ── Doctors (Credenciamento) ──
 router.get("/doctors/solicitacoes", requireRole(["instituto", "admin"]), doctorController.listarSolicitacoesCredenciamento);
 router.get("/doctors/solicitacoes/count", requireRole(["instituto", "admin"]), doctorController.contarSolicitacoesPendentes);
-router.get("/doctors/:id", requireRole(["medico", "instituto", "admin"]), doctorController.getMedico);
+router.get("/doctors/:id", requireRole(["medico", "instituto", "admin", "paciente"]), doctorController.getMedico);
 router.post("/doctors/solicitacoes/:id/responder", requireRole(["instituto", "admin"]), doctorController.responderSolicitacaoCredenciamento);
 router.post("/doctors/registrar-direto", requireRole(["instituto", "admin"]), doctorController.registrarMedicoDireto);
 

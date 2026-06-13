@@ -112,10 +112,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
       if (p?.id_medico_responsavel) {
         try {
-          const [medUser, medDet] = await Promise.all([
-            userService.getUsuario(p.id_medico_responsavel),
-            doctorService.getMedico(p.id_medico_responsavel)
-          ]);
+          const [medUser, medDet] = await Promise.all([userService.getUsuario(p.id_medico_responsavel), doctorService.getMedico(p.id_medico_responsavel)]);
           setMedicoResponsavelText(medUser ? `${medUser.nome} (CRM: ${medDet?.crm || "N/A"})` : "Médico Associado");
         } catch {
           setMedicoResponsavelText("Médico Associado");
@@ -170,7 +167,10 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   if (isLoading) {
     return (
-      <div className="dashboard-med-registration" style={{ textAlign: "center", padding: "40px" }}>
+      <div
+        className="dashboard-med-registration"
+        style={{ textAlign: "center", padding: "40px" }}
+      >
         <p style={{ color: "#888" }}>Carregando dados do painel do paciente...</p>
       </div>
     );
@@ -178,9 +178,17 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   if (loadError) {
     return (
-      <div className="dashboard-med-registration" style={{ textAlign: "center", padding: "40px" }}>
+      <div
+        className="dashboard-med-registration"
+        style={{ textAlign: "center", padding: "40px" }}
+      >
         <p style={{ color: "#dc2626", marginBottom: "8px" }}>{loadError}</p>
-        <button type="button" className="checklist-submit-btn" style={{ margin: 0, padding: "8px 16px", fontSize: "13px" }} onClick={carregarDados}>
+        <button
+          type="button"
+          className="checklist-submit-btn"
+          style={{ margin: 0, padding: "8px 16px", fontSize: "13px" }}
+          onClick={carregarDados}
+        >
           Tentar novamente
         </button>
       </div>
@@ -189,7 +197,10 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   if (!usuarioInfo || !paciente) {
     return (
-      <div className="dashboard-med-registration" style={{ textAlign: "center", padding: "40px" }}>
+      <div
+        className="dashboard-med-registration"
+        style={{ textAlign: "center", padding: "40px" }}
+      >
         <p style={{ color: "#888" }}>Perfil do paciente não encontrado.</p>
       </div>
     );
@@ -213,26 +224,38 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       )}
 
       <div className="patient-dashboard-grid">
-        <PersonalInfoSection usuarioInfo={usuarioInfo} paciente={paciente} />
-        <ReferralStatusSection 
-          paciente={paciente} 
-          usuario={usuario} 
-          statusColors={statusColors} 
-          medicoResponsavelText={medicoResponsavelText} 
-          setPaciente={setPaciente} 
+        <PersonalInfoSection
+          usuarioInfo={usuarioInfo}
+          paciente={paciente}
+        />
+        <ReferralStatusSection
+          paciente={paciente}
+          usuario={usuario}
+          statusColors={statusColors}
+          medicoResponsavelText={medicoResponsavelText}
+          setPaciente={setPaciente}
         />
       </div>
 
-      <LinkRequestsSection solicitacoes={solicitacoes} handleResponderVinculo={handleResponderVinculo} />
-      
-      <ChecklistHistorySection checklists={checklists} sintomasMap={sintomasMap} usuarioInfo={usuarioInfo} />
-      
+      {usuario?.role === "paciente" && (
+        <LinkRequestsSection
+          solicitacoes={solicitacoes}
+          handleResponderVinculo={handleResponderVinculo}
+        />
+      )}
+
+      <ChecklistHistorySection
+        checklists={checklists}
+        sintomasMap={sintomasMap}
+        usuarioInfo={usuarioInfo}
+      />
+
       <div className="patient-dashboard-grid">
-        <ConsultationsHistorySection 
-          notas={notas} 
-          setNotas={setNotas} 
-          usuario={usuario} 
-          paciente={paciente} 
+        <ConsultationsHistorySection
+          notas={notas}
+          setNotas={setNotas}
+          usuario={usuario}
+          paciente={paciente}
         />
         <SupportContactsSection usuario={usuario} />
       </div>
