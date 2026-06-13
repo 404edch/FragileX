@@ -3,7 +3,9 @@ import DadosPessoais from "./DadosPessoais";
 import BotaoInicio from "../Shared/BotaoInicio";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
-import { backendService, type MockUsuario } from "../../services/backendService";
+import { patientService } from "../../services/patientService";
+import { linkService } from "../../services/linkService";
+import { MockUsuario } from "../../services/types";
 import "./Checklist.css";
 import { useNavigate } from "react-router-dom";
 
@@ -21,7 +23,7 @@ export default function RegistroPaciente() {
   const handleCpfBlur = async (cpf: string) => {
     if (!cpf || cpf.length !== 11 || !isMedico) return;
     try {
-      const res = await backendService.checkCpf(cpf);
+      const res = await patientService.checkCpf(cpf);
       if (res.exists && res.user) {
         setExistingUser(res.user);
       } else {
@@ -35,7 +37,7 @@ export default function RegistroPaciente() {
   const handleVincular = async () => {
     if (!usuario || !existingUser) return;
     try {
-      await backendService.importarPacientePorCpf(usuario.id, cpfValue);
+      await linkService.importarPacientePorCpf(usuario.id, cpfValue);
       alert("Solicitação de vínculo enviada com sucesso!");
       navigate("/dashboard");
     } catch (error: any) {

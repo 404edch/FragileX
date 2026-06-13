@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Patient } from '../types';
-import { backendService } from '../../../services/backendService';
+import { userService } from '../../../services/userService';
+import { patientService } from '../../../services/patientService';
 import './PatientCard.css';
 
 interface PatientCardProps {
@@ -23,7 +24,7 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
     reader.onload = async () => {
       try {
         const base64 = reader.result as string;
-        await backendService.atualizarFotoPerfil(Number(patient.id), base64);
+        await userService.atualizarFotoPerfil(Number(patient.id), base64);
         setFotoLocal(base64);
       } catch (err) {
         alert("Erro ao enviar foto");
@@ -44,7 +45,7 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value;
     try {
-      await backendService.updatePatientStatus(Number(patient.id), newStatus);
+      await patientService.updatePatientStatus(Number(patient.id), newStatus);
       setStatus(newStatus);
     } catch (err) {
       console.error("Erro ao atualizar status:", err);

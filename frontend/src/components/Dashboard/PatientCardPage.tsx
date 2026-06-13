@@ -1,7 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PatientCard from "./PatientCard/PatientCard";
-import { backendService } from "../../services/backendService";
+import { userService } from "../../services/userService";
+import { patientService } from "../../services/patientService";
+import { doctorService } from "../../services/doctorService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function PatientCardPage() {
@@ -33,8 +35,8 @@ export default function PatientCardPage() {
       }
 
       try {
-        const u = await backendService.getUsuario(patientIdNum);
-        const d = await backendService.getPaciente(patientIdNum);
+        const u = await userService.getUsuario(patientIdNum);
+        const d = await patientService.getPaciente(patientIdNum);
         setUser(u);
         setDetails(d);
 
@@ -44,7 +46,7 @@ export default function PatientCardPage() {
         } else if (usuario.role === "paciente" && usuario.id === patientIdNum) {
           permissao = true;
         } else if (usuario.role === "medico") {
-          const pacientesDoMedico = await backendService.listarPacientesDoMedico(usuario.id);
+          const pacientesDoMedico = await doctorService.listarPacientesDoMedico(usuario.id);
           permissao = pacientesDoMedico.some((p) => p.id === patientIdNum);
         }
         setTemPermissao(permissao);

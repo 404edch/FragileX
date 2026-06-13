@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import './PatientList.css';
-import { backendService, type MockUsuario, type MockPaciente } from '../../../services/backendService';
+import { doctorService } from '../../../services/doctorService';
+import { patientService } from '../../../services/patientService';
+import { MockUsuario, MockPaciente } from '../../../services/types';
 import { useAuth } from '../../../contexts/AuthContext';
 import Fuse from 'fuse.js';
 
@@ -27,10 +29,10 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
         let data: (MockUsuario & { pacienteDetails?: MockPaciente })[] = [];
         
         if (role === 'medico') {
-          data = await backendService.listarPacientesDoMedico(usuario.id);
+          data = await doctorService.listarPacientesDoMedico(usuario.id);
         } else {
           // Admin and Instituto see all patients
-          data = await backendService.listarTodosPacientes();
+          data = await patientService.listarTodosPacientes();
         }
         
         setPatients(data);

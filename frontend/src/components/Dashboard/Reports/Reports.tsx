@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { backendService, type MockUsuario, type MockPaciente } from '../../../services/backendService';
+import { patientService } from '../../../services/patientService';
+import { userService } from '../../../services/userService';
+import { MockUsuario, MockPaciente } from '../../../services/types';
 import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import * as XLSX from 'xlsx';
 
@@ -20,8 +22,8 @@ export default function Reports() {
     const fetchData = async () => {
       try {
         const [patientsData, usersData] = await Promise.all([
-          backendService.listarTodosPacientes(),
-          backendService.listarTodosUsuarios()
+          patientService.listarTodosPacientes(),
+          userService.listarTodosUsuarios()
         ]);
         setPatients(patientsData);
         setDoctors(usersData.filter(u => u.role === 'medico'));

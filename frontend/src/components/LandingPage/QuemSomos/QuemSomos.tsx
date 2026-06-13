@@ -3,7 +3,7 @@ import { useLarguraJanela, useUmaVezNoViewport } from '../../../hooks/useHooks';
 import { CarrosselDesktop, CarrosselMobile } from '../Carrossel/Carrossel';
 import AnimatedContent from '../../Shared/AnimatedContent';
 import './QuemSomos.css';
-import { backendService } from '../../../services/backendService';
+import { landingService } from '../../../services/landingService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
 
@@ -20,7 +20,7 @@ const QuemSomos = () => {
 
   const carregarCards = async () => {
     try {
-      const data = await backendService.getLandingCards();
+      const data = await landingService.getLandingCards();
       setCards(data);
     } catch (err) {
       console.error(err);
@@ -79,7 +79,7 @@ const QuemSomos = () => {
     }
     
     try {
-      await backendService.saveLandingCards(updated);
+      await landingService.saveLandingCards(updated);
       setCards(updated);
       setIsModalOpen(false);
       setSelectedCard(null);
@@ -92,7 +92,7 @@ const QuemSomos = () => {
     if (!selectedCard || selectedCard.id === 'new') return;
     const updated = cards.filter(c => c.id !== selectedCard.id);
     try {
-      await backendService.saveLandingCards(updated);
+      await landingService.saveLandingCards(updated);
       setCards(updated);
       setIsModalOpen(false);
       setSelectedCard(null);

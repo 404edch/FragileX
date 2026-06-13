@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { backendService, type MockUsuario, type MockMedico } from "../../services/backendService";
+import { userService } from "../../services/userService";
+import { doctorService } from "../../services/doctorService";
+import { MockUsuario, MockMedico } from "../../services/types";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function DoctorList() {
@@ -15,7 +17,7 @@ export default function DoctorList() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const users = await backendService.listarTodosUsuarios();
+        const users = await userService.listarTodosUsuarios();
         const medicos = users.filter((u) => u.role === "medico");
         setDoctors(medicos);
       } catch (err) {
@@ -33,7 +35,7 @@ export default function DoctorList() {
     setSelectedDoctor(doc);
     setLoadingPatients(true);
     try {
-      const patients = await backendService.listarPacientesDoMedico(doc.id);
+      const patients = await doctorService.listarPacientesDoMedico(doc.id);
       setDoctorPatients(patients);
     } catch (err) {
       console.error("Erro ao buscar pacientes do médico:", err);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { backendService, type LandingCard, type MockNews } from '../../services/backendService';
+import { landingService } from '../../services/landingService';
+import { LandingCard, MockNews } from '../../services/types';
 import './Dashboard.css';
 
 const EditLanding = () => {
@@ -14,8 +15,8 @@ const EditLanding = () => {
 
   const carregarDados = async () => {
     try {
-      const cardsData = await backendService.getLandingCards();
-      const newsData = await backendService.getLandingNews();
+      const cardsData = await landingService.getLandingCards();
+      const newsData = await landingService.getLandingNews();
       setCards(cardsData);
       setNews(newsData);
     } catch (error) {
@@ -57,7 +58,7 @@ const EditLanding = () => {
 
   const salvarCards = async () => {
     try {
-      await backendService.saveLandingCards(cards);
+      await landingService.saveLandingCards(cards);
       alert('Cards do carrossel Quem Somos salvos com sucesso!');
       await carregarDados();
     } catch (error) {
@@ -117,7 +118,7 @@ const EditLanding = () => {
 
     const updated = [...news, newItem];
     try {
-      await backendService.saveLandingNews(updated);
+      await landingService.saveLandingNews(updated);
       setNews(updated);
       setNewNewsTitle('');
       setNewNewsLink('');
@@ -131,7 +132,7 @@ const EditLanding = () => {
   const handleRemoveNews = async (id: number) => {
     const updated = news.filter(n => n.id !== id);
     try {
-      await backendService.saveLandingNews(updated);
+      await landingService.saveLandingNews(updated);
       setNews(updated);
       alert('Notícia removida.');
     } catch (error) {
@@ -141,7 +142,7 @@ const EditLanding = () => {
 
   const salvarNoticiasModificadas = async () => {
     try {
-      await backendService.saveLandingNews(news);
+      await landingService.saveLandingNews(news);
       alert('Alterações nas notícias salvas com sucesso!');
       await carregarDados();
     } catch (error) {

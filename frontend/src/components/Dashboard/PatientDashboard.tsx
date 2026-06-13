@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { backendService, type MockConsulta } from "../../services/backendService";
+import { userService } from "../../services/userService";
+import { patientService } from "../../services/patientService";
+import { doctorService } from "../../services/doctorService";
+import { consultaService } from "../../services/consultaService";
+import { checklistService } from "../../services/checklistService";
+import { linkService } from "../../services/linkService";
+import { MockConsulta } from "../../services/types";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSintomas } from "../../services/getSintomas";
 import "./Dashboard.css";
@@ -95,8 +101,8 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const salvarEdicaoNota = async (idNota: number) => {
     if (!textoEdicao.trim()) return;
     try {
-      await backendService.atualizarNota(idNota, textoEdicao);
-      const notasAtualizadas = await backendService.listarNotasPaciente(idUsuario);
+      await consultaService.atualizarNota(idNota, textoEdicao);
+      const notasAtualizadas = await consultaService.listarNotasPaciente(idUsuario);
       setNotas(notasAtualizadas);
       setEditandoNotaId(null);
     } catch (err) {
@@ -108,8 +114,8 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const handleDeletarNota = async (idNota: number) => {
     if (!window.confirm("Tem certeza que deseja excluir esta nota?")) return;
     try {
-      await backendService.deletarNota(idNota);
-      const notasAtualizadas = await backendService.listarNotasPaciente(idUsuario);
+      await consultaService.deletarNota(idNota);
+      const notasAtualizadas = await consultaService.listarNotasPaciente(idUsuario);
       setNotas(notasAtualizadas);
     } catch (err) {
       console.error("Erro ao deletar nota", err);
@@ -122,7 +128,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
     setLoadError(null);
 
     try {
-      const user = await backendService.getUsuario(idUsuario);
+      const user = await userService.getUsuario(idUsuario);
       setUsuarioInfo(user);
       if (!user) {
         setPaciente(null);
@@ -132,12 +138,12 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
         return;
       }
 
-      const p = await backendService.getPaciente(idUsuario);
+      const p = await patientService.getPaciente(idUsuario);
       setPaciente(p);
 
       if (p?.id_medico_responsavel) {
         try {
-          const [medUser, medDet] = await Promise.all([backendService.getUsuario(p.id_medico_responsavel), backendService.getMedico(p.id_medico_responsavel)]);
+          const [medUser, medDet] = await Promise.all([userService.getUsuario(p.id_medico_responsavel), doctorService.getMedico(p.id_medico_responsavel)]);
           setMedicoResponsavelText(medUser ? `${medUser.nome} (CRM: ${medDet?.crm || "N/A"})` : "Médico Associado");
         } catch {
           setMedicoResponsavelText("Médico Associado");
@@ -147,10 +153,10 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       }
 
       const [checklistsData, sintomasList, solicitacoesData, notasData] = await Promise.all([
-        backendService.obterChecklistsPaciente(idUsuario).catch(() => [] as ChecklistPaciente[]),
+        checklistService.obterChecklistsPaciente(idUsuario).catch(() => [] as ChecklistPaciente[]),
         getSintomas().catch(() => []),
-        backendService.listarSolicitacoesVinculoPaciente(idUsuario).catch(() => [] as VinculoPaciente[]),
-        backendService.listarNotasPaciente(idUsuario).catch(() => [] as MockConsulta[]),
+        linkService.listarSolicitacoesVinculoPaciente(idUsuario).catch(() => [] as VinculoPaciente[]),
+        consultaService.listarNotasPaciente(idUsuario).catch(() => [] as MockConsulta[]),
       ]);
 
       setChecklists(Array.isArray(checklistsData) ? checklistsData : []);
@@ -188,7 +194,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
     reader.onload = async () => {
       try {
         const base64 = reader.result as string;
-        await backendService.atualizarFotoPerfil(idUsuario, base64);
+        await userService.atualizarFotoPerfil(idUsuario, base64);
         if (paciente) {
           setPaciente({ ...paciente, foto_perfil: base64 });
         }
@@ -203,7 +209,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   const handleResponderVinculo = async (idVinculo: number, aceitar: boolean) => {
     try {
-      await backendService.responderSolicitacaoVinculo(idVinculo, aceitar);
+      await linkService.responderSolicitacaoVinculo(idVinculo, aceitar);
       alert(aceitar ? "Vínculo com o médico aprovado com sucesso!" : "Vínculo com o médico recusado.");
       await carregarDados();
       await atualizarUsuarioLogado();
@@ -278,7 +284,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
     else nextStatus = "pendente";
 
     try {
-      await backendService.updatePatientStatus(paciente.id_usuario, nextStatus);
+      await patientService.updatePatientStatus(paciente.id_usuario, nextStatus);
       if (paciente) {
         setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
       }
@@ -403,7 +409,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   onChange={async (e) => {
                     const nextStatus = e.target.value;
                     try {
-                      await backendService.updatePatientStatus(paciente.id_usuario, nextStatus);
+                      await patientService.updatePatientStatus(paciente.id_usuario, nextStatus);
                       setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
                     } catch (err) {
                       console.error("Erro ao atualizar status:", err);
@@ -678,9 +684,9 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   if (!novaNota.trim() || !usuario) return;
                   setEnviandoNota(true);
                   try {
-                    await backendService.adicionarNota(paciente.id_usuario, novaNota, usuario.id, usuario.nome || "Usuário", usuario.role || "paciente");
+                    await consultaService.adicionarNota(paciente.id_usuario, novaNota, usuario.id, usuario.nome || "Usuário", usuario.role || "paciente");
                     setNovaNota("");
-                    const notasAtualizadas = await backendService.listarNotasPaciente(paciente.id_usuario);
+                    const notasAtualizadas = await consultaService.listarNotasPaciente(paciente.id_usuario);
                     setNotas(notasAtualizadas);
                   } catch (err) {
                     console.error("Erro ao adicionar nota", err);

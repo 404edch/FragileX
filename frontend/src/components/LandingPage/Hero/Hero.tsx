@@ -6,7 +6,7 @@ import AnimatedContent from '../../Shared/AnimatedContent';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Hero.css';
-import { backendService } from '../../../services/backendService';
+import { landingService } from '../../../services/landingService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
 
@@ -31,7 +31,7 @@ const Hero = () => {
 
   const carregarNews = async () => {
     try {
-      const data = await backendService.getLandingNews();
+      const data = await landingService.getLandingNews();
       setNews(data);
     } catch (err) {
       console.error(err);
@@ -94,7 +94,7 @@ const Hero = () => {
     }
 
     try {
-      await backendService.saveLandingNews(updated);
+      await landingService.saveLandingNews(updated);
       setNews(updated);
       setIsModalOpen(false);
       setSelectedNews(null);
@@ -107,7 +107,7 @@ const Hero = () => {
     if (!selectedNews || selectedNews.id === 'new') return;
     const updated = news.filter(n => n.id !== selectedNews.id);
     try {
-      await backendService.saveLandingNews(updated);
+      await landingService.saveLandingNews(updated);
       setNews(updated);
       setIsModalOpen(false);
       setSelectedNews(null);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { backendService } from '../../services/backendService';
+import { linkService } from '../../services/linkService';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ImportPatient = () => {
@@ -20,7 +20,7 @@ const ImportPatient = () => {
     setStatusMsg({ text: '', type: '' });
 
     try {
-      await backendService.importarPacientePorCpf(usuario.id, cpf);
+      await linkService.importarPacientePorCpf(usuario.id, cpf);
       setStatusMsg({ text: 'Solicitação de vínculo enviada com sucesso! O paciente deve aprovar o vínculo no painel dele.', type: 'success' });
       setCpf('');
     } catch (err: any) {
