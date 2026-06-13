@@ -1,0 +1,346 @@
+.patient-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.patient-welcome-title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #1a5fa8;
+  margin-bottom: 6px;
+}
+
+.patient-welcome-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.patient-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.patient-section-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.patient-section-header {
+  font-size: 18px;
+  color: #1a3a6e;
+  border-bottom: 2px solid rgba(26, 95, 168, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  font-weight: bold;
+}
+
+.patient-info-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.patient-photo-container {
+  flex-shrink: 0;
+}
+
+.patient-photo {
+  width: 140px;
+  height: 140px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 3px solid #1a5fa8;
+}
+
+.patient-photo-placeholder {
+  width: 140px;
+  height: 140px;
+  border-radius: 10px;
+  border: 3px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.patient-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.patient-status-select {
+  width: 100%;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+  appearance: menulist;
+}
+
+.patient-status-display {
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.patient-status-label {
+  font-size: 12px;
+  color: #64748b;
+  display: block;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.patient-status-text {
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.patient-status-description {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.patient-medico-info {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.patient-medico-name {
+  color: #1a5fa8;
+}
+
+.patient-link-request-card {
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.patient-checklist-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.patient-checklist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.patient-checklist-title {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-checklist-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.patient-checklist-date {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.patient-checklist-author {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.patient-sintoma-badge {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.patient-nota-form {
+  margin-bottom: 24px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.patient-nota-textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  outline: none;
+  min-height: 100px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.patient-nota-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.patient-nota-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.patient-nota-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-nota-title {
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.patient-nota-autor {
+  font-size: 12px;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.patient-nota-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-nota-date {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.patient-nota-btn-edit {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.patient-nota-btn-delete {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.patient-nota-btn-save {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.patient-nota-btn-cancel {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #64748b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.patient-nota-text {
+  font-size: 14px;
+  color: #334155;
+  white-space: pre-wrap;
+  margin: 0;
+  line-height: 1.6;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.patient-nota-textarea-edit {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+  font-size: 14px;
+  outline: none;
+  min-height: 80px;
+  resize: vertical;
+  background: #f8fafc;
+  font-family: inherit;
+}
+
+.patient-support-section {
+  background: linear-gradient(to bottom right, #ffffff, #f0f7ff);
+}
+
+.patient-support-contacts {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.patient-support-link {
+  color: #1a5fa8;
+  text-decoration: none;
+}
