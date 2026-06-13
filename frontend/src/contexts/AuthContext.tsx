@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api } from '../services/api';
 
@@ -27,21 +28,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Carrega o usuário da sessão/localStorage se existir
   useEffect(() => {
-    const sessao = localStorage.getItem('fragilex_sessao');
-    if (sessao) {
-      try {
-        const user = JSON.parse(sessao);
-        setUsuario(user);
-      } catch (e) {
-        console.error('Erro ao ler sessão', e);
+    const timeoutId = window.setTimeout(() => {
+      const sessao = localStorage.getItem('fragilex_sessao');
+      if (sessao) {
+        try {
+          const user = JSON.parse(sessao);
+          setUsuario(user);
+        } catch (e) {
+          console.error('Erro ao ler sessão', e);
+        }
       }
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const loginComCredenciais = async (emailOuCpf: string, senha: string): Promise<{ success: boolean; error?: string }> => {
     try {
       // Usar a api real apontando para o backend
-      const response = await api.post<{ message: string; token: string; user: any }>('/auth/login', {
+      const response = await api.post<{ message: string; token: string; user: Omit<Usuario, 'token'> }>('/auth/login', {
         emailOrCpf: emailOuCpf,
         senha
       });
@@ -54,8 +59,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUsuario(userToStore);
       localStorage.setItem('fragilex_sessao', JSON.stringify(userToStore));
       return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e.message || 'Erro ao tentar fazer login.' };
+    } catch (e: unknown) {
+      return { success: false, error: e instanceof Error ? e.message : 'Erro ao tentar fazer login.' };
     }
   };
 

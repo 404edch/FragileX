@@ -37,11 +37,15 @@ const Dashboard = () => {
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!usuario) {
-      navigate("/login");
-    } else if (usuario.role) {
-      setCurrentView(DEFAULT_VIEW[usuario.role] ?? "");
-    }
+    const timeoutId = window.setTimeout(() => {
+      if (!usuario) {
+        navigate("/login");
+      } else if (usuario.role) {
+        setCurrentView(DEFAULT_VIEW[usuario.role] ?? "");
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [usuario, navigate]);
 
   if (!usuario) return null;

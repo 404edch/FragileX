@@ -60,7 +60,7 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
       if (role === "instituto" || role === "admin") {
         api
           .get("/doctors/solicitacoes/count")
-          .then((res: any) => {
+          .then((res: { count?: number }) => {
             if (res && typeof res.count === "number") {
               setPendingCount(res.count);
             }
@@ -73,7 +73,7 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
       if (role === "instituto" || role === "admin") {
         api
           .get("/notificacoes-pcr/count")
-          .then((res: any) => {
+          .then((res: { count?: number }) => {
             if (res && typeof res.count === "number") {
               setChecklistAlertCount(res.count);
             }

@@ -4,13 +4,13 @@ import { api } from '../../../services/api';
 import './AuditLog.css';
 
 const AuditLog = () => {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<Record<string, string>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const carregarAudits = async () => {
       try {
-        const data = await api.get<any[]>('/audits');
+        const data = await api.get<Record<string, string>[]>('/audits');
         setLogs(data);
       } catch (error) {
         console.error("Erro ao obter logs de auditoria:", error);

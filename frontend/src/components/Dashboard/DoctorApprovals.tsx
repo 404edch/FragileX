@@ -35,7 +35,11 @@ const DoctorApprovals = () => {
   };
 
   useEffect(() => {
-    carregarSolicitacoes();
+    const timeoutId = window.setTimeout(() => {
+      carregarSolicitacoes();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const startApprove = (id: number) => {
@@ -51,8 +55,8 @@ const DoctorApprovals = () => {
       setApprovalId(null);
       setSuccessMessage('Médico aprovado com sucesso! A conta agora está ativa para uso no sistema.');
       setTimeout(() => setSuccessMessage(null), 5000);
-    } catch (e: any) {
-      alert(e.message || 'Erro ao aprovar solicitação.');
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Erro ao aprovar solicitação.');
       setApprovalId(null);
     }
   };
@@ -72,8 +76,8 @@ const DoctorApprovals = () => {
         await carregarSolicitacoes();
         window.dispatchEvent(new Event('solicitacoesUpdated'));
         alert('Solicitação de médico rejeitada.');
-      } catch (e: any) {
-        alert(e.message || 'Erro ao rejeitar solicitação.');
+      } catch (e: unknown) {
+        alert(e instanceof Error ? e.message : 'Erro ao rejeitar solicitação.');
       }
     }
   };

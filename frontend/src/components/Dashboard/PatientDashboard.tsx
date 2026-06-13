@@ -77,9 +77,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const [notas, setNotas] = useState<MockConsulta[]>([]);
   const [novaNota, setNovaNota] = useState("");
   const [enviandoNota, setEnviandoNota] = useState(false);
-  const [fotosGaleria, setFotosGaleria] = useState<any[]>([]);
-  const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
-  const [isUploadingFoto, setIsUploadingFoto] = useState(false);
   const [usuarioInfo, setUsuarioInfo] = useState<UsuarioReal | null>(null);
   const [medicoResponsavelText, setMedicoResponsavelText] = useState<string>("Buscando...");
   const [sintomasMap, setSintomasMap] = useState<Record<number, string>>({});
@@ -184,28 +181,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
     return () => window.clearTimeout(timeoutId);
   }, [carregarDados]);
-
-  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    setIsUploadingFoto(true);
-    reader.onload = async () => {
-      try {
-        const base64 = reader.result as string;
-        await userService.atualizarFotoPerfil(idUsuario, base64);
-        if (paciente) {
-          setPaciente({ ...paciente, foto_perfil: base64 });
-        }
-      } catch (err) {
-        alert("Erro ao enviar foto");
-      } finally {
-        setIsUploadingFoto(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleResponderVinculo = async (idVinculo: number, aceitar: boolean) => {
     try {
       await linkService.responderSolicitacaoVinculo(idVinculo, aceitar);
@@ -271,24 +246,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
       return isNaN(idade) ? "N/A" : `${idade} anos`;
     } catch {
       return "N/A";
-    }
-  };
-
-  const handleCycleStatus = async () => {
-    if (usuarioInfo?.role !== "instituto") return;
-
-    let nextStatus = "pendente";
-    if (paciente.encaminhamento_status === "pendente") nextStatus = "encaminhado";
-    else if (paciente.encaminhamento_status === "encaminhado") nextStatus = "encaminhamento negado";
-    else nextStatus = "pendente";
-
-    try {
-      await patientService.updatePatientStatus(paciente.id_usuario, nextStatus);
-      if (paciente) {
-        setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
-      }
-    } catch (err) {
-      console.error("Erro ao atualizar status:", err);
     }
   };
 
@@ -423,7 +380,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                     const nextStatus = e.target.value;
                     try {
                       await patientService.updatePatientStatus(paciente.id_usuario, nextStatus);
-                      setPaciente({ ...paciente, encaminhamento_status: nextStatus as any });
+                      setPaciente({ ...paciente, encaminhamento_status: nextStatus as "pendente" | "encaminhado" | "encaminhamento negado" });
                     } catch (err) {
                       console.error("Erro ao atualizar status:", err);
                     }

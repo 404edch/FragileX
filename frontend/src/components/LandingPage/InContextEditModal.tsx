@@ -17,13 +17,17 @@ export default function InContextEditModal({ isOpen, onClose, onSave, onDelete, 
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      setNome(initialData.nome || '');
-      setLinkHref(initialData.linkHref || '');
-      setImagemUrl(initialData.imagemUrl || '');
-      setImagePreview(initialData.imagemUrl || '');
-      setError('');
-    }
+    const timeoutId = window.setTimeout(() => {
+      if (isOpen) {
+        setNome(initialData.nome || '');
+        setLinkHref(initialData.linkHref || '');
+        setImagemUrl(initialData.imagemUrl || '');
+        setImagePreview(initialData.imagemUrl || '');
+        setError('');
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;

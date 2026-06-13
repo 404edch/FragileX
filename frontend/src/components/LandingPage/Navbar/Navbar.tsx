@@ -10,17 +10,20 @@ import './Navbar.css';
 interface Props {
   onLoginClick: () => void;
   usuarioLogado?: { email: string; nome?: string };
-  onLogout: () => void;
 }
 
-const Navbar = ({ onLoginClick, usuarioLogado, onLogout }: Props) => {
+const Navbar = ({ onLoginClick, usuarioLogado }: Props) => {
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalContatoAberto, setModalContatoAberto] = useState(false);
   const larguraJanela = useLarguraJanela();
   const ehMobile = larguraJanela < 768;
 
   useEffect(() => {
-    if (!ehMobile && menuAberto) setMenuAberto(false);
+    const timeoutId = window.setTimeout(() => {
+      if (!ehMobile && menuAberto) setMenuAberto(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [ehMobile, menuAberto]);
 
   const alternarMenu = useCallback(() => setMenuAberto((v) => !v), []);

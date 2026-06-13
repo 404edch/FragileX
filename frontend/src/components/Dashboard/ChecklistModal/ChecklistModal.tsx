@@ -2,7 +2,7 @@ import React from 'react';
 import './ChecklistModal.css';
 
 interface ChecklistModalProps {
-  checklist: any;
+  checklist: Record<string, string | number | string[] | undefined | unknown>;
   onClose: () => void;
 }
 

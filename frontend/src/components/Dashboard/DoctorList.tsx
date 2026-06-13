@@ -11,7 +11,7 @@ export default function DoctorList() {
   const [loading, setLoading] = useState(true);
   
   const [selectedDoctor, setSelectedDoctor] = useState<MockUsuario | null>(null);
-  const [doctorPatients, setDoctorPatients] = useState<any[]>([]);
+  const [doctorPatients, setDoctorPatients] = useState<Record<string, string | number>[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
 
   useEffect(() => {

@@ -149,7 +149,11 @@ export const CarrosselDesktop = ({ cards, onEdit }: CarrosselProps) => {
   const offsetMaximo = Math.max(0, (cards.length - visiveisCount) * larguraPasso);
 
   useEffect(() => {
-    setOffset((prev) => Math.min(prev, offsetMaximo));
+    const timeoutId = window.setTimeout(() => {
+      setOffset((prev) => Math.min(prev, offsetMaximo));
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [offsetMaximo]);
 
   const podeVoltar = offset > 0;

@@ -4,13 +4,13 @@ import { api } from "../../services/api";
 
 export default function AdminUsers() {
   const { usuario } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
   const [roleFilter, setRoleFilter] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modal State
-  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editCpf, setEditCpf] = useState("");
@@ -30,7 +30,7 @@ export default function AdminUsers() {
 
   const refreshUsers = async () => {
     try {
-      const data = await api.get<any[]>("/users");
+      const data = await api.get<Record<string, unknown>[]>("/users");
       setUsers(data);
     } catch (err) {
       console.error("Erro ao carregar usuários:", err);
@@ -38,10 +38,14 @@ export default function AdminUsers() {
   };
 
   useEffect(() => {
-    refreshUsers();
+    const timeoutId = window.setTimeout(() => {
+      refreshUsers();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
-  const handleEditClick = (u: any) => {
+  const handleEditClick = (u: Record<string, unknown>) => {
     setEditingUser(u);
     setEditNome(u.nome);
     setEditEmail(u.email);
@@ -77,7 +81,7 @@ export default function AdminUsers() {
     }
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         nome: editNome,
         email: editEmail,
         cpf: editCpf,
@@ -107,12 +111,12 @@ export default function AdminUsers() {
       refreshUsers();
 
       setTimeout(() => setSuccess(""), 4000);
-    } catch (err: any) {
-      setError(err.message || "Erro ao atualizar usuário.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao atualizar usuário.");
     }
   };
 
-  const handleDeleteClick = async (u: any) => {
+  const handleDeleteClick = async (u: Record<string, unknown>) => {
     if (!usuario) return;
     if (u.id === usuario.id) {
       alert("Você não pode excluir sua própria conta atualmente logada.");
@@ -131,8 +135,8 @@ export default function AdminUsers() {
         setSuccess(`Usuário "${u.nome}" excluído com sucesso.`);
         refreshUsers();
         setTimeout(() => setSuccess(""), 4000);
-      } catch (err: any) {
-        setError(err.message || "Erro ao excluir usuário.");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao excluir usuário.");
       }
     }
   };
@@ -521,7 +525,7 @@ export default function AdminUsers() {
                   <select
                     className="cadastro-input"
                     value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    onChange={(e) => setEditStatus(e.target.value as "PENDING_ACTIVATION" | "ACTIVE")}
                   >
                     <option value="ACTIVE">Ativo</option>
                     <option value="PENDING_ACTIVATION">Pendente de Ativação</option>
@@ -536,7 +540,7 @@ export default function AdminUsers() {
                   <select
                     className="cadastro-input"
                     value={editRole}
-                    onChange={(e) => setEditRole(e.target.value as any)}
+                    onChange={(e) => setEditRole(e.target.value as "paciente" | "medico" | "instituto")}
                   >
                     <option value="paciente">Paciente</option>
                     <option value="medico">Médico</option>

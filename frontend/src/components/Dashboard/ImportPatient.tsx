@@ -23,7 +23,7 @@ const ImportPatient = () => {
       await linkService.importarPacientePorCpf(usuario.id, cpf);
       setStatusMsg({ text: 'Solicitação de vínculo enviada com sucesso! O paciente deve aprovar o vínculo no painel dele.', type: 'success' });
       setCpf('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setStatusMsg({ text: 'Erro ao solicitar vínculo. Verifique se o CPF está correto, se o paciente existe ou se já há um vínculo pendente.', type: 'error' });
     } finally {

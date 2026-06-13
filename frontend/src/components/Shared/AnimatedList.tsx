@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useRef, useState, useEffect, useCallback, type ReactNode, type UIEvent } from 'react';
 import { motion } from 'motion/react';
 import './AnimatedList.css';
 
@@ -30,12 +30,12 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }: Ani
 
 export interface ListItemObject {
   render: ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AnimatedListProps {
   items?: (string | ListItemObject)[];
-  onItemSelect?: (item: any, index: number) => void;
+  onItemSelect?: (item: string | ListItemObject, index: number) => void;
   showGradients?: boolean;
   enableArrowNavigation?: boolean;
   className?: string;
@@ -65,7 +65,7 @@ const AnimatedList = ({
   }, []);
 
   const handleItemClick = useCallback(
-    (item: any, index: number) => {
+    (item: string | ListItemObject, index: number) => {
       setSelectedIndex(index);
       if (onItemSelect) {
         onItemSelect(item, index);
@@ -74,8 +74,9 @@ const AnimatedList = ({
     [onItemSelect]
   );
 
-  const handleScroll = useCallback((e: any) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = target;
     setTopGradientOpacity(Math.min(scrollTop / 50, 1));
     const bottomDistance = scrollHeight - (scrollTop + clientHeight);
     setBottomGradientOpacity(scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1));

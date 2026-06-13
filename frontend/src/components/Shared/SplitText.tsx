@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP);
 const ehDispositivoTouch = () =>
   typeof window !== 'undefined' && window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
-import { ReactNode, CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
 
 interface SplitTextProps {
   text: string;
@@ -19,13 +19,17 @@ interface SplitTextProps {
   duration?: number;
   ease?: string;
   splitType?: string;
-  from?: any;
-  to?: any;
+  from?: Record<string, unknown>;
+  to?: Record<string, unknown>;
   threshold?: number;
   rootMargin?: string;
-  textAlign?: any;
+  textAlign?: CSSProperties['textAlign'];
   tag?: React.ElementType;
   onLetterAnimationComplete?: () => void;
+}
+
+interface SplitHTMLElement extends HTMLElement {
+  _rbsplitInstance?: { revert: () => void } | null;
 }
 
 const SplitText = ({
@@ -44,7 +48,7 @@ const SplitText = ({
   tag = 'p',
   onLetterAnimationComplete
 }: SplitTextProps) => {
-  const ref = useRef<any>(null);
+  const ref = useRef<SplitHTMLElement>(null);
   const animationCompletedRef = useRef(false);
   const onCompleteRef = useRef(onLetterAnimationComplete);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -55,13 +59,17 @@ const SplitText = ({
   }, [onLetterAnimationComplete]);
 
   useEffect(() => {
-    if (document.fonts.status === 'loaded') {
-      setFontsLoaded(true);
-    } else {
-      document.fonts.ready.then(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (document.fonts.status === 'loaded') {
         setFontsLoaded(true);
-      });
-    }
+      } else {
+        document.fonts.ready.then(() => {
+          setFontsLoaded(true);
+        });
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   useGSAP(
@@ -78,7 +86,7 @@ const SplitText = ({
       if (el._rbsplitInstance) {
         try {
           el._rbsplitInstance.revert();
-        } catch (_) {
+        } catch {
           /* noop */
         }
         el._rbsplitInstance = null;
@@ -96,8 +104,8 @@ const SplitText = ({
             : `+=${marginValue}${marginUnit}`;
       const start = `top ${startPct}%${sign}`;
 
-      let targets: any;
-      const assignTargets = (self: any) => {
+      let targets: Element[] | undefined;
+      const assignTargets = (self: { chars: Element[]; words: Element[]; lines: Element[] }) => {
         if (splitType.includes('chars') && self.chars.length) targets = self.chars;
         if (!targets && splitType.includes('words') && self.words.length) targets = self.words;
         if (!targets && splitType.includes('lines') && self.lines.length) targets = self.lines;
@@ -115,7 +123,7 @@ const SplitText = ({
         onSplit: self => {
           assignTargets(self);
           const tween = gsap.fromTo(
-            targets,
+            targets || [],
             { ...from },
             {
               ...to,
@@ -149,7 +157,7 @@ const SplitText = ({
         });
         try {
           splitInstance.revert();
-        } catch (_) {
+        } catch {
           /* noop */
         }
         el._rbsplitInstance = null;
@@ -183,7 +191,7 @@ const SplitText = ({
     };
     const mergedStyle = { ...baseStyle, ...style };
     const classes = `split-parent ${className}`;
-    const Tag: any = tag || 'p';
+    const Tag = tag || 'p';
 
     return (
       <Tag ref={ref} style={mergedStyle} className={classes}>

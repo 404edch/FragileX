@@ -25,7 +25,11 @@ const EditLanding = () => {
   };
 
   useEffect(() => {
-    carregarDados();
+    const timeoutId = window.setTimeout(() => {
+      carregarDados();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const handleCardChange = (id: number, field: keyof LandingCard, value: string) => {

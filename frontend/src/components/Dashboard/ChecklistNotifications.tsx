@@ -28,7 +28,11 @@ const ChecklistNotifications = () => {
   };
 
   useEffect(() => {
-    carregarNotificacoes();
+    const timeoutId = window.setTimeout(() => {
+      carregarNotificacoes();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const marcarComoLida = async (id: number) => {

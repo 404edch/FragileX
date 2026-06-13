@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
-import ItemCadastro from '../Checklist/ItemCadastro';
 import BotaoInicio from '../Shared/BotaoInicio';
 import '../Checklist/Checklist.css';
 
@@ -10,7 +9,7 @@ const ActivateAccount = () => {
   const navigate = useNavigate();
   const token = searchParams.get('token');
 
-  const [usuario, setUsuario] = useState<any | null>(null);
+  const [usuario, setUsuario] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,7 +24,7 @@ const ActivateAccount = () => {
           if (user) {
             setUsuario(user);
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
           console.error("Token inválido ou expirado", e);
         }
       }
@@ -58,8 +57,12 @@ const ActivateAccount = () => {
         try {
           await api.post('/patients/ativar-conta', { token, senha: password });
           setSuccess(true);
-        } catch (e: any) {
-          setErrorMessage(e.response?.data?.error || 'Erro ao tentar ativar a conta. Link expirado ou inválido.');
+        } catch (e: unknown) {
+          if (e instanceof Error) {
+            setErrorMessage((e as unknown as { response?: { data?: { error?: string } } }).response?.data?.error || 'Erro ao tentar ativar a conta. Link expirado ou inválido.');
+          } else {
+            setErrorMessage('Erro ao tentar ativar a conta. Link expirado ou inválido.');
+          }
         }
       }
     };

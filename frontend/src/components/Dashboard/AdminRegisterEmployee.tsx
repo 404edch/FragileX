@@ -41,8 +41,8 @@ export default function AdminRegisterEmployee() {
       setTelefone("");
       setSenha("");
       setConfirmarSenha("");
-    } catch (error: any) {
-      if (error.message) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message) {
         setErrorMessage(error.message);
       } else {
         setErrorMessage("Erro ao cadastrar funcionário. Verifique os dados e tente novamente.");

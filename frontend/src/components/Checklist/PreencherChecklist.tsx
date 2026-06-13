@@ -2,7 +2,6 @@ import { Suspense, useState, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { getSintomas } from "../../services/getSintomas";
 import ChecklistItems from "./ChecklistItems";
-import ItemCadastro from "./ItemCadastro";
 import BotaoInicio from "../Shared/BotaoInicio";
 import "./Checklist.css";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -15,13 +14,30 @@ interface Props {
   isRapido?: boolean;
 }
 
+interface PatientDetails {
+  id: number;
+  nome: string;
+  cpf: string;
+  pacienteDetails?: {
+    sexo_biologico: string;
+  };
+}
+
+interface ReportData {
+  score_final: number;
+  classificacao: string;
+  memoria_calculo: string;
+  sintomas_identificados: (string | undefined)[];
+  isRapido: boolean;
+}
+
 export default function PreencherChecklist({ isRapido = false }: Props) {
   const [sintomasSelecionados, setSintomasSelecionados] = useState<number[]>([]);
   const [step, setStep] = useState<1 | 2>(1);
 
   // Para fluxo formal (não rápido)
   const [cpfBusca, setCpfBusca] = useState("");
-  const [patientDetails, setPatientDetails] = useState<any>(null);
+  const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [isLoadingPatient, setIsLoadingPatient] = useState(false);
 
   // Para fluxo rápido
@@ -33,7 +49,7 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
   const [quemPreencheOutro, setQuemPreencheOutro] = useState("");
 
   // Relatório Final (Modal)
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
 
   const navigate = useNavigate();
   const { usuario } = useAuth();
@@ -43,33 +59,37 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
   const cpfParam = searchParams.get('cpf');
 
   useEffect(() => {
-    // Se for paciente logado, busca os próprios dados automaticamente
-    if (!isRapido && usuario && usuario.role === "paciente") {
-      setIsLoadingPatient(true);
-      api
-        .get(`/patients/cpf/${usuario.cpf}`)
-        .then((res) => {
-          setPatientDetails(res);
-          setStep(2);
-        })
-        .catch(() => {
-          alert("Erro ao carregar dados do paciente.");
-        })
-        .finally(() => setIsLoadingPatient(false));
-    } else if (!isRapido && cpfParam) {
-      setCpfBusca(cpfParam);
-      setIsLoadingPatient(true);
-      api
-        .get(`/patients/cpf/${cpfParam}`)
-        .then((res) => {
-          setPatientDetails(res);
-          setStep(2);
-        })
-        .catch(() => {
-          alert("Paciente não encontrado pelo CPF passado.");
-        })
-        .finally(() => setIsLoadingPatient(false));
-    }
+    const timeoutId = window.setTimeout(() => {
+      // Se for paciente logado, busca os próprios dados automaticamente
+      if (!isRapido && usuario && usuario.role === "paciente") {
+        setIsLoadingPatient(true);
+        api
+          .get(`/patients/cpf/${usuario.cpf}`)
+          .then((res) => {
+            setPatientDetails(res as PatientDetails);
+            setStep(2);
+          })
+          .catch(() => {
+            alert("Erro ao carregar dados do paciente.");
+          })
+          .finally(() => setIsLoadingPatient(false));
+      } else if (!isRapido && cpfParam) {
+        setCpfBusca(cpfParam);
+        setIsLoadingPatient(true);
+        api
+          .get(`/patients/cpf/${cpfParam}`)
+          .then((res) => {
+            setPatientDetails(res as PatientDetails);
+            setStep(2);
+          })
+          .catch(() => {
+            alert("Paciente não encontrado pelo CPF passado.");
+          })
+          .finally(() => setIsLoadingPatient(false));
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [usuario, isRapido, cpfParam]);
 
   const handleBuscarPaciente = async (e: React.FormEvent) => {
@@ -78,9 +98,9 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
     setIsLoadingPatient(true);
     try {
       const res = await api.get(`/patients/cpf/${cpfBusca}`);
-      setPatientDetails(res);
+      setPatientDetails(res as PatientDetails);
       setStep(2);
-    } catch (error: any) {
+    } catch {
       alert("Paciente não encontrado. Verifique o CPF.");
     } finally {
       setIsLoadingPatient(false);
@@ -133,7 +153,7 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
 
     // Fluxo Formal
     const payload = {
-      idPaciente: patientDetails.id,
+      idPaciente: patientDetails?.id,
       idMedico: usuario?.role === "medico" ? usuario.id : null,
       preenchidoPor: usuario?.role === "paciente" ? quemPreencheFinal : usuario?.nome || "Anônimo",
       sintomasSelecionados,
@@ -147,10 +167,10 @@ export default function PreencherChecklist({ isRapido = false }: Props) {
         navigate("/dashboard");
       } else {
         // Exibir modal para médico/instituto/admin
-        setReportData(result);
+        setReportData(result as ReportData);
       }
-    } catch (error: any) {
-      alert(error.message || "Erro ao salvar o checklist.");
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : "Erro ao salvar o checklist.");
     }
   };
 

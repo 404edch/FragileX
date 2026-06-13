@@ -8,7 +8,7 @@ import { api } from '../../../services/api';
 const AplicacaoMedico = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
-  const [successData, setSuccessData] = useState<any | null>(null);
+  const [successData, setSuccessData] = useState<Record<string, string> | null>(null);
 
   const handleApply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,9 +28,9 @@ const AplicacaoMedico = () => {
         instituicao: dados.instituicao,
         senha: dados.senha,
       });
-      setSuccessData(dados);
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Erro ao enviar solicitação.');
+      setSuccessData(dados as Record<string, string>);
+    } catch (error: unknown) {
+      setErrorMessage(error instanceof Error ? error.message : 'Erro ao enviar solicitação.');
     }
   };
 

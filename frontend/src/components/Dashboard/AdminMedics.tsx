@@ -70,8 +70,8 @@ export default function AdminMedics() {
       setTimeout(() => {
         setSuccess(false);
       }, 5000);
-    } catch (err: any) {
-      setError(err.message || "Erro ao registrar médico.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao registrar médico.");
     }
   };
 

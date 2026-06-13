@@ -6,6 +6,7 @@ import './QuemSomos.css';
 import { landingService } from '../../../services/landingService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
+import { LandingCard } from '../../../services/types';
 
 const QuemSomos = () => {
   const larguraJanela = useLarguraJanela();
@@ -14,8 +15,8 @@ const QuemSomos = () => {
   const { usuario } = useAuth();
   const isAdmin = usuario?.role === 'admin';
 
-  const [cards, setCards] = useState<any[]>([]);
-  const [selectedCard, setSelectedCard] = useState<any | null>(null);
+  const [cards, setCards] = useState<LandingCard[]>([]);
+  const [selectedCard, setSelectedCard] = useState<LandingCard | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const carregarCards = async () => {
@@ -28,13 +29,17 @@ const QuemSomos = () => {
   };
 
   useEffect(() => {
-    carregarCards();
+    const timeoutId = window.setTimeout(() => {
+      carregarCards();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const secaoRef = useRef(null);
   const cabecalhoVisto = useUmaVezNoViewport(secaoRef, 0.2);
 
-  const handleEditCard = (id: number | string) => {
+  const handleEditCard = (id: number) => {
     const card = cards.find(c => c.id === id);
     if (card) {
       setSelectedCard(card);
@@ -43,7 +48,7 @@ const QuemSomos = () => {
   };
 
   const handleAddNewCardClick = () => {
-    setSelectedCard({ id: 'new', nome: '', imagemUrl: '', linkHref: '' });
+    setSelectedCard({ id: -1, nome: '', imagemUrl: '', linkHref: '', etiquetaImg: 'Foto' });
     setIsModalOpen(true);
   };
 
@@ -51,7 +56,7 @@ const QuemSomos = () => {
     if (!selectedCard) return;
     
     let updated;
-    if (selectedCard.id === 'new') {
+    if (selectedCard.id === -1) {
       const nextId = cards.length > 0 ? Math.max(...cards.map(c => Number(c.id))) + 1 : 1;
       updated = [
         ...cards,
@@ -89,7 +94,7 @@ const QuemSomos = () => {
   };
 
   const handleDeleteCard = async () => {
-    if (!selectedCard || selectedCard.id === 'new') return;
+    if (!selectedCard || selectedCard.id === -1) return;
     const updated = cards.filter(c => c.id !== selectedCard.id);
     try {
       await landingService.saveLandingCards(updated);
@@ -160,13 +165,13 @@ const QuemSomos = () => {
           isOpen={isModalOpen}
           onClose={() => { setIsModalOpen(false); setSelectedCard(null); }}
           onSave={handleSaveCard}
-          onDelete={selectedCard.id !== 'new' ? handleDeleteCard : undefined}
+          onDelete={selectedCard.id !== -1 ? handleDeleteCard : undefined}
           initialData={{
             nome: selectedCard.nome,
             imagemUrl: selectedCard.imagemUrl,
             linkHref: selectedCard.linkHref
           }}
-          title={selectedCard.id === 'new' ? 'Novo Card' : `Editar Card: ${selectedCard.nome}`}
+          title={selectedCard.id === -1 ? 'Novo Card' : `Editar Card: ${selectedCard.nome}`}
         />
       )}
     </section>

@@ -9,6 +9,7 @@ import './Hero.css';
 import { landingService } from '../../../services/landingService';
 import { useAuth } from '../../../contexts/AuthContext';
 import InContextEditModal from '../InContextEditModal';
+import { MockNews } from '../../../services/types';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,8 +26,8 @@ const Hero = () => {
   const { usuario } = useAuth();
   const isAdmin = usuario?.role === 'admin';
 
-  const [news, setNews] = useState<any[]>([]);
-  const [selectedNews, setSelectedNews] = useState<any | null>(null);
+  const [news, setNews] = useState<MockNews[]>([]);
+  const [selectedNews, setSelectedNews] = useState<MockNews | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const carregarNews = async () => {
@@ -39,7 +40,11 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    carregarNews();
+    const timeoutId = window.setTimeout(() => {
+      carregarNews();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -59,7 +64,7 @@ const Hero = () => {
     }
   }, []);
 
-  const handleEditNews = (n: any) => {
+  const handleEditNews = (n: MockNews) => {
     setSelectedNews(n);
     setIsModalOpen(true);
   };
@@ -68,7 +73,7 @@ const Hero = () => {
     if (!selectedNews) return;
 
     let updated;
-    if (selectedNews.id === 'new') {
+    if (selectedNews.id === -1) {
       const nextId = news.length > 0 ? Math.max(...news.map(n => Number(n.id))) + 1 : 1;
       updated = [
         ...news,
@@ -104,7 +109,7 @@ const Hero = () => {
   };
 
   const handleDeleteNews = async () => {
-    if (!selectedNews || selectedNews.id === 'new') return;
+    if (!selectedNews || selectedNews.id === -1) return;
     const updated = news.filter(n => n.id !== selectedNews.id);
     try {
       await landingService.saveLandingNews(updated);
@@ -143,7 +148,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedNews({ id: 'new', titulo: '', imagemUrl: '', linkHref: '' });
+                  setSelectedNews({ id: -1, titulo: '', imagemUrl: '', linkHref: '' });
                   setIsModalOpen(true);
                 }}
                 className="checklist-submit-btn"
@@ -171,7 +176,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedNews({ id: 'new', titulo: '', imagemUrl: '', linkHref: '' });
+                  setSelectedNews({ id: -1, titulo: '', imagemUrl: '', linkHref: '' });
                   setIsModalOpen(true);
                 }}
                 className="checklist-submit-btn"
@@ -324,13 +329,13 @@ const Hero = () => {
           isOpen={isModalOpen}
           onClose={() => { setIsModalOpen(false); setSelectedNews(null); }}
           onSave={handleSaveNews}
-          onDelete={selectedNews.id !== 'new' ? handleDeleteNews : undefined}
+          onDelete={selectedNews.id !== -1 ? handleDeleteNews : undefined}
           initialData={{
             nome: selectedNews.titulo,
             imagemUrl: selectedNews.imagemUrl,
             linkHref: selectedNews.linkHref
           }}
-          title={selectedNews.id === 'new' ? 'Nova Notícia' : `Editar Notícia: ${selectedNews.titulo}`}
+          title={selectedNews.id === -1 ? 'Nova Notícia' : `Editar Notícia: ${selectedNews.titulo}`}
         />
       )}
     </section>
