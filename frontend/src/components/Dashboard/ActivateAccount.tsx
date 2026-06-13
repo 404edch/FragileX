@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import { Usuario } from '../../contexts/AuthContext';
 import BotaoInicio from '../Shared/BotaoInicio';
 import '../Checklist/Checklist.css';
 
@@ -9,7 +10,7 @@ const ActivateAccount = () => {
   const navigate = useNavigate();
   const token = searchParams.get('token');
 
-  const [usuario, setUsuario] = useState<Record<string, unknown> | null>(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,7 +21,7 @@ const ActivateAccount = () => {
     const validate = async () => {
       if (token) {
         try {
-          const user = await api.get(`/patients/validar-token?token=${token}`);
+          const user = await api.get<Usuario>(`/patients/validar-token?token=${token}`);
           if (user) {
             setUsuario(user);
           }

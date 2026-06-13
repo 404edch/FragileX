@@ -59,8 +59,8 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
     const fetchCount = () => {
       if (role === "instituto" || role === "admin") {
         api
-          .get("/doctors/solicitacoes/count")
-          .then((res: { count?: number }) => {
+          .get<{ count?: number }>("/doctors/solicitacoes/count")
+          .then((res) => {
             if (res && typeof res.count === "number") {
               setPendingCount(res.count);
             }
@@ -72,8 +72,8 @@ const Sidebar = ({ role, user, setView, onLogout, isOpen, onClose }: Props) => {
     const fetchChecklistAlertCount = () => {
       if (role === "instituto" || role === "admin") {
         api
-          .get("/notificacoes-pcr/count")
-          .then((res: { count?: number }) => {
+          .get<{ count?: number }>("/notificacoes-pcr/count")
+          .then((res) => {
             if (res && typeof res.count === "number") {
               setChecklistAlertCount(res.count);
             }

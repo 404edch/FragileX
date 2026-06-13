@@ -3,13 +3,18 @@ import { Sintoma } from "../../../../shared/classes/sintoma";
 
 interface Props {
   promiseSintomas: Promise<Sintoma[]>;
+  isMale?: boolean;
 
   onChange: (selecionados: number[]) => void;
 }
 
-export default function ChecklistItems({ promiseSintomas, onChange }: Props) {
+export default function ChecklistItems({ promiseSintomas, isMale, onChange }: Props) {
   const [selecionados, setSelecionados] = useState<number[]>([]);
-  const sintomas: Sintoma[] = use(promiseSintomas);
+  const sintomasRaw: Sintoma[] = use(promiseSintomas);
+  
+  const sintomas = isMale === false
+    ? sintomasRaw.filter((item) => item.nome.toLowerCase() !== "macroorquidismo")
+    : sintomasRaw;
 
   useEffect(() => {
     onChange(selecionados);

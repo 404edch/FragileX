@@ -39,8 +39,8 @@ const QuemSomos = () => {
   const secaoRef = useRef(null);
   const cabecalhoVisto = useUmaVezNoViewport(secaoRef, 0.2);
 
-  const handleEditCard = (id: number) => {
-    const card = cards.find(c => c.id === id);
+  const handleEditCard = (id: number | string) => {
+    const card = cards.find(c => c.id === Number(id));
     if (card) {
       setSelectedCard(card);
       setIsModalOpen(true);

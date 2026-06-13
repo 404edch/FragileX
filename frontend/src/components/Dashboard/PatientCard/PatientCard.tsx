@@ -24,7 +24,7 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
     reader.onload = async () => {
       try {
         const base64 = reader.result as string;
-        await userService.atualizarFotoPerfil(Number(patient.id), base64);
+        await patientService.atualizarFotoPerfil(Number(patient.id), base64);
         setFotoLocal(base64);
       } catch {
         alert("Erro ao enviar foto");

@@ -119,9 +119,8 @@ export default function Step2Symptoms({
             </p>
 
             <ChecklistItems
-              promiseSintomas={promiseSintomas.then((list) =>
-                list.filter((item) => (isMale ? true : item.nome.toLowerCase() !== "macroorquidismo"))
-              )}
+              promiseSintomas={promiseSintomas}
+              isMale={isMale}
               onChange={setSintomasSelecionados}
             />
           </div>

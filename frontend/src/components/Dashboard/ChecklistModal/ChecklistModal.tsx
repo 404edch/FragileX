@@ -1,8 +1,20 @@
 import React from 'react';
 import './ChecklistModal.css';
 
+interface ChecklistData {
+  nome_paciente?: string;
+  paciente_nome?: string;
+  paciente_cpf?: string;
+  preenchido_por?: string;
+  data_preenchimento: string | number | Date;
+  classificacao?: string;
+  score_final?: number;
+  sintomas_nomes?: string[];
+  [key: string]: any;
+}
+
 interface ChecklistModalProps {
-  checklist: Record<string, string | number | string[] | undefined | unknown>;
+  checklist: ChecklistData;
   onClose: () => void;
 }
 

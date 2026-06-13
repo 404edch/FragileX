@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { userService } from "../../services/userService";
 import { doctorService } from "../../services/doctorService";
-import { MockUsuario, MockMedico } from "../../services/types";
+import { MockUsuario, MockMedico, MockPaciente } from "../../services/types";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function DoctorList() {
@@ -11,7 +11,7 @@ export default function DoctorList() {
   const [loading, setLoading] = useState(true);
   
   const [selectedDoctor, setSelectedDoctor] = useState<MockUsuario | null>(null);
-  const [doctorPatients, setDoctorPatients] = useState<Record<string, string | number>[]>([]);
+  const [doctorPatients, setDoctorPatients] = useState<(MockUsuario & { pacienteDetails?: MockPaciente })[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
 
   useEffect(() => {

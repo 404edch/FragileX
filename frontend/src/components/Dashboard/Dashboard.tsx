@@ -60,8 +60,8 @@ const Dashboard = () => {
     }
   };
 
-  const handlePatientClick = (patient: Patient) => {
-    setSelectedPatientId(patient.id as number);
+  const handlePatientClick = (patient: { id: number }) => {
+    setSelectedPatientId(patient.id);
     setCurrentView("view-patient");
   };
 

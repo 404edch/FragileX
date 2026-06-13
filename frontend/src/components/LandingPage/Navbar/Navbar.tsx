@@ -10,6 +10,7 @@ import './Navbar.css';
 interface Props {
   onLoginClick: () => void;
   usuarioLogado?: { email: string; nome?: string };
+  onLogout?: () => void;
 }
 
 const Navbar = ({ onLoginClick, usuarioLogado }: Props) => {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../../services/api";
 import { ReportData, PatientDetails } from "../types";
 import { Usuario } from "../../../contexts/AuthContext";
-import { Sintoma } from "../../../../shared/classes/sintoma";
+import { Sintoma } from "../../../../../shared/classes/sintoma";
 
 interface UseChecklistSubmitProps {
   isRapido: boolean;
@@ -33,11 +33,7 @@ export function useChecklistSubmit({
     e.preventDefault();
 
     const quemPreencheFinal =
-      quemPreencheSelecionado === "Outro"
-        ? quemPreencheOutro.trim()
-          ? `Outro: ${quemPreencheOutro.trim()}`
-          : ""
-        : quemPreencheSelecionado;
+      quemPreencheSelecionado === "Outro" ? (quemPreencheOutro.trim() ? `Outro: ${quemPreencheOutro.trim()}` : "") : quemPreencheSelecionado;
 
     if (!isRapido && usuario?.role === "paciente" && !quemPreencheFinal) {
       alert("Por favor, informe quem está preenchendo o formulário.");
