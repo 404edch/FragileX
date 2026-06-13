@@ -1,13 +1,1 @@
-export interface Patient {
-  id: number | string;
-  name: string;
-  age: number;
-  sex: string;
-  lastConsultation: string;
-  tag?: string;
-  responsibleFigure?: string;
-  phone?: string;
-  foto_perfil?: string | null;
-  classificacao_oficial?: string;
-  encaminhamento_status?: string;
-}
+export * from "../../types";
