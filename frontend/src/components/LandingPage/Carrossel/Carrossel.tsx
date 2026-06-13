@@ -85,8 +85,7 @@ export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, esti
         <img
           src={imagemUrl}
           alt={nome}
-          className="carousel-img-placeholder"
-          style={{ objectFit: 'cover', display: 'block', width: '100%', height: '150px', borderRadius: '12px' }}
+          style={{ objectFit: 'cover', display: 'block', width: '100%', height: '180px' }}
         />
       ) : (
         <ImagemPlaceholder etiqueta={etiquetaImg} />

@@ -71,6 +71,9 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
   const [notas, setNotas] = useState<MockConsulta[]>([]);
   const [novaNota, setNovaNota] = useState("");
   const [enviandoNota, setEnviandoNota] = useState(false);
+  const [fotosGaleria, setFotosGaleria] = useState<any[]>([]);
+  const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
+  const [isUploadingFoto, setIsUploadingFoto] = useState(false);
   const [usuarioInfo, setUsuarioInfo] = useState<UsuarioReal | null>(null);
   const [medicoResponsavelText, setMedicoResponsavelText] = useState<string>("Buscando...");
   const [sintomasMap, setSintomasMap] = useState<Record<number, string>>({});
@@ -175,6 +178,28 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
     return () => window.clearTimeout(timeoutId);
   }, [carregarDados]);
+
+
+  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    setIsUploadingFoto(true);
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result as string;
+        await backendService.atualizarFotoPerfil(idUsuario, base64);
+        if (paciente) {
+          setPaciente({ ...paciente, foto_perfil: base64 });
+        }
+      } catch (err) {
+        alert("Erro ao enviar foto");
+      } finally {
+        setIsUploadingFoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleResponderVinculo = async (idVinculo: number, aceitar: boolean) => {
     try {
@@ -303,31 +328,49 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           >
             Dados Pessoais
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", color: "#475569" }}>
-            <p>
-              <strong>Nome Completo:</strong> {usuarioInfo.nome}
-            </p>
-            <p>
-              <strong>Responsável:</strong> {paciente.responsavel_nome} ({paciente.responsavel_parentesco})
-            </p>
-            <p>
-              <strong>Idade:</strong> {calcularIdade(paciente.data_nascimento)} | <strong>Nascimento:</strong> {paciente.data_nascimento}
-            </p>
-            <p>
-              <strong>Sexo Biológico:</strong> {paciente.sexo_biologico} | <strong>Gênero:</strong> {paciente.genero}
-            </p>
-            <p>
-              <strong>CPF:</strong> {usuarioInfo.cpf}
-            </p>
-            <p>
-              <strong>Cidade/UF:</strong> {paciente.cidade} - {paciente.estado}
-            </p>
-            <p>
-              <strong>País:</strong> {paciente.pais}
-            </p>
-            <p>
-              <strong>E-mail:</strong> {usuarioInfo.email}
-            </p>
+          <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+            {/* FOTO DO PERFIL */}
+            <div style={{ flexShrink: 0 }}>
+              {paciente.foto_perfil ? (
+                <img
+                  src={paciente.foto_perfil}
+                  alt="Foto do Paciente"
+                  style={{ width: "140px", height: "140px", borderRadius: "10px", objectFit: "cover", border: "3px solid #1a5fa8" }}
+                />
+              ) : (
+                <div style={{ width: "140px", height: "140px", borderRadius: "10px", border: "3px dashed #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>
+                  Sem Foto
+                </div>
+              )}
+            </div>
+            
+            {/* DADOS PESSOAIS */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", color: "#475569" }}>
+              <p>
+                <strong>Nome Completo:</strong> {usuarioInfo.nome}
+              </p>
+              <p>
+                <strong>Responsável:</strong> {paciente.responsavel_nome} ({paciente.responsavel_parentesco})
+              </p>
+              <p>
+                <strong>Idade:</strong> {calcularIdade(paciente.data_nascimento)} | <strong>Nascimento:</strong> {paciente.data_nascimento}
+              </p>
+              <p>
+                <strong>Sexo Biológico:</strong> {paciente.sexo_biologico} | <strong>Gênero:</strong> {paciente.genero}
+              </p>
+              <p>
+                <strong>CPF:</strong> {usuarioInfo.cpf}
+              </p>
+              <p>
+                <strong>Cidade/UF:</strong> {paciente.cidade} - {paciente.estado}
+              </p>
+              <p>
+                <strong>País:</strong> {paciente.pais}
+              </p>
+              <p>
+                <strong>E-mail:</strong> {usuarioInfo.email}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -635,7 +678,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   if (!novaNota.trim() || !usuario) return;
                   setEnviandoNota(true);
                   try {
-                    await backendService.adicionarNota(paciente.id_usuario, novaNota, usuario.id, usuario.nome, usuario.role);
+                    await backendService.adicionarNota(paciente.id_usuario, novaNota, usuario.id, usuario.nome || "Usuário", usuario.role || "paciente");
                     setNovaNota("");
                     const notasAtualizadas = await backendService.listarNotasPaciente(paciente.id_usuario);
                     setNotas(notasAtualizadas);
@@ -843,22 +886,26 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   color: "white",
                   fontWeight: "bold",
                   borderRadius: "8px",
+                  cursor: "pointer",
                 }}
-                onClick={() => window.open("https://wa.me/5541999999999?text=Olá,%20gostaria%20de%20suporte%20sobre%20o%20Programa%20X%20Frágil", "_blank")}
+                onClick={() => window.open("https://wa.me/5541991034847?text=Olá,%20gostaria%20de%20suporte%20sobre%20o%20Programa%20X%20Frágil", "_blank")}
               >
                 Falar no WhatsApp Suporte
               </button>
               <div style={{ fontSize: "12px", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px", marginTop: "6px" }}>
                 <div>
-                  📞 <strong>Instituto:</strong> (41) 3222-0000
+                  📞 <strong>Fixo:</strong> <a href="tel:+554131560309" style={{ color: "#1a5fa8", textDecoration: "none" }}>(41) 3156-0309</a>
                 </div>
                 <div>
-                  ✉ <strong>E-mail:</strong> contato@bukokaesemodel.org.br
+                  ✉ <strong>E-mail:</strong> <a href="mailto:contato@institutobk.org.br" style={{ color: "#1a5fa8", textDecoration: "none" }}>contato@institutobk.org.br</a>
+                </div>
+                <div>
+                  📍 <strong>Endereço:</strong> <a href="https://maps.app.goo.gl/FDVXQcNtnsnnVAH98" target="_blank" rel="noreferrer" style={{ color: "#1a5fa8", textDecoration: "none" }}>Rua Fernando Simas, 172 – Curitiba-PR</a>
                 </div>
                 <div>
                   🌐 <strong>Guia Síndrome X Frágil:</strong>{" "}
                   <a
-                    href="https://xfragil.org.br/"
+                    href="https://eudigox.com.br/"
                     target="_blank"
                     rel="noreferrer"
                     style={{ color: "#1a5fa8", textDecoration: "underline" }}

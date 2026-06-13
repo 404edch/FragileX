@@ -181,9 +181,8 @@ const DoctorApprovals = () => {
         </div>
       )}
 
-      {/* Título Principal */}
       <div>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1a5fa8', marginBottom: '10px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffffff', marginBottom: '10px' }}>
           Solicitações de Credenciamento
         </h2>
         <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)' }}>

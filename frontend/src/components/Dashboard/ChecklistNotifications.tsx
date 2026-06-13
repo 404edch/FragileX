@@ -4,7 +4,7 @@ import "./Dashboard.css";
 
 interface NotificacaoPCR {
   id: number;
-  paciente_nome: string;
+  nome_paciente: string;
   preenchido_por: string;
   score_final: number;
   classificacao: string;
@@ -65,9 +65,8 @@ const ChecklistNotifications = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-      {/* Título Principal */}
       <div>
-        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#1a5fa8", marginBottom: "10px" }}>Alertas de Checklist</h2>
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#ffffff", marginBottom: "10px" }}>Alertas de Checklist</h2>
         <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)" }}>Acompanhe os resultados dos checklists de pré-triagem preenchidos pelos médicos.</p>
       </div>
 
@@ -103,7 +102,7 @@ const ChecklistNotifications = () => {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
                   <div>
-                    <h4 style={{ margin: 0, color: "#1e293b", fontSize: "16px", fontWeight: "bold" }}>{notif.paciente_nome}</h4>
+                    <h4 style={{ margin: 0, color: "#1e293b", fontSize: "16px", fontWeight: "bold" }}>{notif.nome_paciente}</h4>
                     <span style={{ fontSize: "12px", color: "#64748b" }}>Preenchido por: {notif.preenchido_por}</span>
                   </div>
                   <span
@@ -198,7 +197,7 @@ const ChecklistNotifications = () => {
                 }}
               >
                 <div>
-                  <h4 style={{ margin: 0, color: "#475569", fontSize: "14px", fontWeight: "bold" }}>{notif.paciente_nome}</h4>
+                  <h4 style={{ margin: 0, color: "#475569", fontSize: "14px", fontWeight: "bold" }}>{notif.nome_paciente}</h4>
                   <p style={{ margin: 0, fontSize: "12px", color: "#94a3b8" }}>
                     Por: {notif.preenchido_por} | Score: {notif.score_final} pts | {notif.data_criacao ? formatarData(notif.data_criacao) : "N/A"}
                   </p>

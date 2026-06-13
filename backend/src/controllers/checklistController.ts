@@ -31,7 +31,7 @@ export const salvarChecklist = async (req: Request, res: Response): Promise<any>
     if (sintomasSelecionados.length > 0) {
       const sintomasRes = await client.query(`SELECT id, sintoma, score_m, score_f FROM sintomas WHERE id = ANY($1::int[])`, [sintomasSelecionados]);
       sintomasEncontrados = sintomasRes.rows;
-      
+
       const calculos: string[] = [];
       for (const s of sintomasEncontrados) {
         const peso = sexo_biologico === 'M' ? Number(s.score_m) : Number(s.score_f);
@@ -237,7 +237,7 @@ export const buscarChecklistsAvancado = async (req: Request, res: Response): Pro
       WHERE cs.id_checklist = ANY($1::int[])
     `;
     const symptomsRes = await db.query(symptomsQuery, [checklistIds]);
-    
+
     const symptomsMap: Record<number, number[]> = {};
     const symptomsNamesMap: Record<number, string[]> = {};
     symptomsRes.rows.forEach(row => {
@@ -272,6 +272,177 @@ export const buscarChecklistsAvancado = async (req: Request, res: Response): Pro
     return res.json(mapped);
   } catch (error) {
     console.error("Erro ao buscar checklists avançado:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
+export const atualizarChecklist = async (req: Request, res: Response): Promise<any> => {
+  const idChecklist = Number(req.params.id);
+  const { sintomasSelecionados } = req.body;
+  const user = (req as any).user;
+  const role = user?.role;
+
+  if (isNaN(idChecklist) || !Array.isArray(sintomasSelecionados)) {
+    return res.status(400).json({ error: "Dados inválidos." });
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+
+    const chQuery = "SELECT id_paciente FROM checklists WHERE id = $1";
+    const chRes = await client.query(chQuery, [idChecklist]);
+    if (chRes.rows.length === 0) {
+      throw new Error("Checklist não encontrado.");
+    }
+    const idPaciente = chRes.rows[0].id_paciente;
+
+    if (role === 'paciente' && idPaciente !== user.userId) {
+       throw new Error("Acesso negado.");
+    }
+    if (role === 'medico') {
+       throw new Error("Médicos não têm permissão para editar checklists.");
+    }
+
+    const pacRes = await client.query("SELECT p.sexo_biologico, u.nome FROM usuarios u LEFT JOIN pacientes p ON p.id_usuario = u.id WHERE u.id = $1", [idPaciente]);
+    const sexo_biologico = pacRes.rows[0]?.sexo_biologico || 'M';
+    const pacNome = pacRes.rows[0]?.nome || 'Usuário Desconhecido';
+
+    let scoreCalculado = 0;
+    let memoriaCalculo = '';
+    let classificacao = 'Negativo';
+
+    if (sintomasSelecionados.length > 0) {
+      const sintomasRes = await client.query(`SELECT id, sintoma, score_m, score_f FROM sintomas WHERE id = ANY($1::int[])`, [sintomasSelecionados]);
+      const calculos: string[] = [];
+      for (const s of sintomasRes.rows) {
+        const peso = sexo_biologico === 'M' ? Number(s.score_m) : Number(s.score_f);
+        scoreCalculado += peso;
+        calculos.push(`${s.sintoma}: ${peso.toFixed(2)}`);
+      }
+      memoriaCalculo = calculos.join('\n');
+    }
+
+    if (sexo_biologico === 'M' && scoreCalculado >= 0.56) classificacao = 'Suspeito';
+    if (sexo_biologico === 'F' && scoreCalculado >= 0.55) classificacao = 'Suspeito';
+
+    await client.query(
+      `UPDATE checklists SET score_final = $1, classificacao = $2, memoria_calculo = $3 WHERE id = $4`,
+      [scoreCalculado, classificacao, memoriaCalculo, idChecklist]
+    );
+
+    await client.query(`DELETE FROM checklist_sintomas WHERE id_checklist = $1`, [idChecklist]);
+    for (const idSintoma of sintomasSelecionados) {
+      await client.query(
+        `INSERT INTO checklist_sintomas (id_checklist, id_sintoma, possui) VALUES ($1, $2, true)`,
+        [idChecklist, idSintoma]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    if (role === 'instituto') {
+      try {
+        await db.query(`UPDATE pacientes SET classificacao_oficial = $1 WHERE id_usuario = $2`, [classificacao, idPaciente]);
+      } catch (err) {}
+    }
+
+    await logAction(user.userId, user.nome || "Usuário", "Edição de Checklist", `Editou checklist do paciente ${pacNome}.`);
+    
+    return res.json({ success: true });
+  } catch (error: any) {
+    await client.query("ROLLBACK");
+    console.error("Erro ao atualizar checklist:", error);
+    return res.status(error.message === "Acesso negado." || error.message.includes("permissão") ? 403 : 500).json({ error: error.message });
+  } finally {
+    client.release();
+  }
+};
+
+export const deletarChecklist = async (req: Request, res: Response): Promise<any> => {
+  const idChecklist = Number(req.params.id);
+  const user = (req as any).user;
+  const role = user?.role;
+
+  if (isNaN(idChecklist)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  try {
+    const chQuery = "SELECT id_paciente FROM checklists WHERE id = $1";
+    const chRes = await db.query(chQuery, [idChecklist]);
+    if (chRes.rows.length === 0) {
+      return res.status(404).json({ error: "Checklist não encontrado." });
+    }
+    const idPaciente = chRes.rows[0].id_paciente;
+
+    if (role === 'paciente' && idPaciente !== user.userId) {
+       return res.status(403).json({ error: "Acesso negado." });
+    }
+    if (role === 'medico') {
+       return res.status(403).json({ error: "Médicos não têm permissão para excluir checklists." });
+    }
+
+    await db.query("DELETE FROM checklists WHERE id = $1", [idChecklist]);
+    await logAction(user.userId, user.nome || "Usuário", "Exclusão de Checklist", `Excluiu um checklist do paciente ID ${idPaciente}.`);
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao deletar checklist:", error);
+    return res.status(500).json({ error: "Erro interno no servidor." });
+  }
+};
+
+export const obterChecklistPorId = async (req: Request, res: Response): Promise<any> => {
+  const idChecklist = Number(req.params.id);
+  const role = (req as any).user?.role;
+  const isPaciente = role === 'paciente';
+
+  if (isNaN(idChecklist)) {
+    return res.status(400).json({ error: "ID de checklist inválido." });
+  }
+
+  try {
+    const query = `
+      SELECT id, id_paciente, id_medico, preenchido_por, score_final, classificacao, data_preenchimento, memoria_calculo
+      FROM checklists
+      WHERE id = $1
+    `;
+    const checklistRes = await db.query(query, [idChecklist]);
+
+    if (checklistRes.rows.length === 0) {
+      return res.status(404).json({ error: "Checklist não encontrado." });
+    }
+
+    const checklist = checklistRes.rows[0];
+
+    const symptomsQuery = `
+      SELECT cs.id_sintoma, s.sintoma AS nome_sintoma
+      FROM checklist_sintomas cs
+      JOIN sintomas s ON cs.id_sintoma = s.id
+      WHERE cs.id_checklist = $1
+    `;
+    const symptomsRes = await db.query(symptomsQuery, [idChecklist]);
+
+    const result: any = {
+      id: checklist.id,
+      id_paciente: checklist.id_paciente,
+      id_medico: checklist.id_medico,
+      preenchido_por: checklist.preenchido_por,
+      data_preenchimento: checklist.data_preenchimento,
+      sintomas_selecionados: symptomsRes.rows.map(r => r.id_sintoma),
+      sintomas_nomes: symptomsRes.rows.map(r => r.nome_sintoma)
+    };
+
+    if (!isPaciente) {
+      result.score_final = Number(checklist.score_final);
+      result.classificacao = checklist.classificacao;
+      result.memoria_calculo = checklist.memoria_calculo;
+    }
+
+    return res.json(result);
+  } catch (error) {
+    console.error("Erro ao obter checklist por ID:", error);
     return res.status(500).json({ error: "Erro interno no servidor." });
   }
 };

@@ -27,7 +27,7 @@
   font-size: 16px;
   font-weight: 700;
   color: #1a3a6e;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.16);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
   letter-spacing: 0.4px;
   width: 220px;
   white-space: nowrap;
@@ -37,12 +37,12 @@
 
 .hero-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 }
 
 .hero-btn-secondary {
   background: transparent;
-  border: 1.5px solid rgba(255,255,255,0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   border-radius: 8px;
   padding: 16px 32px;
   font-size: 16px;
@@ -56,7 +56,7 @@
 }
 
 .hero-btn-secondary:hover {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-color: #fff;
 }
 
@@ -64,8 +64,8 @@
   flex: none;
   min-height: 120px;
   border-radius: 16px;
-  border: 1px dashed rgba(255,255,255,0.65);
-  background: rgba(255,255,255,0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.08);
   width: 100%;
 }
 

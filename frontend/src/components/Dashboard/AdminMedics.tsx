@@ -78,8 +78,8 @@ export default function AdminMedics() {
   return (
     <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
       <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#0f131a", marginBottom: "8px" }}>Registrar Novo Médico</h2>
-        <p style={{ color: "#caced4", fontSize: "14px" }}>
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#ffffff", marginBottom: "8px" }}>Registrar Novo Médico</h2>
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
           Cadastre uma conta de médico ativada diretamente no sistema. Ele poderá acessar imediatamente utilizando o e-mail ou CRM e a senha cadastrada.
         </p>
       </div>

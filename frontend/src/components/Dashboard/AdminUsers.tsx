@@ -155,10 +155,10 @@ export default function AdminUsers() {
   return (
     <div style={{ padding: "24px" }}>
       <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#1a202c", marginBottom: "8px" }}>Gerenciamento de Usuários</h2>
-          <p style={{ color: "#4a5568", fontSize: "14px" }}>
-            Visualize, filtre, edite ou remova usuários cadastrados no sistema (médicos, pacientes, instituto e administradores).
+        <div style={{ marginBottom: "24px" }}>
+          <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#ffffff", marginBottom: "8px" }}>Gerenciamento de Usuários</h2>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
+            Lista de todos os usuários do sistema. Ative, desative ou atualize informações conforme necessário.
           </p>
         </div>
       </div>

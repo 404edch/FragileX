@@ -10,7 +10,7 @@ const AuditLog = () => {
   useEffect(() => {
     const carregarAudits = async () => {
       try {
-        const data = await api.get('/audits');
+        const data = await api.get<any[]>('/audits');
         setLogs(data);
       } catch (error) {
         console.error("Erro ao obter logs de auditoria:", error);
@@ -34,7 +34,7 @@ const AuditLog = () => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="audit-container">
       <h2 className="audit-title">Registro de Auditoria do Sistema</h2>
       <p className="audit-desc">Acompanhe em tempo real todas as ações administrativas, médicas e de sistema.</p>
-      
+
       <div style={{ marginBottom: '20px' }}>
         <input
           type="text"
@@ -73,7 +73,7 @@ const AuditLog = () => {
             filteredLogs.map(log => {
               const date = new Date(log.timestamp);
               const formattedDate = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-              
+
               return (
                 <tr key={log.id}>
                   <td style={{ fontSize: '13px', color: '#666' }}>{formattedDate}</td>

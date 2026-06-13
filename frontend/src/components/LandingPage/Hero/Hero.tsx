@@ -66,7 +66,7 @@ const Hero = () => {
 
   const handleSaveNews = async (data: { nome: string; imagemUrl: string; linkHref: string }) => {
     if (!selectedNews) return;
-    
+
     let updated;
     if (selectedNews.id === 'new') {
       const nextId = news.length > 0 ? Math.max(...news.map(n => Number(n.id))) + 1 : 1;
@@ -92,7 +92,7 @@ const Hero = () => {
         return n;
       });
     }
-    
+
     try {
       await backendService.saveLandingNews(updated);
       setNews(updated);
@@ -232,11 +232,13 @@ const Hero = () => {
                       src={n.imagemUrl}
                       alt={n.titulo}
                       style={{
-                        width: '80px',
-                        height: '60px',
+                        width: '120px',
+                        height: '80px',
                         objectFit: 'cover',
                         borderRadius: '8px',
-                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        backgroundColor: '#ffffff',
+                        flexShrink: 0
                       }}
                     />
                   )}
@@ -304,12 +306,13 @@ const Hero = () => {
           ref={mascotRef}
           className="hero-mascot-container"
           style={{
-            right: ehMobile ? "-120px" : "-370px",
-            bottom: ehMobile ? "-210px" : "-270px",
-            transform: ehMobile ? "translateX(50%) rotate(-8deg)" : "rotate(-8deg)",
-            width: ehMobile ? 200 : 280,
-            height: ehMobile ? 240 : 340,
+            right: ehMobile ? "-20px" : "-340px",
+            bottom: ehMobile ? "-300px" : "-210px",
+            transform: ehMobile ? "translateX(20%) rotate(-8deg)" : "rotate(-8deg)",
+            width: ehMobile ? 200 : 320,
+            height: ehMobile ? 240 : 380,
             opacity: ehMobile ? 1 : 1,
+            zIndex: 0,
           }}
         >
           <img src="/buko.png" alt="Mascote Buko acenando" className="hero-mascot-img" />

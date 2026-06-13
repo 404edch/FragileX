@@ -276,5 +276,26 @@ export const backendService = {
 
   async deletarNota(idNota: number): Promise<void> {
     await api.delete(`/consultas/${idNota}`);
+  },
+
+  async listarFotosPaciente(idPaciente: number): Promise<any[]> {
+    return api.get<any[]>(`/pacientes/${idPaciente}/fotos`);
+  },
+
+  async adicionarFotoPaciente(idPaciente: number, fotoBase64: string): Promise<any> {
+    return api.post<any>(`/pacientes/${idPaciente}/fotos`, { fotoBase64 });
+  },
+
+  async deletarFotoPaciente(idPaciente: number, idFoto: number): Promise<any> {
+    return api.delete<any>(`/pacientes/${idPaciente}/fotos/${idFoto}`);
+  },
+
+  
+  async atualizarFotoPerfil(idPaciente: number, fotoBase64: string): Promise<any> {
+    return api.put<any>(`/pacientes/${idPaciente}/foto-perfil`, { fotoBase64 });
+  },
+
+  async definirFotoPrincipal(idPaciente: number, idFoto: number): Promise<any> {
+    return api.put<any>(`/pacientes/${idPaciente}/fotos/${idFoto}/principal`, {});
   }
 };

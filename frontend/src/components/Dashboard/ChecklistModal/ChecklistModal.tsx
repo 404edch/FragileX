@@ -16,7 +16,7 @@ const ChecklistModal = ({ checklist, onClose }: ChecklistModalProps) => {
         </div>
         <div className="checklist-modal-body">
           <div className="info-group">
-            <p><strong>Paciente:</strong> {checklist.paciente_nome}</p>
+            <p><strong>Paciente:</strong> {checklist.nome_paciente || checklist.paciente_nome}</p>
             <p><strong>CPF:</strong> {checklist.paciente_cpf || 'Não informado'}</p>
             <p><strong>Preenchido por:</strong> {checklist.preenchido_por}</p>
             <p><strong>Data:</strong> {new Date(checklist.data_preenchimento).toLocaleString('pt-BR')}</p>

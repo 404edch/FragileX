@@ -12,6 +12,27 @@ interface PatientCardProps {
 
 const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
   const [status, setStatus] = useState(patient.encaminhamento_status || 'pendente');
+  const [isUploadingFoto, setIsUploadingFoto] = useState(false);
+  const [fotoLocal, setFotoLocal] = useState(patient.foto_perfil);
+
+  const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    setIsUploadingFoto(true);
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result as string;
+        await backendService.atualizarFotoPerfil(Number(patient.id), base64);
+        setFotoLocal(base64);
+      } catch (err) {
+        alert("Erro ao enviar foto");
+      } finally {
+        setIsUploadingFoto(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleWhatsAppRedirect = (phone?: string) => {
     if(phone) {
@@ -43,12 +64,20 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
       </motion.button>
       
       <div className="patient-card-header">
-        <div className="patient-card-picture" style={{ padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {patient.foto_perfil && role !== 'paciente' ? (
-            <img src={patient.foto_perfil} alt="Foto do paciente" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <span style={{ fontSize: '32px', color: '#64748b' }}>{patient.name?.charAt(0)}</span>
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div className="patient-card-picture" style={{ width: '180px', height: '180px', padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #1a5fa8', borderRadius: '10px' }}>
+            {fotoLocal ? (
+              <img src={fotoLocal} alt="Foto do paciente" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ fontSize: '32px', color: '#64748b' }}>{patient.name?.charAt(0)}</span>
+            )}
+          </div>
+          <div style={{ marginTop: "10px" }}>
+            <label style={{ cursor: "pointer", color: "#1a5fa8", fontSize: "13px", fontWeight: "bold", textDecoration: "underline" }}>
+              {isUploadingFoto ? "Enviando..." : (fotoLocal ? "Trocar Foto" : "+ Adicionar Foto")}
+              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleUploadFoto} disabled={isUploadingFoto} />
+            </label>
+          </div>
         </div>
         <div className="patient-card-info" style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -127,8 +156,48 @@ const PatientCard = ({ patient, onClose, role }: PatientCardProps) => {
 
       {role === 'paciente' && (
         <div className="patient-card-support">
-          <h3 className="patient-card-support-title">Cartão de Suporte</h3>
-          <p className="patient-card-support-text">Precisa de ajuda? Entre em contato com nossa equipe de suporte.</p>
+          <h3 className="patient-card-support-title">Suporte e Contatos Úteis</h3>
+          <p className="patient-card-support-text" style={{ marginBottom: "16px", color: "#475569" }}>
+            O Programa de Ajuda do Instituto Buko Kaesemodel oferece acolhimento e orientações sobre a Síndrome do X Frágil.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <button
+              type="button"
+              className="patient-card-whatsapp-btn"
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                padding: "10px 14px",
+                fontSize: "13px",
+                background: "#25D366",
+                border: "none",
+                color: "white",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                cursor: "pointer",
+              }}
+              onClick={() => window.open("https://wa.me/5541991034847?text=Olá,%20gostaria%20de%20suporte%20sobre%20o%20Programa%20X%20Frágil", "_blank")}
+            >
+              Falar no WhatsApp Suporte
+            </button>
+            <div style={{ fontSize: "12px", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px", marginTop: "6px" }}>
+              <div>
+                📞 <strong>Fixo:</strong> <a href="tel:+554131560309" style={{ color: "#1a5fa8", textDecoration: "none" }}>(41) 3156-0309</a>
+              </div>
+              <div>
+                ✉ <strong>E-mail:</strong> <a href="mailto:contato@institutobk.org.br" style={{ color: "#1a5fa8", textDecoration: "none" }}>contato@institutobk.org.br</a>
+              </div>
+              <div>
+                📍 <strong>Endereço:</strong> <a href="https://maps.app.goo.gl/FDVXQcNtnsnnVAH98" target="_blank" rel="noreferrer" style={{ color: "#1a5fa8", textDecoration: "none" }}>Rua Fernando Simas, 172 – Curitiba-PR</a>
+              </div>
+              <div>
+                🌐 <strong>Guia Síndrome X Frágil:</strong> <a href="https://eudigox.com.br/" target="_blank" rel="noreferrer" style={{ color: "#1a5fa8", textDecoration: "none" }}>Acesse o Portal</a>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

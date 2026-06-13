@@ -52,10 +52,12 @@ export default function AdminRegisterEmployee() {
 
   return (
     <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
-      <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#0f131a", marginBottom: "8px" }}>Cadastrar Novo Funcionário</h2>
-      <p style={{ color: "#caced4", fontSize: "14px", marginBottom: "24px" }}>
-        Preencha os dados abaixo para registrar um novo membro da equipe do Instituto. Eles terão acesso a informações de pacientes e médicos.
-      </p>
+      <div style={{ marginBottom: "24px" }}>
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#ffffff", marginBottom: "8px" }}>Cadastrar Novo Funcionário</h2>
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
+          Registre contas de administração ou funcionários da instituição.
+        </p>
+      </div>
 
       {successMessage && (
         <div

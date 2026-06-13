@@ -462,3 +462,17 @@ export const updateStatus = async (req: Request, res: Response): Promise<any> =>
     return res.status(500).json({ error: "Erro interno no servidor." });
   }
 };
+
+export const atualizarFotoPerfil = async (req: Request, res: Response): Promise<any> => {
+  const idPaciente = Number(req.params.id);
+  const { fotoBase64 } = req.body;
+  if (isNaN(idPaciente) || !fotoBase64) return res.status(400).json({ error: "Dados inválidos" });
+  
+  try {
+    await db.query("UPDATE pacientes SET foto_perfil = $1 WHERE id_usuario = $2", [fotoBase64, idPaciente]);
+    return res.json({ success: true, foto_url: fotoBase64 });
+  } catch (err) {
+    console.error("Erro ao atualizar foto", err);
+    return res.status(500).json({ error: "Erro interno" });
+  }
+};

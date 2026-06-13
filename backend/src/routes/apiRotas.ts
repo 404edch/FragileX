@@ -83,6 +83,11 @@ router.get("/audits", requireRole(["instituto", "admin"]), auditController.getAu
 router.post("/checklists", requireRole(["medico", "instituto", "paciente", "admin"]), checklistController.salvarChecklist);
 router.get("/checklists/search", requireRole(["instituto", "admin"]), checklistController.buscarChecklistsAvancado);
 router.get("/checklists/paciente/:idPaciente", requireRole(["medico", "instituto", "paciente", "admin"]), checklistController.obterChecklistsPaciente);
+router.get("/checklists/detalhes/:id", requireRole(["instituto", "admin", "paciente"]), checklistController.obterChecklistPorId);
+router.put("/checklists/:id", requireRole(["instituto", "admin", "paciente"]), checklistController.atualizarChecklist);
+router.delete("/checklists/:id", requireRole(["instituto", "admin", "paciente"]), checklistController.deletarChecklist);
+
+router.put("/pacientes/:id/foto-perfil", requireRole(["instituto", "admin", "paciente", "medico"]), patientController.atualizarFotoPerfil);
 
 // ── Consultas (Anotações) ──
 import * as consultasController from "../controllers/consultasController";

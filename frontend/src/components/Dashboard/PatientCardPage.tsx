@@ -141,18 +141,18 @@ export default function PatientCardPage() {
   const patient =
     user && details
       ? {
-          id: user.id,
-          name: user.nome,
-          age: calculateAge(details.data_nascimento),
-          sex: details.sexo_biologico,
-          lastConsultation: details.id_medico_responsavel ? "2026-05-15" : "Sem consulta vinculada",
-          tag: details.id_medico_responsavel ? "Acompanhamento" : "Sem Médico",
-          responsibleFigure: details.responsavel_nome,
-          phone: details.whatsapp || details.telefone_2 || "",
-          foto_perfil: details.foto_perfil,
-          classificacao_oficial: details.classificacao_oficial,
-          encaminhamento_status: details.encaminhamento_status,
-        }
+        id: user.id,
+        name: user.nome,
+        age: calculateAge(details.data_nascimento),
+        sex: details.sexo_biologico,
+        lastConsultation: details.id_medico_responsavel ? "2026-05-15" : "Sem consulta vinculada",
+        tag: details.id_medico_responsavel ? "Acompanhamento" : "Sem Médico",
+        responsibleFigure: details.responsavel_nome,
+        phone: details.whatsapp || details.telefone_2 || "",
+        foto_perfil: details.foto_perfil,
+        classificacao_oficial: details.classificacao_oficial,
+        encaminhamento_status: details.encaminhamento_status,
+      }
       : null;
 
   if (patient) {
@@ -171,7 +171,7 @@ export default function PatientCardPage() {
           <PatientCard
             patient={patient}
             onClose={() => navigate("/dashboard")}
-            role={usuario.role}
+            role={usuario?.role || 'paciente'}
           />
         </div>
       </div>

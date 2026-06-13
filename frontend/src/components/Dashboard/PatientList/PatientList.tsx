@@ -15,7 +15,7 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterSindrome, setFilterSindrome] = useState('');
+  const [filterTriagem, setFilterTriagem] = useState('');
 
   const { usuario } = useAuth();
 
@@ -60,12 +60,16 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
       result = result.filter(p => p.pacienteDetails?.encaminhamento_status === filterStatus);
     }
 
-    if (filterSindrome) {
-      result = result.filter(p => p.pacienteDetails?.sindrome === filterSindrome);
+    if (filterTriagem) {
+      if (filterTriagem === 'Não Avaliado') {
+        result = result.filter(p => !p.pacienteDetails?.classificacao_oficial || p.pacienteDetails.classificacao_oficial === 'Não Avaliado');
+      } else {
+        result = result.filter(p => p.pacienteDetails?.classificacao_oficial === filterTriagem);
+      }
     }
 
     return result;
-  }, [searchTerm, filterStatus, filterSindrome, fuse, patients]);
+  }, [searchTerm, filterStatus, filterTriagem, fuse, patients]);
 
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Carregando lista de pacientes...</div>;
@@ -74,7 +78,9 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
   return (
     <div className="patient-list-container">
       <div className="patient-list-header">
-        <h2>{role === 'medico' ? 'Meus Pacientes' : 'Todos os Pacientes'}</h2>
+        <h2 style={{ color: '#ffffff', fontWeight: 'bold', fontSize: '24px', margin: 0 }}>
+          {role === 'medico' ? 'Meus Pacientes' : 'Todos os Pacientes'}
+        </h2>
       </div>
 
       <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #e2e8f0', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
@@ -96,14 +102,14 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
           <option value="encaminhamento negado">Encaminhamento Negado</option>
         </select>
         <select 
-          value={filterSindrome} 
-          onChange={(e) => setFilterSindrome(e.target.value)}
+          value={filterTriagem} 
+          onChange={(e) => setFilterTriagem(e.target.value)}
           style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', background: '#fff' }}
         >
-          <option value="">Síndrome</option>
-          <option value="normal">Normal</option>
-          <option value="pre_mutacao">Pré-Mutação</option>
-          <option value="mutacao">Mutação Completa</option>
+          <option value="">Resultado da Triagem (Todos)</option>
+          <option value="Suspeito">Suspeito</option>
+          <option value="Negativo">Normal (Negativo)</option>
+          <option value="Não Avaliado">Não Avaliado</option>
         </select>
       </div>
 
@@ -162,29 +168,58 @@ const PatientList = ({ role, onPatientClick }: PatientListProps) => {
                           </span>
                         )}
                       </h3>
-                      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '4px' }}>
                         <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
                           <strong>CPF:</strong> {patient.cpf || 'Não informado'}
                         </p>
                         <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
                           <strong>Nascimento:</strong> {patient.pacienteDetails?.data_nascimento ? new Date(patient.pacienteDetails.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado'}
                         </p>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                          <strong>Sexo Biológico:</strong> {patient.pacienteDetails?.sexo_biologico === 'M' ? 'Masculino' : patient.pacienteDetails?.sexo_biologico === 'F' ? 'Feminino' : 'Não informado'}
+                        </p>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                          <strong>Responsável Principal:</strong> {patient.pacienteDetails?.responsavel_nome || 'O próprio paciente'}
+                        </p>
                       </div>
                     </div>
                   </div>
                   
                   <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                    <span style={{ 
-                      padding: '8px 16px', 
-                      borderRadius: '999px', 
-                      fontSize: '13px', 
-                      fontWeight: 700, 
-                      background: patient.status === 'ACTIVE' ? '#dcfce7' : '#fef9c3',
-                      color: patient.status === 'ACTIVE' ? '#166534' : '#854d0e',
-                      border: `1px solid ${patient.status === 'ACTIVE' ? '#bbf7d0' : '#fef08a'}`
-                    }}>
-                      {patient.status === 'ACTIVE' ? 'Ativo' : 'Aguardando Ativação'}
-                    </span>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <span style={{ 
+                        padding: '6px 12px', 
+                        borderRadius: '999px', 
+                        fontSize: '12px', 
+                        fontWeight: 700, 
+                        background: patient.status === 'ACTIVE' ? '#dcfce7' : '#fef9c3',
+                        color: patient.status === 'ACTIVE' ? '#166534' : '#854d0e',
+                        border: `1px solid ${patient.status === 'ACTIVE' ? '#bbf7d0' : '#fef08a'}`,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {patient.status === 'ACTIVE' ? 'Usuário Ativo' : 'Aguardando Ativação'}
+                      </span>
+                      
+                      {patient.pacienteDetails?.encaminhamento_status && (
+                        <span style={{
+                          padding: '6px 12px',
+                          borderRadius: '999px',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          background: patient.pacienteDetails.encaminhamento_status === 'encaminhado' ? '#dcfce7' : 
+                                      patient.pacienteDetails.encaminhamento_status === 'encaminhamento negado' ? '#fee2e2' : '#fef3c7',
+                          color: patient.pacienteDetails.encaminhamento_status === 'encaminhado' ? '#166534' : 
+                                 patient.pacienteDetails.encaminhamento_status === 'encaminhamento negado' ? '#991b1b' : '#92400e',
+                          border: `1px solid ${
+                                  patient.pacienteDetails.encaminhamento_status === 'encaminhado' ? '#bbf7d0' : 
+                                  patient.pacienteDetails.encaminhamento_status === 'encaminhamento negado' ? '#fecaca' : '#fde68a'}`,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {patient.pacienteDetails.encaminhamento_status === 'encaminhado' ? 'Encaminhado' : 
+                           patient.pacienteDetails.encaminhamento_status === 'encaminhamento negado' ? 'Negado' : 'Pendente'}
+                        </span>
+                      )}
+                    </div>
                     {patient.pacienteDetails?.classificacao_oficial && patient.pacienteDetails.classificacao_oficial !== 'Não Avaliado' && (
                       <span style={{
                         padding: '4px 12px',
