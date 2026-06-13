@@ -23,6 +23,7 @@ export default function AdminRegisterEmployee() {
 
     if (cpf.length !== 11 || /^\d{11}$/.test(cpf) === false) {
       setErrorMessage("CPF Inválido.");
+      return;
     }
 
     try {

@@ -697,34 +697,66 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                       <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "500", background: "#f1f5f9", padding: "4px 10px", borderRadius: "12px" }}>
                         {new Date(nota.data_consulta).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                       </span>
-                      {(usuario?.role === "admin" || usuario?.id === nota.autor_id) && (
+                      {(usuario?.role === "admin" || usuario?.role === "instituto" || usuario?.id === nota.autor_id) && (
                         <div style={{ display: "flex", gap: "8px" }}>
                           {editandoNotaId === nota.id ? (
                             <>
-                              <button 
+                              <button
                                 onClick={() => salvarEdicaoNota(nota.id)}
-                                style={{ padding: "4px 8px", fontSize: "12px", background: "#10b981", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                                style={{
+                                  padding: "4px 8px",
+                                  fontSize: "12px",
+                                  background: "#10b981",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                }}
                               >
                                 Salvar
                               </button>
-                              <button 
+                              <button
                                 onClick={cancelarEdicaoNota}
-                                style={{ padding: "4px 8px", fontSize: "12px", background: "#64748b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                                style={{
+                                  padding: "4px 8px",
+                                  fontSize: "12px",
+                                  background: "#64748b",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                }}
                               >
                                 Cancelar
                               </button>
                             </>
                           ) : (
                             <>
-                              <button 
+                              <button
                                 onClick={() => iniciarEdicaoNota(nota)}
-                                style={{ padding: "4px 8px", fontSize: "12px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                                style={{
+                                  padding: "4px 8px",
+                                  fontSize: "12px",
+                                  background: "#3b82f6",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                }}
                               >
                                 Editar
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDeletarNota(nota.id)}
-                                style={{ padding: "4px 8px", fontSize: "12px", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                                style={{
+                                  padding: "4px 8px",
+                                  fontSize: "12px",
+                                  background: "#ef4444",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  cursor: "pointer",
+                                }}
                               >
                                 Excluir
                               </button>
@@ -748,7 +780,7 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                         minHeight: "80px",
                         resize: "vertical",
                         background: "#f8fafc",
-                        fontFamily: "inherit"
+                        fontFamily: "inherit",
                       }}
                     />
                   ) : (
