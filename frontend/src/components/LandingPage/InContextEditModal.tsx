@@ -163,6 +163,24 @@ export default function InContextEditModal({ isOpen, onClose, onSave, onDelete, 
           </div>
 
           <div className="cadastro-item" style={{ width: '100%' }}>
+            <label className="cadastro-label">URL da Imagem (opcional)</label>
+            <input
+              type="url"
+              className="cadastro-input"
+              value={imagemUrl.startsWith('data:') ? '' : imagemUrl}
+              onChange={(e) => {
+                setImagemUrl(e.target.value);
+                setImagePreview(e.target.value);
+              }}
+              placeholder="https://exemplo.com/imagem.jpg"
+            />
+          </div>
+
+          <div style={{ textAlign: 'center', margin: '4px 0', color: '#64748b', fontSize: '14px', fontWeight: 'bold' }}>
+            OU
+          </div>
+
+          <div className="cadastro-item" style={{ width: '100%' }}>
             <label className="cadastro-label">Upload de Imagem (JPEG/PNG, máx 2MB)</label>
             <input
               type="file"
