@@ -6,9 +6,9 @@ INSERT INTO landing_cards (id, nome, etiqueta_img, imagem_url, link_href) VALUES
 (6, 'Quando o cuidado também precisa de cuidado', 'Imagem Carregada', 'https://portaldotea.com.br/wp-content/uploads/2026/02/Instituto-Buko-Kaesemodel-foto@marceloeliasfoto-7108-e1772218698307-1024x906.jpg', 'https://www.eudigox.com.br/noticias/quando-o-cuidado-tambem-precisa-de-cuidado/'),
 (8, 'Nossa História', 'Imagem Carregada', 'https://institutobk.org.br/wp-content/uploads/2023/01/buko.jpg', 'https://institutobk.org.br/o_instituto_buko_kaesemodel/#nossa_historia'),
 (9, 'Veja um Pouco do Projeto', 'Imagem Carregada', 'https://institutobk.org.br/wp-content/uploads/2022/12/Maos-Unidas-1.jpg', 'https://institutobk.org.br/maos-unidas-2/'),
-(10, 'Rwvista Autismo', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2023/02/Captura-de-Tela-2023-02-14-as-11.55.24-222x300.jpg', 'https://www.eudigox.com.br/revista-autismo/'),
+(10, 'Revista Autismo', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2023/02/Captura-de-Tela-2023-02-14-as-11.55.24-222x300.jpg', 'https://www.eudigox.com.br/revista-autismo/'),
 (11, 'Podcast Síndrome do X Frágil', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2025/02/Captura-de-Tela-2025-02-21-as-17.48.41-768x423.png', 'https://www.eudigox.com.br/videos/fran-franceschi-podcast-sindrome-do-x-fragil/'),
-(12, 'Vila Viva', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2016/07/Vila-Viva.jpg', 'https://www.eudigox.com.br/programaseprojetos/projeto-vila-viva/'),
+(12, 'Projeto Vila Viva', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2016/07/Vila-Viva.jpg', 'https://www.eudigox.com.br/programaseprojetos/projeto-vila-viva/'),
 (14, 'Instituto Buko Kaesemodel  ', 'Imagem Carregada', 'https://media.licdn.com/dms/image/v2/D560BAQFnUefXbaMA6g/company-logo_200_200/company-logo_200_200/0/1699029534685/instituto_buko_kaesemodel_logo?e=2147483647&v=beta&t=RLUeULZUR9Sydv0yt7I94B1kyBRwts7LqzNulpyllzE', '');
 SELECT setval('landing_cards_id_seq', 14);
 
