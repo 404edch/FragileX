@@ -1,26 +1,21 @@
-
 DELETE FROM landing_cards;
 INSERT INTO landing_cards (id, nome, etiqueta_img, imagem_url, link_href) VALUES 
-(1, 'A Síndrome do X Frágil', 'Imagem', 'https://picsum.photos/seed/card1/400/300', 'https://buko.org.br/sobre/'),
-(2, 'Diagnóstico Precoce', 'Pesquisa', 'https://picsum.photos/seed/card2/400/300', 'https://buko.org.br/diagnostico/'),
-(3, 'Nossas Campanhas', 'Ação', 'https://picsum.photos/seed/card3/400/300', 'https://buko.org.br/campanhas/'),
-(4, 'O que é a Mutação', 'Educação', 'https://picsum.photos/seed/card4/400/300', 'https://buko.org.br/mutacao/'),
-(5, 'Tratamento', 'Saúde', 'https://picsum.photos/seed/card5/400/300', 'https://buko.org.br/tratamento/'),
-(6, 'Famílias', 'Apoio', 'https://picsum.photos/seed/card6/400/300', 'https://buko.org.br/familias/'),
-(7, 'Escolas e Professores', 'Educação', 'https://picsum.photos/seed/card7/400/300', 'https://buko.org.br/escolas/'),
-(8, 'Profissionais de Saúde', 'Médico', 'https://picsum.photos/seed/card8/400/300', 'https://buko.org.br/profissionais/'),
-(9, 'Seja um Voluntário', 'Ação', 'https://picsum.photos/seed/card9/400/300', 'https://buko.org.br/voluntario/'),
-(10, 'Doações', 'Apoio', 'https://picsum.photos/seed/card10/400/300', 'https://buko.org.br/doacoes/');
-SELECT setval('landing_cards_id_seq', 10);
+(1, 'Instagram Eu Digo X', 'Imagem Carregada', 'https://www.canalautismo.com.br/wp-content/uploads/2022/04/logo-projeto-Eu_Digo_X-IBK-705x641.jpg', 'https://www.instagram.com/programaeudigox/'),
+(3, 'Congresso de genética médica do Brasil', 'Imagem Carregada', 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgwUdUKvXoTmjooU6ehMa8-Ws1pTwpJfqHzsuIYqqNM_0KaIeFPUuT76pphrqndq40c9DFurKhn_z6afiDNQjhwu_G0OOlCpJKtEwpG_Ip1NPa5xrgMfeUmsgxoMFNChYla5xpBIfblSWMitpk6wYvg_752JNTtT6gRGqpNP8cEeAgHpY1q7DObFUwALDs/s320/unnamed%20(16).jpg', 'https://www.eudigox.com.br/saibamais/'),
+(4, 'Referência nacional em Síndrome do X Frágil', 'Imagem Carregada', 'https://odiariodecuritiba.com.br/wp-content/uploads/2025/11/123446152868dec7f560f68.jpg', 'https://www.eudigox.com.br/downloads/'),
+(6, 'Quando o cuidado também precisa de cuidado', 'Imagem Carregada', 'https://portaldotea.com.br/wp-content/uploads/2026/02/Instituto-Buko-Kaesemodel-foto@marceloeliasfoto-7108-e1772218698307-1024x906.jpg', 'https://www.eudigox.com.br/noticias/quando-o-cuidado-tambem-precisa-de-cuidado/'),
+(8, 'Nossa História', 'Imagem Carregada', 'https://institutobk.org.br/wp-content/uploads/2023/01/buko.jpg', 'https://institutobk.org.br/o_instituto_buko_kaesemodel/#nossa_historia'),
+(9, 'Veja um Pouco do Projeto', 'Imagem Carregada', 'https://institutobk.org.br/wp-content/uploads/2022/12/Maos-Unidas-1.jpg', 'https://institutobk.org.br/maos-unidas-2/'),
+(10, 'Rwvista Autismo', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2023/02/Captura-de-Tela-2023-02-14-as-11.55.24-222x300.jpg', 'https://www.eudigox.com.br/revista-autismo/'),
+(11, 'Podcast Síndrome do X Frágil', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2025/02/Captura-de-Tela-2025-02-21-as-17.48.41-768x423.png', 'https://www.eudigox.com.br/videos/fran-franceschi-podcast-sindrome-do-x-fragil/'),
+(12, 'Vila Viva', 'Imagem Carregada', 'https://www.eudigox.com.br/wp-content/uploads/2016/07/Vila-Viva.jpg', 'https://www.eudigox.com.br/programaseprojetos/projeto-vila-viva/'),
+(14, 'Instituto Buko Kaesemodel  ', 'Imagem Carregada', 'https://media.licdn.com/dms/image/v2/D560BAQFnUefXbaMA6g/company-logo_200_200/company-logo_200_200/0/1699029534685/instituto_buko_kaesemodel_logo?e=2147483647&v=beta&t=RLUeULZUR9Sydv0yt7I94B1kyBRwts7LqzNulpyllzE', '');
+SELECT setval('landing_cards_id_seq', 14);
 
 DELETE FROM landing_news;
-INSERT INTO landing_news (id, titulo, link_href, imagem_url) VALUES 
-(1, 'Congresso Internacional de Genética 2026', 'https://buko.org.br/news1', 'https://picsum.photos/seed/news1/400/300'),
-(2, 'Novo Tratamento Aprovado pela ANVISA', 'https://buko.org.br/news2', 'https://picsum.photos/seed/news2/400/300'),
-(3, 'Semana de Conscientização da Síndrome do X Frágil', 'https://buko.org.br/news3', 'https://picsum.photos/seed/news3/400/300'),
-(4, 'Lançamento do App EudigoX', 'https://buko.org.br/news4', 'https://picsum.photos/seed/news4/400/300'),
-(5, 'Parceria com Hospitais de Curitiba', 'https://buko.org.br/news5', 'https://picsum.photos/seed/news5/400/300');
-SELECT setval('landing_news_id_seq', 5);
+INSERT INTO landing_news (id, titulo, imagem_url, link_href) VALUES 
+(1, 'ÁLBUM COPA DO BUKINHO', 'https://www.eudigox.com.br/wp-content/uploads/2026/04/IBK-BANNER-SITE-COPA-DO-BUKINHO-1.jpg', 'https://www.instagram.com/reel/DZaB3aanKgZ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=='),
+(2, 'ÁLBUM NATAL DO BUKINHO', 'https://www.eudigox.com.br/wp-content/uploads/2025/12/IBK_NATALDOBUKINHO-1024x1024.jpg', 'https://www.eudigox.com.br/blog/');
 
 -- Seeder Inicial de Sintomas
 INSERT INTO sintomas (sintoma, score_m, score_f) VALUES
@@ -56,22 +51,9 @@ INSERT INTO pacientes (id_usuario, data_nascimento, sexo_biologico, genero, sind
 (3, '1981-05-15', 'F', 'Feminino', 'normal', 'Mary Cooper', 'Mary Cooper', 'Mãe', '00011122233', 'São Paulo', 'SP', 'Brasil', '11999999999', 2),
 (4, '1994-09-01', 'M', 'Masculino', 'mutacao', 'Jane Smith', 'Jane Smith', 'Mãe', '11122233344', 'Curitiba', 'PR', 'Brasil', '41988888888', 2);
 
--- Seeder Inicial de Cards da Landing Page
-INSERT INTO landing_cards (id, nome, etiqueta_img, imagem_url, link_href) VALUES
-(1, 'Equipe BK', 'Foto equipe', '/equipe.png', 'https://xfragil.org.br/quem-somos/'),
-(2, 'Nossa missão', 'Foto missão', '/missao.png', 'https://xfragil.org.br/missao-visao-valores/'),
-(3, 'Nosso impacto', 'Foto impacto', '/impacto.png', 'https://xfragil.org.br/projetos/'),
-(4, 'Parceiros', 'Foto parceiros', '/parceiros.png', 'https://xfragil.org.br/parceiros/'),
-(5, 'Projetos', 'Foto projetos', '/projetos.png', 'https://xfragil.org.br/projetos/'),
-(6, 'Voluntários', 'Foto voluntários', '/voluntarios.png', 'https://xfragil.org.br/como-ajudar/');
+-- Seeder Inicial de Cards da Landing Page (removido para evitar conflito com o seed acima)
 
-SELECT setval('landing_cards_id_seq', 7);
-
--- Seeder Inicial de Notícias
-INSERT INTO landing_news (id, titulo, imagem_url, link_href) VALUES
-(1, 'Novidades do Instituto Buko Kaesemodel', '', 'https://xfragil.org.br/noticias/');
-
-SELECT setval('landing_news_id_seq', 2);
+-- Seeder Inicial de Notícias (removido para evitar conflito com o seed acima)
 -- Inserir dados realistas no banco de dados (FragileX)
 -- Preserva usuários de teste atuais (usando IDs a partir de 1000 para evitar colisão)
 -- A senha de todos é '123456' (bcrypt hash)
