@@ -185,7 +185,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
     return () => window.clearTimeout(timeoutId);
   }, [carregarDados]);
 
-
   const handleUploadFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -303,12 +302,15 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* Mensagem de Boas-Vindas */}
-      <div>
-        <h2 style={{ fontSize: "26px", fontWeight: "bold", color: "#1a5fa8", marginBottom: "6px" }}>Olá, {usuarioInfo.nome}!</h2>
-        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.9)" }}>Bem-vindo ao seu painel pessoal de acompanhamento da Síndrome do X Frágil.</p>
-      </div>
-
+      {usuario?.role === "paciente" && (
+        <>
+          {/* Mensagem de Boas-Vindas */}
+          <div>
+            <h2 style={{ fontSize: "26px", fontWeight: "bold", color: "#1a5fa8", marginBottom: "6px" }}>Olá, {usuarioInfo.nome}!</h2>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.9)" }}>Bem-vindo ao seu painel pessoal de acompanhamento da Síndrome do X Frágil.</p>
+          </div>
+        </>
+      )}
       {/* Grid de Seções do Painel */}
       <div
         style={{
@@ -344,12 +346,23 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
                   style={{ width: "140px", height: "140px", borderRadius: "10px", objectFit: "cover", border: "3px solid #1a5fa8" }}
                 />
               ) : (
-                <div style={{ width: "140px", height: "140px", borderRadius: "10px", border: "3px dashed #cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" }}>
+                <div
+                  style={{
+                    width: "140px",
+                    height: "140px",
+                    borderRadius: "10px",
+                    border: "3px dashed #cbd5e1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#94a3b8",
+                  }}
+                >
                   Sem Foto
                 </div>
               )}
             </div>
-            
+
             {/* DADOS PESSOAIS */}
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", color: "#475569" }}>
               <p>
@@ -482,7 +495,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           </div>
         </div>
       </div>
-
       {/* Solicitações de Vínculo de Médicos (Seção 5) */}
       <div
         className="dashboard-med-registration"
@@ -559,7 +571,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           </div>
         )}
       </div>
-
       {/* Seção 2: CHECKLISTS */}
       <div className="dashboard-med-registration">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
@@ -642,7 +653,6 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
           </div>
         )}
       </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
         {/* Histórico de Consultas / Notas */}
         <div className="dashboard-med-registration">
@@ -900,13 +910,33 @@ const PatientDashboard = ({ idUsuario }: PatientDashboardProps) => {
               </button>
               <div style={{ fontSize: "12px", color: "#64748b", display: "flex", flexDirection: "column", gap: "4px", marginTop: "6px" }}>
                 <div>
-                  📞 <strong>Fixo:</strong> <a href="tel:+554131560309" style={{ color: "#1a5fa8", textDecoration: "none" }}>(41) 3156-0309</a>
+                  📞 <strong>Fixo:</strong>{" "}
+                  <a
+                    href="tel:+554131560309"
+                    style={{ color: "#1a5fa8", textDecoration: "none" }}
+                  >
+                    (41) 3156-0309
+                  </a>
                 </div>
                 <div>
-                  ✉ <strong>E-mail:</strong> <a href="mailto:contato@institutobk.org.br" style={{ color: "#1a5fa8", textDecoration: "none" }}>contato@institutobk.org.br</a>
+                  ✉ <strong>E-mail:</strong>{" "}
+                  <a
+                    href="mailto:contato@institutobk.org.br"
+                    style={{ color: "#1a5fa8", textDecoration: "none" }}
+                  >
+                    contato@institutobk.org.br
+                  </a>
                 </div>
                 <div>
-                  📍 <strong>Endereço:</strong> <a href="https://maps.app.goo.gl/FDVXQcNtnsnnVAH98" target="_blank" rel="noreferrer" style={{ color: "#1a5fa8", textDecoration: "none" }}>Rua Fernando Simas, 172 – Curitiba-PR</a>
+                  📍 <strong>Endereço:</strong>{" "}
+                  <a
+                    href="https://maps.app.goo.gl/FDVXQcNtnsnnVAH98"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: "#1a5fa8", textDecoration: "none" }}
+                  >
+                    Rua Fernando Simas, 172 – Curitiba-PR
+                  </a>
                 </div>
                 <div>
                   🌐 <strong>Guia Síndrome X Frágil:</strong>{" "}

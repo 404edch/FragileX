@@ -5,6 +5,7 @@ import { userService } from "../../services/userService";
 import { patientService } from "../../services/patientService";
 import { doctorService } from "../../services/doctorService";
 import { useAuth } from "../../contexts/AuthContext";
+import { MockUsuario, MockPaciente } from "../../services/types";
 
 export default function PatientCardPage() {
   const { id } = useParams();
@@ -12,14 +13,14 @@ export default function PatientCardPage() {
   const navigate = useNavigate();
 
   const patientIdNum = Number(id);
-  const [user, setUser] = useState<any | null>(null);
-  const [details, setDetails] = useState<any | null>(null);
+  const [user, setUser] = useState<MockUsuario | null>(null);
+  const [details, setDetails] = useState<MockPaciente | null>(null);
   const [temPermissao, setTemPermissao] = useState<boolean | null>(null);
 
   const calculateAge = (dob: string) => {
     try {
       const birthDate = new Date(dob);
-      const difference = Date.now() - birthDate.getTime();
+      const difference = new Date().getTime() - birthDate.getTime();
       const ageDate = new Date(difference);
       return Math.abs(ageDate.getUTCFullYear() - 1970);
     } catch {

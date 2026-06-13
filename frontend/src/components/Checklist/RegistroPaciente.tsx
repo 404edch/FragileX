@@ -40,8 +40,8 @@ export default function RegistroPaciente() {
       await linkService.importarPacientePorCpf(usuario.id, cpfValue);
       alert("Solicitação de vínculo enviada com sucesso!");
       navigate("/dashboard");
-    } catch (error: any) {
-      setErrorMessage(error.message || "Erro ao solicitar vínculo.");
+    } catch (error) {
+      setErrorMessage((error as Error).message || "Erro ao solicitar vínculo.");
     }
   };
 
@@ -58,14 +58,14 @@ export default function RegistroPaciente() {
     e.preventDefault();
     setErrorMessage("");
     const formData = new FormData(e.currentTarget);
-    const dadosPessoais: any = Object.fromEntries(formData.entries());
+    const dadosPessoais = Object.fromEntries(formData.entries()) as Record<string, string>;
 
     let foto_perfil = "";
     const fotoFile = formData.get("foto_perfil_file") as File;
     if (fotoFile && fotoFile.size > 0) {
       try {
         foto_perfil = await toBase64(fotoFile);
-      } catch (err) {
+      } catch {
         setErrorMessage("Erro ao processar a foto.");
         return;
       }
@@ -96,8 +96,8 @@ export default function RegistroPaciente() {
         });
         const fullLink = `${window.location.origin}${res.linkAtivacao}`;
         setActivationLink(fullLink);
-      } catch (error: any) {
-        setErrorMessage(error.message || "Erro ao registrar paciente. Tente novamente.");
+      } catch (error) {
+        setErrorMessage((error as Error).message || "Erro ao registrar paciente. Tente novamente.");
       }
     } else {
       // Autocadastro de paciente
@@ -132,14 +132,15 @@ export default function RegistroPaciente() {
         await loginComCredenciais(dadosPessoais.cpfPaciente as string, dadosPessoais.senha as string);
         alert("Cadastro realizado com sucesso!");
         navigate("/dashboard");
-      } catch (error: any) {
-        if (error.message === "REGISTRADO_PELO_MEDICO") {
+      } catch (error) {
+        const errMessage = (error as Error).message;
+        if (errMessage === "REGISTRADO_PELO_MEDICO") {
           setErrorMessage(
             "Um profissional de saúde já iniciou o seu cadastro no sistema. Por favor, utilize o link de ativação enviado para definir sua senha ou entre em contato com seu médico.",
           );
-        } else if (error.message === "CPF_EXISTENTE") {
+        } else if (errMessage === "CPF_EXISTENTE") {
           setErrorMessage("Já encontramos um cadastro associado a este CPF. Faça login para acessar sua conta.");
-        } else if (error.message === "EMAIL_EXISTENTE") {
+        } else if (errMessage === "EMAIL_EXISTENTE") {
           setErrorMessage("Já encontramos um cadastro associado a este E-mail. Faça login para acessar sua conta.");
         } else {
           setErrorMessage("Erro ao realizar o cadastro. Tente novamente.");

@@ -9,7 +9,7 @@ import Fuse from 'fuse.js';
 
 interface PatientListProps {
   role: string;
-  onPatientClick?: (patient: any) => void;
+  onPatientClick?: (patient: { id: number }) => void;
 }
 
 const PatientList = ({ role, onPatientClick }: PatientListProps) => {
