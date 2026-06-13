@@ -1,97 +1,26 @@
 import { Request, Response } from "express";
 import { db } from "../config/database";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { logAction } from "../services/auditService";
+import { 
+  createPatientByDoctor, 
+  createPatientSelfRegistration, 
+  mapPatientRowToDto, 
+  mapFullPatientProfileToDto 
+} from "../services/patientService";
+import { USER_STATUS, ERROR_MESSAGES, BCRYPT_SALT_ROUNDS, USER_ROLES } from "../utils/constants";
 
 export const cadastrarPeloMedico = async (req: Request, res: Response): Promise<any> => {
-  const {
-    idMedico,
-    nomePaciente,
-    cpfPaciente,
-    email,
-    telefone,
-    dataNascimento,
-    sexo_biologico,
-    genero,
-    nomeMae,
-    nomePai,
-    nomeResponsavel,
-    grauParentesco,
-    cpfResponsavel,
-    cidade,
-    estado,
-    pais,
-    telefone2,
-    whatsapp,
-    foto_perfil,
-  } = req.body;
-
   try {
-    // Validar CPF e E-mail existentes
-    const checkQuery = "SELECT id, email, cpf FROM usuarios WHERE cpf = $1 OR email = $2";
-    const checkRes = await db.query(checkQuery, [cpfPaciente, email]);
-
-    if (checkRes.rows.length > 0) {
-      const existing = checkRes.rows[0];
-      if (existing.cpf === cpfPaciente) {
-        return res.status(400).json({ error: "CPF já cadastrado." });
-      }
-      return res.status(400).json({ error: "E-mail já cadastrado." });
-    }
-
-    const token = crypto.randomBytes(20).toString("hex");
-
-    // Inserir na tabela usuarios
-    const insertUserQuery = `
-      INSERT INTO usuarios (nome, cpf, email, telefone, senha_hash, role, status, token_ativacao)
-      VALUES ($1, $2, $3, $4, $5, 'paciente', 'PENDING_ACTIVATION', $6)
-      RETURNING id
-    `;
-    const userRes = await db.query(insertUserQuery, [nomePaciente, cpfPaciente, email, telefone, "MOCK_HASH", token]);
-    const novoUsuarioId = userRes.rows[0].id;
-
-    // Inserir na tabela pacientes
-    const insertPacQuery = `
-      INSERT INTO pacientes (
-        id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, nome_pai,
-        responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais,
-        telefone_2, whatsapp, id_medico_responsavel, foto_perfil
-      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    `;
-    const sexoBiologicoDb = sexo_biologico === "masculino" || sexo_biologico === "M" ? "M" : "F";
-    const generoDb = genero === "masculino" || genero === "M" ? "Masculino" : "Feminino";
-
-    await db.query(insertPacQuery, [
-      novoUsuarioId,
-      dataNascimento,
-      sexoBiologicoDb,
-      generoDb,
-      nomeMae,
-      nomePai || "",
-      nomeResponsavel,
-      grauParentesco,
-      cpfResponsavel,
-      cidade,
-      estado,
-      pais,
-      telefone2 || "",
-      whatsapp || "",
-      idMedico,
-      foto_perfil || null,
-    ]);
-
-    const medUser = await db.query("SELECT nome, role FROM usuarios WHERE id = $1", [idMedico]);
-    const medNome = medUser.rows[0]?.nome || "Médico";
-    const medRole = medUser.rows[0]?.role || "medico";
-
-    await logAction(idMedico, medNome, "Cadastro de Paciente", `Médico cadastrou o paciente ${nomePaciente} (Aguardando Ativação).`);
-
+    const token = await createPatientByDoctor(req.body, req.body.idMedico);
     const linkAtivacao = `/activate-account?token=${token}`;
     return res.status(201).json({ linkAtivacao, token });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao cadastrar paciente pelo médico:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    if (error.message === ERROR_MESSAGES.CPF_ALREADY_REGISTERED || error.message === ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED) {
+      return res.status(400).json({ error: error.message });
+    }
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -103,15 +32,15 @@ export const validarTokenAtivacao = async (req: Request, res: Response): Promise
 
   try {
     const query = "SELECT id, nome, email, role, status FROM usuarios WHERE token_ativacao = $1 AND status = $2";
-    const result = await db.query(query, [token, "PENDING_ACTIVATION"]);
+    const result = await db.query(query, [token, USER_STATUS.PENDING_ACTIVATION]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Token de ativação inválido ou expirado." });
+      return res.status(404).json({ error: ERROR_MESSAGES.INVALID_TOKEN });
     }
     return res.json(result.rows[0]);
   } catch (error) {
     console.error("Erro ao validar token:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -129,108 +58,38 @@ export const ativarConta = async (req: Request, res: Response): Promise<any> => 
     }
     const user = checkRes.rows[0];
 
-    const senhaHash = await bcrypt.hash(senha, 12);
+    const senhaHash = await bcrypt.hash(senha, BCRYPT_SALT_ROUNDS);
     const updateQuery = `
       UPDATE usuarios 
-      SET senha_hash = $1, status = 'ACTIVE', token_ativacao = NULL 
-      WHERE id = $2
+      SET senha_hash = $1, status = $2, token_ativacao = NULL 
+      WHERE id = $3
     `;
-    await db.query(updateQuery, [senhaHash, user.id]);
+    await db.query(updateQuery, [senhaHash, USER_STATUS.ACTIVE, user.id]);
 
     await logAction(user.id, user.nome, "Ativação de Conta", "Conta ativada pelo link temporário.");
 
     return res.json({ success: true });
   } catch (error) {
     console.error("Erro ao ativar conta:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
 export const autocadastro = async (req: Request, res: Response): Promise<any> => {
-  const {
-    nomePaciente,
-    cpfPaciente,
-    email,
-    telefone,
-    dataNascimento,
-    sexo_biologico,
-    genero,
-    nomeMae,
-    nomePai,
-    nomeResponsavel,
-    grauParentesco,
-    cpfResponsavel,
-    cidade,
-    estado,
-    pais,
-    telefone2,
-    whatsapp,
-    senha,
-    foto_perfil,
-  } = req.body;
-
   try {
-    const checkQuery = "SELECT id, status FROM usuarios WHERE cpf = $1";
-    const checkRes = await db.query(checkQuery, [cpfPaciente]);
-    if (checkRes.rows.length > 0) {
-      const user = checkRes.rows[0];
-      if (user.status === "PENDING_ACTIVATION") {
-        return res.status(409).json({ error: "REGISTRADO_PELO_MEDICO" });
-      }
-      return res.status(400).json({ error: "CPF_EXISTENTE" });
-    }
+    const senhaHash = await bcrypt.hash(req.body.senha, BCRYPT_SALT_ROUNDS);
+    const novoUsuarioId = await createPatientSelfRegistration(req.body, senhaHash);
 
-    const emailCheck = await db.query("SELECT id FROM usuarios WHERE email = $1", [email]);
-    if (emailCheck.rows.length > 0) {
-      return res.status(400).json({ error: "EMAIL_EXISTENTE" });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 12);
-
-    // Inserir usuarios
-    const insertUserQuery = `
-      INSERT INTO usuarios (nome, cpf, email, telefone, senha_hash, role, status)
-      VALUES ($1, $2, $3, $4, $5, 'paciente', 'ACTIVE')
-      RETURNING id
-    `;
-    const userRes = await db.query(insertUserQuery, [nomePaciente, cpfPaciente, email, telefone, senhaHash]);
-    const novoUsuarioId = userRes.rows[0].id;
-
-    // Inserir pacientes
-    const insertPacQuery = `
-      INSERT INTO pacientes (
-        id_usuario, data_nascimento, sexo_biologico, genero, sindrome, nome_mae, nome_pai,
-        responsavel_nome, responsavel_parentesco, responsavel_cpf, cidade, estado, pais,
-        telefone_2, whatsapp, id_medico_responsavel, foto_perfil
-      ) VALUES ($1, $2, $3, $4, 'normal', $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NULL, $15)
-    `;
-    const sexoBiologicoDb = sexo_biologico === "masculino" || sexo_biologico === "M" ? "M" : "F";
-    const generoDb = genero === "masculino" || genero === "M" ? "Masculino" : "Feminino";
-
-    await db.query(insertPacQuery, [
-      novoUsuarioId,
-      dataNascimento,
-      sexoBiologicoDb,
-      generoDb,
-      nomeMae,
-      nomePai || "",
-      nomeResponsavel,
-      grauParentesco,
-      cpfResponsavel,
-      cidade,
-      estado,
-      pais,
-      telefone2 || "",
-      whatsapp || "",
-      foto_perfil || null,
-    ]);
-
-    await logAction(novoUsuarioId, nomePaciente, "Autocadastro", "Paciente se cadastrou de forma autônoma.");
-
-    return res.status(201).json({ id: novoUsuarioId, nome: nomePaciente, role: "paciente", status: "ACTIVE" });
-  } catch (error) {
+    return res.status(201).json({ id: novoUsuarioId, nome: req.body.nomePaciente, role: USER_ROLES.PACIENTE, status: USER_STATUS.ACTIVE });
+  } catch (error: any) {
     console.error("Erro no autocadastro:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    if (error.message === ERROR_MESSAGES.REGISTERED_BY_DOCTOR) {
+      return res.status(409).json({ error: error.message });
+    }
+    if (error.message === ERROR_MESSAGES.CPF_EXISTS || error.message === ERROR_MESSAGES.EMAIL_EXISTS) {
+      return res.status(400).json({ error: error.message });
+    }
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -250,36 +109,15 @@ export const getPaciente = async (req: Request, res: Response): Promise<any> => 
     `;
     const result = await db.query(query, [idUsuario]);
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Perfil do paciente não encontrado." });
+      return res.status(404).json({ error: ERROR_MESSAGES.PATIENT_NOT_FOUND });
     }
 
-    const row = result.rows[0];
-    const details = {
-      id_usuario: row.id_usuario,
-      data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
-      sexo_biologico: row.sexo_biologico,
-      genero: row.genero,
-      sindrome: row.sindrome,
-      nome_mae: row.nome_mae,
-      nome_pai: row.nome_pai,
-      responsavel_nome: row.responsavel_nome,
-      responsavel_parentesco: row.responsavel_parentesco,
-      responsavel_cpf: row.responsavel_cpf,
-      cidade: row.cidade,
-      estado: row.estado,
-      pais: row.pais,
-      telefone_2: row.telefone_2,
-      whatsapp: row.whatsapp,
-      id_medico_responsavel: row.id_medico_responsavel,
-      foto_perfil: row.foto_perfil,
-      encaminhamento_status: row.encaminhamento_status,
-      classificacao_oficial: row.classificacao_oficial,
-    };
+    const details = mapFullPatientProfileToDto(result.rows[0]);
 
     return res.json(details);
   } catch (error) {
     console.error("Erro ao obter paciente:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -295,7 +133,7 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
              p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel, p.foto_perfil, p.encaminhamento_status, p.classificacao_oficial
       FROM usuarios u
       JOIN pacientes p ON u.id = p.id_usuario
-      WHERE u.role = 'paciente' AND (
+      WHERE u.role = $2 AND (
         p.id_medico_responsavel = $1 OR 
         u.id IN (
           SELECT id_paciente FROM vinculos_medicos WHERE id_medico = $1 AND status = 'LINK_APPROVED'
@@ -303,7 +141,7 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
       )
       ORDER BY u.nome ASC
     `;
-    const result = await db.query(query, [idMedico]);
+    const result = await db.query(query, [idMedico, USER_ROLES.PACIENTE]);
 
     const mapped = result.rows.map((row) => ({
       id: row.id,
@@ -313,27 +151,13 @@ export const listPacientesDoMedico = async (req: Request, res: Response): Promis
       telefone: row.telefone,
       role: row.role,
       status: row.status,
-      pacienteDetails: {
-        data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
-        sexo_biologico: row.sexo_biologico,
-        genero: row.genero,
-        sindrome: row.sindrome,
-        responsavel_nome: row.responsavel_nome,
-        cidade: row.cidade,
-        estado: row.estado,
-        pais: row.pais,
-        whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel,
-        foto_perfil: row.foto_perfil,
-        encaminhamento_status: row.encaminhamento_status,
-        classificacao_oficial: row.classificacao_oficial,
-      },
+      pacienteDetails: mapPatientRowToDto(row),
     }));
 
     return res.json(mapped);
   } catch (error) {
     console.error("Erro ao listar pacientes do médico:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -346,15 +170,15 @@ export const getPacienteByCpf = async (req: Request, res: Response): Promise<any
   try {
     const query = `
       SELECT u.id, u.nome, u.cpf, u.email, u.telefone, u.status, u.role,
-             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel
+             p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel, p.foto_perfil, p.encaminhamento_status, p.classificacao_oficial
       FROM usuarios u
       JOIN pacientes p ON u.id = p.id_usuario
-      WHERE u.cpf = $1 AND u.role = 'paciente'
+      WHERE u.cpf = $1 AND u.role = $2
     `;
-    const result = await db.query(query, [cpf]);
+    const result = await db.query(query, [cpf, USER_ROLES.PACIENTE]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Paciente não encontrado." });
+      return res.status(404).json({ error: ERROR_MESSAGES.PATIENT_NOT_FOUND });
     }
 
     const row = result.rows[0];
@@ -366,27 +190,13 @@ export const getPacienteByCpf = async (req: Request, res: Response): Promise<any
       telefone: row.telefone,
       role: row.role,
       status: row.status,
-      pacienteDetails: {
-        data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
-        sexo_biologico: row.sexo_biologico,
-        genero: row.genero,
-        sindrome: row.sindrome,
-        responsavel_nome: row.responsavel_nome,
-        cidade: row.cidade,
-        estado: row.estado,
-        pais: row.pais,
-        whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel,
-        foto_perfil: row.foto_perfil,
-        encaminhamento_status: row.encaminhamento_status,
-        classificacao_oficial: row.classificacao_oficial,
-      },
+      pacienteDetails: mapPatientRowToDto(row),
     };
 
     return res.json(mapped);
   } catch (error) {
     console.error("Erro ao obter paciente por CPF:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -397,10 +207,10 @@ export const listTodosPacientes = async (req: Request, res: Response): Promise<a
              p.data_nascimento, p.sexo_biologico, p.genero, p.sindrome, p.responsavel_nome, p.cidade, p.estado, p.pais, p.whatsapp, p.id_medico_responsavel, p.foto_perfil, p.encaminhamento_status, p.classificacao_oficial
       FROM usuarios u
       JOIN pacientes p ON u.id = p.id_usuario
-      WHERE u.role = 'paciente'
+      WHERE u.role = $1
       ORDER BY u.nome ASC
     `;
-    const result = await db.query(query);
+    const result = await db.query(query, [USER_ROLES.PACIENTE]);
 
     const mapped = result.rows.map((row) => ({
       id: row.id,
@@ -410,41 +220,27 @@ export const listTodosPacientes = async (req: Request, res: Response): Promise<a
       telefone: row.telefone,
       role: row.role,
       status: row.status,
-      pacienteDetails: {
-        data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
-        sexo_biologico: row.sexo_biologico,
-        genero: row.genero,
-        sindrome: row.sindrome,
-        responsavel_nome: row.responsavel_nome,
-        cidade: row.cidade,
-        estado: row.estado,
-        pais: row.pais,
-        whatsapp: row.whatsapp,
-        id_medico_responsavel: row.id_medico_responsavel,
-        foto_perfil: row.foto_perfil,
-        encaminhamento_status: row.encaminhamento_status,
-        classificacao_oficial: row.classificacao_oficial,
-      },
+      pacienteDetails: mapPatientRowToDto(row),
     }));
 
     return res.json(mapped);
   } catch (error) {
     console.error("Erro ao listar todos os pacientes:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
 export const checkCpf = async (req: Request, res: Response): Promise<any> => {
   const { cpf } = req.params;
   try {
-    const result = await db.query("SELECT id, nome, status FROM usuarios WHERE cpf = $1 AND role = $2", [cpf, "paciente"]);
+    const result = await db.query("SELECT id, nome, status FROM usuarios WHERE cpf = $1 AND role = $2", [cpf, USER_ROLES.PACIENTE]);
     if (result.rows.length > 0) {
       return res.json({ exists: true, user: result.rows[0] });
     }
     return res.json({ exists: false });
   } catch (error) {
     console.error("Erro ao verificar CPF:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -459,7 +255,7 @@ export const updateStatus = async (req: Request, res: Response): Promise<any> =>
     return res.json({ success: true });
   } catch (error) {
     console.error("Erro ao atualizar status:", error);
-    return res.status(500).json({ error: "Erro interno no servidor." });
+    return res.status(500).json({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
