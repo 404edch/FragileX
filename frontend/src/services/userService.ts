@@ -15,11 +15,11 @@ export const userService = {
     return api.get<(MockUsuario & { pacienteDetails?: MockPaciente; medicoDetails?: MockMedico })[]>("/users");
   },
 
-  async atualizarUsuario(id: number, dados: object, adminUser: Usuario): Promise<void> {
-    await api.put(`/users/${id}`, { ...dados, adminUser });
+  async atualizarUsuario(id: number, dados: object): Promise<void> {
+    await api.put(`/users/${id}`, dados);
   },
 
-  async deletarUsuario(id: number, adminUser: Usuario): Promise<void> {
-    await api.delete(`/users/${id}`, { adminUser });
+  async deletarUsuario(id: number): Promise<void> {
+    await api.delete(`/users/${id}`);
   },
 };

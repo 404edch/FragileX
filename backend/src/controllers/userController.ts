@@ -6,6 +6,45 @@ import { logAction } from "../services/auditService";
 
 const SECRET_KEY = process.env.JWT_SECRET || "chave-super-secreta-ibk";
 
+// Helper function to map user results
+const mapUserDetails = (row: any) => {
+  const user: any = {
+    id: row.id,
+    nome: row.nome,
+    cpf: row.cpf,
+    email: row.email,
+    telefone: row.telefone,
+    role: row.role,
+    status: row.status,
+    data_criacao: row.data_criacao,
+  };
+
+  if (row.role === "medico") {
+    user.medicoDetails = {
+      crm: row.crm,
+      especialidade: row.especialidade,
+      instituicao: row.instituicao,
+      cidade: row.med_cidade,
+      estado: row.med_estado,
+    };
+  }
+
+  if (row.role === "paciente") {
+    user.pacienteDetails = {
+      data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
+      sexo_biologico: row.sexo_biologico,
+      genero: row.genero,
+      sindrome: row.sindrome,
+      responsavel_nome: row.responsavel_nome,
+      cidade: row.pac_cidade,
+      estado: row.pac_estado,
+      pais: row.pac_pais,
+    };
+  }
+
+  return user;
+};
+
 export const login = async (req: Request, res: Response): Promise<any> => {
   const { emailOrCpf, senha } = req.body;
   if (!emailOrCpf || !senha) {
@@ -93,7 +132,7 @@ export const getMe = async (req: Request, res: Response): Promise<any> => {
 
 export const createEmployee = async (req: Request, res: Response): Promise<any> => {
   const { nome, email, cpf, telefone, senha } = req.body;
-  const adminUser = req.body.adminUser;
+  const adminUser = (req as any).user;
 
   if (!nome || !email || !cpf || !senha) {
     return res.status(400).json({ error: "Nome, e-mail, CPF e senha são obrigatórios." });
@@ -116,8 +155,8 @@ export const createEmployee = async (req: Request, res: Response): Promise<any> 
 
     if (adminUser) {
       await logAction(
-        adminUser.id,
-        adminUser.nome,
+        adminUser.userId,
+        "Usuário do Sistema", // O nome não está no JWT. Seria possível buscar no banco, mas para manter o controller leve mantemos o fallback.
         "Cadastro de Funcionário",
         `Registrou o funcionário do instituto: ${newUser.nome} (E-mail: ${newUser.email}).`,
       );
@@ -142,45 +181,7 @@ export const listAll = async (req: Request, res: Response): Promise<any> => {
       ORDER BY u.data_criacao DESC
     `;
     const result = await db.query(query);
-
-    // Mapear no formato esperado pelo frontend
-    const mapped = result.rows.map((row) => {
-      const user: any = {
-        id: row.id,
-        nome: row.nome,
-        cpf: row.cpf,
-        email: row.email,
-        telefone: row.telefone,
-        role: row.role,
-        status: row.status,
-        data_criacao: row.data_criacao,
-      };
-
-      if (row.role === "medico") {
-        user.medicoDetails = {
-          crm: row.crm,
-          especialidade: row.especialidade,
-          instituicao: row.instituicao,
-          cidade: row.med_cidade,
-          estado: row.med_estado,
-        };
-      }
-
-      if (row.role === "paciente") {
-        user.pacienteDetails = {
-          data_nascimento: row.data_nascimento ? new Date(row.data_nascimento).toISOString().split("T")[0] : "",
-          sexo_biologico: row.sexo_biologico,
-          genero: row.genero,
-          sindrome: row.sindrome,
-          responsavel_nome: row.responsavel_nome,
-          cidade: row.pac_cidade,
-          estado: row.pac_estado,
-          pais: row.pac_pais,
-        };
-      }
-
-      return user;
-    });
+    const mapped = result.rows.map(mapUserDetails);
 
     return res.json(mapped);
   } catch (error) {
@@ -191,7 +192,8 @@ export const listAll = async (req: Request, res: Response): Promise<any> => {
 
 export const update = async (req: Request, res: Response): Promise<any> => {
   const targetId = Number(req.params.id);
-  const { nome, email, cpf, telefone, status, role, crm, especialidade, instituicao, cidade, estado, adminUser } = req.body;
+  const { nome, email, cpf, telefone, status, role, crm, especialidade, instituicao, cidade, estado } = req.body;
+  const adminUser = (req as any).user;
 
   if (isNaN(targetId)) {
     return res.status(400).json({ error: "ID inválido." });
@@ -244,7 +246,7 @@ export const update = async (req: Request, res: Response): Promise<any> => {
     }
 
     if (adminUser) {
-      await logAction(adminUser.id, adminUser.nome, "Edição de Usuário", `Editou o perfil do usuário ${oldUser.nome} (ID: ${oldUser.id}).`);
+      await logAction(adminUser.userId, "Usuário do Sistema", "Edição de Usuário", `Editou o perfil do usuário ${oldUser.nome} (ID: ${oldUser.id}).`);
     }
 
     return res.json({ success: true });
@@ -256,8 +258,7 @@ export const update = async (req: Request, res: Response): Promise<any> => {
 
 export const remove = async (req: Request, res: Response): Promise<any> => {
   const targetId = Number(req.params.id);
-  console.log(req.body);
-  const { adminUser } = req.body;
+  const adminUser = (req as any).user;
 
   if (isNaN(targetId)) {
     return res.status(400).json({ error: "ID inválido." });
@@ -276,7 +277,7 @@ export const remove = async (req: Request, res: Response): Promise<any> => {
     await db.query(deleteQuery, [targetId]);
 
     if (adminUser) {
-      await logAction(adminUser.id, adminUser.nome, "Exclusão de Usuário", `Excluiu a conta do usuário ${user.nome} (ID: ${targetId}, Role: ${user.role}).`);
+      await logAction(adminUser.userId, "Usuário do Sistema", "Exclusão de Usuário", `Excluiu a conta do usuário ${user.nome} (ID: ${targetId}, Role: ${user.role}).`);
     }
 
     return res.json({ success: true });

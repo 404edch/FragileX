@@ -48,12 +48,7 @@ export default function AdminUsers() {
 
     try {
       const payload = {
-        ...updatedData,
-        adminUser: {
-          id: usuario.id,
-          nome: usuario.nome,
-          role: usuario.role || "admin",
-        }
+        ...updatedData
       };
 
       await api.put(`/users/${editingUser.id}`, payload);
@@ -80,10 +75,7 @@ export default function AdminUsers() {
     );
     if (confirm) {
       try {
-        const payload = {
-          adminUser: usuario,
-        };
-        await api.delete(`/users/${u.id}`, payload);
+        await api.delete(`/users/${u.id}`);
         setSuccess(`Usuário "${u.nome}" excluído com sucesso.`);
         refreshUsers();
         setTimeout(() => setSuccess(""), 4000);

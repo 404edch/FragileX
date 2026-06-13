@@ -70,9 +70,7 @@ class ApiService {
 
   async delete<T>(
     endpoint: string,
-    body?: {
-      adminUser: Usuario;
-    },
+    body?: object,
   ): Promise<T> {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: "DELETE",
