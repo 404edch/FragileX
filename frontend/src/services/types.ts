@@ -76,7 +76,7 @@ export interface MockChecklist {
   data_preenchimento: string;
 }
 
-export interface MockAudit {
+interface MockAudit {
   id: number;
   id_usuario?: number | null;
   nome_usuario: string;

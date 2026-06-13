@@ -2,7 +2,7 @@ import React from 'react';
 import logoGif from '/logo.gif';
 import SplitText from './SplitText';
 
-export const LogoGif = () => (
+const LogoGif = () => (
   <img
     src={logoGif}
     alt="Logo Eu Digo X"
@@ -20,7 +20,7 @@ interface LogoProps {
   pequeno?: boolean;
 }
 
-export const LogoTexto = ({ pequeno = false }: LogoProps) => (
+const LogoTexto = ({ pequeno = false }: LogoProps) => (
   <div style={{
     lineHeight: 1,
     fontFamily: "'DM Serif Display', serif",

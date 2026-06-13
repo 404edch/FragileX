@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api } from '../services/api';
 
-export type Role = 'medico' | 'instituto' | 'paciente' | 'admin' | null;
+type Role = 'medico' | 'instituto' | 'paciente' | 'admin' | null;
 
 export interface Usuario {
   id: number;

@@ -12,7 +12,7 @@ export interface Patient {
   encaminhamento_status?: string;
 }
 
-export interface MedicoDetails {
+interface MedicoDetails {
   crm?: string;
   especialidade?: string;
   instituicao?: string;
@@ -20,7 +20,7 @@ export interface MedicoDetails {
   estado?: string;
 }
 
-export interface PacienteDetails {
+interface PacienteDetails {
   cidade?: string;
   estado?: string;
   responsavel_nome?: string;

@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { LARGURA_CARD, ESPACAMENTO_CARD } from '../../../constants/constantes';
-import { useLarguraJanela } from '../../../hooks/useHooks';
-import { useAuth } from '../../../contexts/AuthContext';
-import './Carrossel.css';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { LARGURA_CARD, ESPACAMENTO_CARD } from "../../../constants/constantes";
+import { useLarguraJanela } from "../../../hooks/useHooks";
+import { useAuth } from "../../../contexts/AuthContext";
+import "./Carrossel.css";
 
 interface ImagemPlaceholderProps {
   etiqueta: string;
 }
-export const ImagemPlaceholder = ({ etiqueta }: ImagemPlaceholderProps) => (
-  <div aria-label={etiqueta} className="carousel-img-placeholder">
+const ImagemPlaceholder = ({ etiqueta }: ImagemPlaceholderProps) => (
+  <div
+    aria-label={etiqueta}
+    className="carousel-img-placeholder"
+  >
     {etiqueta}
   </div>
 );
@@ -23,17 +26,17 @@ interface CardCarrosselProps {
   onEdit?: (id: number | string) => void;
 }
 
-export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, estilo: estiloExtra, onEdit }: CardCarrosselProps) => {
+const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, estilo: estiloExtra, onEdit }: CardCarrosselProps) => {
   const { usuario } = useAuth();
-  const isAdmin = usuario?.role === 'admin';
+  const isAdmin = usuario?.role === "admin";
 
   const cardContent = (
     <article
       className="carousel-card"
       style={{
         width: LARGURA_CARD,
-        cursor: linkHref ? 'pointer' : 'default',
-        position: 'relative',
+        cursor: linkHref ? "pointer" : "default",
+        position: "relative",
         ...estiloExtra,
       }}
     >
@@ -46,46 +49,44 @@ export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, esti
             onEdit(id);
           }}
           style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            background: '#1a5fa8',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '50%',
-            width: '32px',
-            height: '32px',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            background: "#1a5fa8",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: "32px",
+            height: "32px",
+            fontSize: "20px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            boxShadow: "0 4px 6px rgba(0,0,0,0.15)",
             zIndex: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s, background-color 0.2s',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "transform 0.2s, background-color 0.2s",
           }}
           title="Editar Card"
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.backgroundColor = '#144d8a';
+            e.currentTarget.style.transform = "scale(1.1)";
+            e.currentTarget.style.backgroundColor = "#144d8a";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.backgroundColor = '#1a5fa8';
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.backgroundColor = "#1a5fa8";
           }}
         >
           +
         </button>
       )}
-      <div className="carousel-card-title">
-        {nome}
-      </div>
+      <div className="carousel-card-title">{nome}</div>
       {imagemUrl ? (
         <img
           src={imagemUrl}
           alt={nome}
-          style={{ objectFit: 'cover', display: 'block', width: '100%', height: '180px' }}
+          style={{ objectFit: "cover", display: "block", width: "100%", height: "180px" }}
         />
       ) : (
         <ImagemPlaceholder etiqueta={etiquetaImg} />
@@ -95,7 +96,12 @@ export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, esti
 
   if (linkHref) {
     return (
-      <a href={linkHref} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+      <a
+        href={linkHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
         {cardContent}
       </a>
     );
@@ -105,7 +111,7 @@ export const CardCarrossel = ({ id, nome, etiquetaImg, imagemUrl, linkHref, esti
 };
 
 interface BotaoSetaProps {
-  direcao: 'esquerda' | 'direita';
+  direcao: "esquerda" | "direita";
   onClick: () => void;
   desativado: boolean;
   etiqueta: string;
@@ -115,7 +121,7 @@ const BotaoSeta = ({ direcao, onClick, desativado, etiqueta }: BotaoSetaProps) =
     onClick={onClick}
     disabled={desativado}
     aria-label={etiqueta}
-    className={`carousel-arrow-btn ${desativado ? 'carousel-arrow-disabled' : ''}`}
+    className={`carousel-arrow-btn ${desativado ? "carousel-arrow-disabled" : ""}`}
   >
     {direcao === "esquerda" ? "‹" : "›"}
   </button>
@@ -131,18 +137,12 @@ export const CarrosselDesktop = ({ cards, onEdit }: CarrosselProps) => {
   const [animando, setAnimando] = useState(false);
 
   const PADDING_SECAO = 24;
-  const LARGURA_CONTROLES = (40 * 2) + (16 * 2);
+  const LARGURA_CONTROLES = 40 * 2 + 16 * 2;
 
-  const larguraDisponivel = Math.max(
-    larguraJanela - PADDING_SECAO * 2 - LARGURA_CONTROLES,
-    LARGURA_CARD + ESPACAMENTO_CARD
-  );
+  const larguraDisponivel = Math.max(larguraJanela - PADDING_SECAO * 2 - LARGURA_CONTROLES, LARGURA_CARD + ESPACAMENTO_CARD);
 
   const visiveisCount = useMemo(() => {
-    return Math.max(
-      1,
-      Math.floor((larguraDisponivel + ESPACAMENTO_CARD) / (LARGURA_CARD + ESPACAMENTO_CARD))
-    );
+    return Math.max(1, Math.floor((larguraDisponivel + ESPACAMENTO_CARD) / (LARGURA_CARD + ESPACAMENTO_CARD)));
   }, [larguraDisponivel]);
 
   const larguraPasso = LARGURA_CARD + ESPACAMENTO_CARD;
@@ -159,17 +159,18 @@ export const CarrosselDesktop = ({ cards, onEdit }: CarrosselProps) => {
   const podeVoltar = offset > 0;
   const podeAvancar = offset < offsetMaximo;
 
-  const navegar = useCallback((dir: 'esquerda' | 'direita') => {
-    if (animando) return;
-    setAnimando(true);
-    setOffset((prev) => {
-      const proximo = dir === "direita"
-        ? Math.min(prev + visiveisCount * larguraPasso, offsetMaximo)
-        : Math.max(prev - visiveisCount * larguraPasso, 0);
-      return proximo;
-    });
-    setTimeout(() => setAnimando(false), 380);
-  }, [animando, visiveisCount, larguraPasso, offsetMaximo]);
+  const navegar = useCallback(
+    (dir: "esquerda" | "direita") => {
+      if (animando) return;
+      setAnimando(true);
+      setOffset((prev) => {
+        const proximo = dir === "direita" ? Math.min(prev + visiveisCount * larguraPasso, offsetMaximo) : Math.max(prev - visiveisCount * larguraPasso, 0);
+        return proximo;
+      });
+      setTimeout(() => setAnimando(false), 380);
+    },
+    [animando, visiveisCount, larguraPasso, offsetMaximo],
+  );
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 16, width: "100%" }}>
@@ -180,7 +181,12 @@ export const CarrosselDesktop = ({ cards, onEdit }: CarrosselProps) => {
         etiqueta="Anterior"
       />
 
-      <div className="slide-viewport" style={{ flex: 1, overflow: 'hidden' }} aria-live="polite" aria-label="Carrossel de cards">
+      <div
+        className="slide-viewport"
+        style={{ flex: 1, overflow: "hidden" }}
+        aria-live="polite"
+        aria-label="Carrossel de cards"
+      >
         <div
           style={{
             display: "flex",
@@ -256,14 +262,18 @@ export const CarrosselMobile = ({ cards, onEdit }: CarrosselProps) => {
         ))}
       </div>
 
-      <div role="tablist" aria-label="Indicadores de posição" className="carousel-indicators">
+      <div
+        role="tablist"
+        aria-label="Indicadores de posição"
+        className="carousel-indicators"
+      >
         {cards.map((_, i) => (
           <div
             key={i}
             role="tab"
             aria-selected={i === indiceAtivo}
             aria-label={`Card ${i + 1} de ${cards.length}`}
-            className={`carousel-indicator ${i === indiceAtivo ? 'carousel-indicator-active' : ''}`}
+            className={`carousel-indicator ${i === indiceAtivo ? "carousel-indicator-active" : ""}`}
           />
         ))}
       </div>
