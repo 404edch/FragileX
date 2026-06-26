@@ -1,93 +1,175 @@
-# Projeto Eu Digo X - Instituto Buko Kaesemodel
+# FragileX 🧬
 
-Este repositório contém a aplicação web completa (Full-Stack) desenvolvida para o projeto **Eu Digo X**, iniciativa do **Instituto Buko Kaesemodel**. O objetivo principal da plataforma é conscientizar sobre a Síndrome do X Frágil, além de fornecer uma ferramenta robusta para cadastro e acompanhamento de pacientes, médicos e relatórios clínicos (Dashboard Administrativo e Médico).
-
-## 🚀 Tecnologias Utilizadas
-
-### Frontend
-- **React 19** com **TypeScript**
-- **Vite** (Build tool e Dev Server)
-- **React Router** (Navegação)
-- **Recharts** (Gráficos e dashboards)
-- **GSAP & Motion** (Animações fluidas)
-
-### Backend
-- **Node.js** com **Express** e **TypeScript**
-- **PostgreSQL** (Banco de Dados Relacional via `pg`)
-- **JWT (JSON Web Token)** e **Bcryptjs** (Autenticação e Segurança)
-- **CORS** (Controle de acesso à API)
+A digital support platform, designed to streamline the early diagnosis of **Fragile X Syndrome** through clinical scoring, secure patient management, and intelligent PCR referral workflows.
 
 ---
 
-## 📂 Estrutura do Repositório
+## 📖 About the Project
 
-O projeto adota uma arquitetura de monorepo separando as responsabilidades:
+Fragile X Syndrome is one of the leading hereditary causes of intellectual disability. Many patients are currently referred for expensive molecular PCR testing without completing an adequate clinical pre-screening, increasing healthcare costs and overwhelming diagnostic services.
 
-- `/frontend`: Aplicação do lado do cliente (Landing Page pública, formulários interativos, dashboard do paciente, médico e administrador).
-- `/backend`: API RESTful responsável pelas regras de negócio, autenticação e comunicação com o banco de dados.
-- `/shared`: Arquivos, tipagens e utilitários que podem ser compartilhados entre frontend e backend.
+**FragileX** digitizes a **validated clinical checklist** and automates it's scoring algorithm. The platform evaluates **12 clinically significant symptoms**, applying sex-specific weighting to calculate the probability of Fragile X Syndrome.
 
----
-
-## 🛠️ Como Configurar e Executar Localmente
-
-### Pré-requisitos
-- [Node.js](https://nodejs.org/) (Versão 18 ou superior recomendada)
-- Banco de Dados [PostgreSQL](https://www.postgresql.org/) rodando localmente ou remotamente.
-
-### 1. Configurando o Banco de Dados (Backend)
-1. Navegue até o diretório do backend:
-   ```bash
-   cd backend
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Crie um arquivo `.env` na raiz do `backend` com as credenciais do seu banco de dados:
-   ```env
-   DB_USER=seu_usuario
-   DB_HOST=localhost
-   DB_DATABASE=seu_banco
-   DB_PASSWORD=sua_senha
-   DB_PORT=5432
-   JWT_SECRET=sua_chave_secreta_aqui
-   ```
-4. Inicialize o banco de dados rodando os scripts SQL localizados em `backend/src/models/db.sql` para criar as tabelas, e `backend/src/models/seed.sql` para popular com os dados iniciais.
-5. Inicie o servidor:
-   ```bash
-   npm run dev
-   ```
-   *(O backend estará rodando, geralmente, na porta configurada ou na padrão 3000)*.
-
-### 2. Rodando a Interface de Usuário (Frontend)
-1. Em um novo terminal, navegue até a pasta do frontend:
-   ```bash
-   cd frontend
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Inicie a aplicação no modo de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-4. Acesse o frontend no seu navegador acessando o link fornecido no terminal (geralmente `http://localhost:5173`).
+Patients with scores above the clinical threshold are automatically flagged for molecular testing, allowing the prioritization of high-probability cases while maintaining complete administrative oversight.
 
 ---
 
-## 🔐 Acessos Iniciais Padrão (Seed)
-Caso você tenha rodado o `seed.sql`, alguns usuários estarão disponíveis por padrão para testar os diferentes perfis (Role):
+## ✨ Features
 
-- **Senha Padrão para todos:** `123456`
-- Administrador Institucional: `instituto@teste.com` ou e-mails específicos do instituto.
-- Médico: `medico@teste.com`
-- Paciente: `paciente@teste.com`
+### 🔬 Clinical Decision Support
 
-*(Verifique o arquivo `seed.sql` para visualizar a lista completa de usuários e credenciais)*.
+* Automated symptom scoring using the clinical algorithm
+* Sex-adjusted weighting for all 12 symptoms
+* Configurable diagnostic thresholds
+
+  * **Male:** ≥ 0.56
+  * **Female:** ≥ 0.55
+* Approximately **95% clinical sensitivity** for both sexes
+
+### 👥 Multi-Role Platform
+
+Role-based dashboards for:
+
+* Patients / Families
+* Doctors
+* IBK Staff
+* Administrators
+
+### 🔗 Consent-Based Doctor Access
+
+Doctors can only access a patient's medical information after explicit approval from the patient, ensuring compliance with privacy regulations.
+
+### 🏥 Doctor Credentialing
+
+New physicians enter a verification workflow where CRM credentials are reviewed before receiving access to the platform.
+
+### 📋 Clinical History
+
+* Complete checklist history
+* Medical evaluations
+* Previous diagnoses
+* Patient scores remain hidden from patients to discourage self-diagnosis while remaining accessible to authorized healthcare professionals.
+
+### 🚨 PCR Referral Dashboard
+
+Automatically generated queue of suspected Fragile X cases requiring PCR testing, including physician-approved referral overrides.
+
+### 📁 Persistent Medical Records
+
+Medical exams, documents, and clinical notes remain permanently linked to the patient's account, independent of doctor-patient association status.
+
+### 📊 Administrative Reports
+
+* Statistical dashboards
+* Filtering by multiple criteria
+* Excel export
+* Institutional analytics
+
+### 🛡️ Audit Logging
+
+Immutable audit trail of administrative actions to support legal compliance and LGPD requirements.
+
+### 📰 Content Management System
+
+Staff can update the public landing page without modifying the application source code.
 
 ---
 
-## 📜 Licença e Termos
-Este sistema é de uso do Instituto Buko Kaesemodel. Todos os direitos reservados de acordo com o contrato ou licença especificada no repositório.
+## 🔐 Authentication & Security
+
+* JWT (JSON Web Token) authentication
+* Protected API routes using authentication middleware
+* Role-Based Access Control (RBAC)
+* Password hashing with bcryptjs
+* Secure authorization middleware
+* Input validation and request sanitization
+
+---
+
+## 🛠 Tech Stack
+
+| Layer          | Technology                        |
+| -------------- | --------------------------------- |
+| Frontend       | React + TypeScript + Vanilla CSS  |
+| Backend        | Node.js + Express.js + TypeScript |
+| Database       | PostgreSQL                        |
+| Authentication | JWT                               |
+| Security       | bcryptjs, RBAC, Protected Routes  |
+
+---
+
+## 🗄 Database Architecture
+
+The database follows a **Class Table Inheritance (CTI)** approach, where a central `usuarios` table stores shared user information while specialized child tables maintain role-specific data.
+
+### Example Design Decisions
+
+* **usuarios**
+
+  * Base user entity shared across every account.
+
+* **medicos**
+
+  * Doctor-specific information and credentials.
+
+* **pacientes**
+
+  * Patient demographic and clinical information.
+
+* **funcionarios_ibk**
+
+  * Institute staff accounts.
+
+* **sintomas**
+
+  * Clinical dictionary containing configurable symptom weights, allowing medical adjustments without source code modifications.
+
+* **notificacoes_pcr**
+
+  * Precomputed PCR referral queue consumed directly by the administrative dashboard.
+
+* **solicitacoes_credenciamento**
+
+  * Quarantine table isolating newly registered physicians until manual approval.
+
+* **logs_auditoria**
+
+  * Immutable audit records for administrative actions and compliance.
+
+---
+
+## 🏗 System Architecture
+
+* React SPA frontend
+* RESTful Express API
+* PostgreSQL relational database
+* JWT-based authentication
+* RBAC authorization layer
+* Protected API endpoints
+* Clinical scoring engine
+* Administrative reporting module
+
+---
+
+## 🚀 Future Improvements
+
+* Email notifications
+* Multi-factor authentication
+* Medical imaging support
+* Dashboard analytics enhancements
+* Internationalization (i18n)
+* Mobile application
+
+---
+
+## 👨‍💻 Authors
+
+* Bruno Rogerio Coutinho Moretoni
+* Eduardo Henrique Chechin Teixeira
+* Lunna Damo Perera
+
+---
+
+## 📄 License
+
+This project was developed for academic purposes in collaboration with **Instituto Buko Kaesemodel (IBK)**.
