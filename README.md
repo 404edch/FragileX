@@ -13,6 +13,93 @@ Fragile X Syndrome is one of the leading hereditary causes of intellectual disab
 Patients with scores above the clinical threshold are automatically flagged for molecular testing, allowing the prioritization of high-probability cases while maintaining complete administrative oversight.
 
 ---
+# 🚀 Getting Started
+
+This project runs with a single command from the root folder, but requires proper database and environment setup before execution.
+
+---
+
+## 📦 Installation
+
+Clone the repository:
+
+```bash id="cl1"
+git clone https://github.com/your-username/FragileX.git
+cd FragileX
+```
+
+Install dependencies for both frontend and backend:
+
+```bash id="cl2"
+cd frontend
+npm install
+
+cd ../backend
+npm install
+```
+
+---
+
+## 🗄 Database Setup
+
+Create a PostgreSQL database and configure it using the schema and seed files located in:
+
+```
+backend/src/models
+```
+
+This folder contains:
+
+* Database schema definitions
+* Seed scripts (if applicable)
+
+---
+
+## 🔐 Environment Variables
+
+Before running the project, you **must** create a `.env` file inside the `backend` folder.
+
+The backend uses these variables for database and authentication setup:
+
+```env id="env1"
+DATABASE_HOST=localhost
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your_password_here
+DATABASE_NAME=fragilex
+JWT_SECRET=your_super_secure_jwt_secret
+```
+
+### Variable explanation:
+
+* **DATABASE_HOST** → PostgreSQL server host (e.g. `localhost` or cloud provider)
+* **DATABASE_USER** → Database username
+* **DATABASE_PASSWORD** → Database password
+* **DATABASE_NAME** → Name of the PostgreSQL database
+* **JWT_SECRET** → Secret key used to sign and verify JWT authentication tokens (keep this secure)
+
+> ⚠️ If any of these variables are missing or incorrect, the backend will fail to start or authenticate users properly.
+
+---
+
+## ▶️ Running the Project
+
+From the root folder, simply run:
+
+```bash id="run1"
+npm run dev
+```
+
+This starts both the **frontend and backend servers simultaneously**.
+
+---
+
+## ⚙️ Notes
+
+* Database connection is handled in `backend/src/config`
+* PostgreSQL default port is `5432` (hardcoded)
+* Ensure PostgreSQL is running before starting the backend
+  
+---
 
 ## ✨ Features
 
