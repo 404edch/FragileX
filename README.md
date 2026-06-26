@@ -6,7 +6,7 @@ A digital support platform, designed to streamline the early diagnosis of **Frag
 
 ## 📖 About the Project
 
-Fragile X Syndrome is one of the leading hereditary causes of intellectual disability. Many patients are currently referred for expensive molecular PCR testing without completing an adequate clinical pre-screening, increasing healthcare costs and overwhelming diagnostic services.
+Many patients are currently referred for expensive molecular PCR testing without completing an adequate clinical pre-screening, increasing healthcare costs and overwhelming diagnostic services.
 
 **FragileX** digitizes a **validated clinical checklist** and automates it's scoring algorithm. The platform evaluates **12 clinically significant symptoms**, applying sex-specific weighting to calculate the probability of Fragile X Syndrome.
 
